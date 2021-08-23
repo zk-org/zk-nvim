@@ -3,6 +3,7 @@ local is_installed, lspconfig = pcall(require, 'lspconfig')
 if not is_installed then error('lspconfig needs to be installed.') end
 
 local configs = require'lspconfig/configs'
+local util = require'zk-nvim.util'
 
 local zk_config = {
     bin = 'zk',
