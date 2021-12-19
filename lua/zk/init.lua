@@ -20,7 +20,6 @@ function zk.list(path, args, cb)
   lsp_execute_command(path, "list", args, cb)
 end
 
-
 zk.tag = {}
 
 function zk.tag.list(path, args, cb)
@@ -29,9 +28,10 @@ end
 
 local config = {
   lsp = {
-    autostart = {
+    auto_attach = {
       enabled = true,
       filetypes = { "markdown" },
+      root_dir = require("lspconfig.util").root_pattern(".zk"),
     },
     config = {
       cmd = { "zk", "lsp" },
@@ -41,22 +41,41 @@ local config = {
 }
 local client_id = nil
 
-local function setup_lsp_autostart()
+local function setup_lsp_auto_attach()
   --- NOTE: modified version of code in nvim-lspconfig
   local trigger
-  if config.lsp.autostart.filetypes then
-    trigger = "FileType " .. table.concat(config.lsp.autostart.filetypes, ",")
+  local filetypes = config.lsp.auto_attach.filetypes
+  if filetypes then
+    trigger = "FileType " .. table.concat(filetypes, ",")
   else
     trigger = "BufReadPost *"
   end
-  vim.api.nvim_command(string.format("autocmd %s lua require'zk'.lsp_buf_add()", trigger))
+  vim.api.nvim_command(string.format("autocmd %s lua require'zk'._lsp_buf_auto_add(0)", trigger))
 end
 
 function zk.setup(user_config)
   config = vim.tbl_deep_extend("force", config, user_config or {})
-  if config.lsp.autostart.enabled then
-    setup_lsp_autostart()
+  if config.lsp.auto_attach.enabled then
+    setup_lsp_auto_attach()
   end
+end
+
+--- NOTE: No need to manually call this. Automatically called via an |autocmd| if config.lsp.auto_attach is enabled.
+function zk._lsp_buf_auto_add(bufnr)
+  -- check that the buffer is a file
+  if vim.api.nvim_buf_get_option(bufnr, "buftype") == "nofile" then
+    return
+  end
+
+  -- check that we got a match on the root directory
+  local get_root_dir = config.lsp.auto_attach.root_dir
+  if get_root_dir then
+    if not get_root_dir(vim.api.nvim_buf_get_name(bufnr), bufnr) then
+      return
+    end
+  end
+
+  zk.lsp_buf_add(bufnr)
 end
 
 --- Starts an LSP client if necessary
@@ -67,7 +86,6 @@ function zk.lsp_start()
 end
 
 --- Starts an LSP client if necessary, and attaches the given buffer.
---- NOTE: Automatically called via an |autocmd| if config.lsp.autostart is enabled.
 function zk.lsp_buf_add(bufnr)
   bufnr = bufnr or 0
   zk.lsp_start()

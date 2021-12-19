@@ -1,6 +1,22 @@
 # zk-nvim
 Neovim extension for zk
 
+## Install
+
+Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
+```lua
+use {
+  "mickael-menu/zk-nvim",
+  requires = { "neovim/nvim-lspconfig" }
+}
+```
+
+Using [vim-plug](https://github.com/junegunn/vim-plug)
+```viml
+Plug "mickael-menu/zk-nvim"
+Plug "neovim/nvim-lspconfig"
+```
+
 ## Setup
 ```lua
 require("zk").setup()
@@ -12,10 +28,14 @@ The default configuration is as follows
 ```lua
 require("zk").setup({
   lsp = {
-    autostart = {
+    -- automatically attach buffers that match the given filetypes and root_dir
+    auto_attach = {
       enabled = true,
       filetypes = { "markdown" },
+      -- same as the nvim-lspconfig `root_dir` function
+      root_dir = require("lspconfig.util").root_pattern(".zk"),
     },
+
     -- `config` is passed to `vim.lsp.start_client(config)`
     config = {
       cmd = { "zk", "lsp" },
