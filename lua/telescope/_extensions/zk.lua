@@ -13,7 +13,7 @@ local function request_notes(bufnr, options, cb)
     command = "zk.list",
     arguments = {
       vim.api.nvim_buf_get_name(bufnr),
-      vim.tbl_extend("error", { select = { "title", "absPath", "rawContent" } }, options or {}),
+      vim.tbl_extend("error", { select = { "title", "absPath", "rawContent" }, sort = { "created" } }, options or {}),
     },
   }, function(err, res)
     assert(not err, tostring(err))
@@ -26,7 +26,7 @@ end
 local function request_tags(bufnr, cb)
   vim.lsp.buf_request(bufnr, "workspace/executeCommand", {
     command = "zk.tag.list",
-    arguments = { vim.api.nvim_buf_get_name(bufnr) },
+    arguments = { vim.api.nvim_buf_get_name(bufnr), { sort = { "note-count" } } },
   }, function(err, res)
     assert(not err, tostring(err))
     if res then
