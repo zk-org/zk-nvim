@@ -22,7 +22,7 @@ Plug "neovim/nvim-lspconfig"
 require("zk").setup()
 require("telescope").load_extension("zk")
 ```
-This plugin will setup the LSP server for you, there is no need to call `require("lspconfig").zk.setup()`.
+Note: This plugin will setup and start the LSP server for you, do not call `require("lspconfig").zk.setup()`.
 
 The default configuration is as follows
 ```lua
@@ -49,10 +49,29 @@ require("zk").setup({
 ```
 
 ## Commands
+
+```vim
+:ZkIndex
+:ZkNew <title>
+```
+or via Lua
+```lua
+require("zk").cmd.index(path, args) -- path and args are optional
+require("zk").cmd.new(path, args) -- path and args are optional
+```
+
+### Telescope
+
 ```vim
 :Telescope zk notes
 :Telescope zk tags
 :Telescope zk backlinks
+```
+or via Lua
+```
+require('telescope').extensions.zk.notes()
+require('telescope').extensions.zk.tags()
+require('telescope').extensions.zk.backlinks()
 ```
 By default, this plugin will use the path of the currently active buffer to determine the location of the notebook you want to query.
 You can override this behavior by providing the path to any file or folder within the notebook you would like to query: `:Telescope zk notes path=/foo/bar` or `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
@@ -60,17 +79,38 @@ You can override this behavior by providing the path to any file or folder withi
 ## API
 
 ```lua
-path = "/path/to/notebook" -- can be nil, falls back to the current buffer then
-args = { select = { "title", "absPath", "rawContent" }, sort = { "created" } } -- the `select` key is required, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-require("zk").list(path, args, function(notes)
+-- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+path = "/path/to/notebook" -- optional
+args = nil
+require("zk").api.index(path, args, function(stats)
+  -- do something with the stats
+end)
+```
+
+```lua
+-- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+path = "/path/to/notebook" -- optional
+args = nil
+require("zk").api.new(path, args, function(res)
+  file_path = res.path
+  -- do something with the new file path
+end)
+```
+
+```lua
+-- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+path = "/path/to/notebook" -- optional
+args = { select = { "title", "absPath", "rawContent" }, sort = { "created" } } -- `select` is required
+require("zk").api.list(path, args, function(notes)
   -- do something with the notes
 end)
 ```
 
 ```lua
-path = "/path/to/notebook" -- can be nil, falls back to the current buffer then
-args = { sort = { "note-count" } } -- can be nil, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
-require("zk").tag.list(path, args, function(tags)
+-- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+path = "/path/to/notebook" -- optional
+args = { sort = { "note-count" } } -- optional
+require("zk").api.tag.list(path, args, function(tags)
   -- do something with the tags
 end)
 ```
