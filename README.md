@@ -1,5 +1,5 @@
 # zk-nvim
-Neovim extension for zk
+Neovim extension for [zk](https://github.com/mickael-menu/zk).
 
 ## Install
 
@@ -22,9 +22,9 @@ Plug "neovim/nvim-lspconfig"
 require("zk").setup()
 require("telescope").load_extension("zk")
 ```
-Note: This plugin will setup and start the LSP server for you, do not call `require("lspconfig").zk.setup()`.
+> :warning: This plugin will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
 
-The default configuration is as follows
+#### Default configuration
 ```lua
 require("zk").setup({
   lsp = {
@@ -68,7 +68,7 @@ require("zk").cmd.new(path, args) -- path and args are optional
 :Telescope zk backlinks
 ```
 or via Lua
-```
+```lua
 require('telescope').extensions.zk.notes()
 require('telescope').extensions.zk.tags()
 require('telescope').extensions.zk.backlinks()
@@ -115,12 +115,26 @@ require("zk").api.tag.list(path, args, function(tags)
 end)
 ```
 
-## Example Mapping
+## Example Mappings
 ```lua
 vim.api.nvim_set_keymap(
   "n",
-  "<Leader>fz",
+  "<Leader>zl",
   "<cmd>lua require('telescope').extensions.zk.notes()<CR>",
+  { noremap = true }
+)
+
+vim.api.nvim_set_keymap(
+  "n",
+  "<Leader>zb",
+  "<cmd>lua require('telescope').extensions.zk.backlinks()<CR>",
+  { noremap = true }
+)
+
+vim.api.nvim_set_keymap(
+  "n",
+  "<Leader>zt",
+  "<cmd>lua require('telescope').extensions.zk.tags()<CR>",
   { noremap = true }
 )
 ```
