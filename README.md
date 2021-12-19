@@ -1,28 +1,66 @@
 # zk-nvim
 Neovim extension for zk
 
-## Telescope
-
-> Only works in buffers where the `zk` language server (LSP) is attached.
-
-### Setup
+## Setup
 ```lua
+require("zk").setup()
 require("telescope").load_extension("zk")
 ```
+This plugin will setup the LSP server for you, there is no need to call `require("lspconfig").zk.setup()`.
 
-### Commands
+The default configuration is as follows
+```lua
+require("zk").setup({
+  lsp = {
+    autostart = {
+      enabled = true,
+      filetypes = { "markdown" },
+    },
+    -- `config` is passed to `vim.lsp.start_client(config)`
+    config = {
+      cmd = { "zk", "lsp" },
+      name = "zk",
+      -- init_options = ...
+      -- on_attach = ...
+      -- etc, see `:h vim.lsp.start_client()`
+    },
+  },
+})
+```
+
+## Commands
 ```vim
 :Telescope zk notes
 :Telescope zk tags
 :Telescope zk backlinks
 ```
+By default, this plugin will use the path of the currently active buffer to determine the location of the notebook you want to query.
+You can override this behavior by providing the path to any file or folder within the notebook you would like to query: `:Telescope zk notes path=/foo/bar` or `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
 
-### Example Mapping
+## API
+
+```lua
+path = "/path/to/notebook" -- can be nil, falls back to the current buffer then
+args = { select = { "title", "absPath", "rawContent" }, sort = { "created" } } -- the `select` key is required, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+require("zk").list(path, args, function(notes)
+  -- do something with the notes
+end)
+```
+
+```lua
+path = "/path/to/notebook" -- can be nil, falls back to the current buffer then
+args = { sort = { "note-count" } } -- can be nil, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+require("zk").tag.list(path, args, function(tags)
+  -- do something with the tags
+end)
+```
+
+## Example Mapping
 ```lua
 vim.api.nvim_set_keymap(
   "n",
   "<Leader>fz",
   "<cmd>lua require('telescope').extensions.zk.notes()<CR>",
-  {noremap = true}
+  { noremap = true }
 )
 ```

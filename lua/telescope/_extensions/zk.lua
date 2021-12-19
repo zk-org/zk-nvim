@@ -36,7 +36,7 @@ local function make_note_previewer()
 end
 
 local function _list_notes(opts, defaults, zk_args)
-  zk.list(zk_args, function(notes)
+  zk.list(opts.path, zk_args, function(notes)
     pickers.new(
       opts,
       vim.tbl_extend("error", {
@@ -63,7 +63,7 @@ end
 
 local function list_tags(opts)
   opts = opts or {}
-  zk.tag.list(make_tag_args(), function(tags)
+  zk.tag.list(opts.path, make_tag_args(), function(tags)
     pickers.new(opts, {
       prompt_title = "Zk Tags",
       finder = finders.new_table({
