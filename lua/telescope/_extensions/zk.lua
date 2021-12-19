@@ -7,32 +7,14 @@ local action_utils = require("telescope.actions.utils")
 local putils = require("telescope.previewers.utils")
 local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
+local zk = require("zk")
 
-local function request_notes(bufnr, options, cb)
-  vim.lsp.buf_request(bufnr, "workspace/executeCommand", {
-    command = "zk.list",
-    arguments = {
-      vim.api.nvim_buf_get_name(bufnr),
-      vim.tbl_extend("error", { select = { "title", "absPath", "rawContent" }, sort = { "created" } }, options or {}),
-    },
-  }, function(err, res)
-    assert(not err, tostring(err))
-    if res then
-      cb(res)
-    end
-  end)
+local function make_note_args(opts)
+  return vim.tbl_extend("force", { select = { "title", "absPath", "rawContent" }, sort = { "created" } }, opts or {})
 end
 
-local function request_tags(bufnr, cb)
-  vim.lsp.buf_request(bufnr, "workspace/executeCommand", {
-    command = "zk.tag.list",
-    arguments = { vim.api.nvim_buf_get_name(bufnr), { sort = { "note-count" } } },
-  }, function(err, res)
-    assert(not err, tostring(err))
-    if res then
-      cb(res)
-    end
-  end)
+local function make_tag_args(opts)
+  return vim.tbl_extend("force", { sort = { "note-count" } }, opts or {})
 end
 
 local function make_note_entry(note)
@@ -53,35 +35,35 @@ local function make_note_previewer()
   })
 end
 
-local function _list_notes(user_opts, local_opts, lsp_opts)
-  request_notes(0, lsp_opts, function(notes)
+local function _list_notes(opts, defaults, zk_args)
+  zk.list(zk_args, function(notes)
     pickers.new(
-      user_opts,
+      opts,
       vim.tbl_extend("error", {
         finder = finders.new_table({
           results = notes,
           entry_maker = make_note_entry,
         }),
-        sorter = conf.file_sorter(user_opts),
+        sorter = conf.file_sorter(opts),
         previewer = make_note_previewer(),
-      }, local_opts)
+      }, defaults)
     ):find()
   end)
 end
 
 local function list_notes(opts)
   opts = opts or {}
-  _list_notes(opts, { prompt_title = "Zk Notes" }, nil)
+  _list_notes(opts, { prompt_title = "Zk Notes" }, make_note_args())
 end
 
 local function list_links_to_current_note(opts)
   opts = opts or {}
-  _list_notes(opts, { prompt_title = "Zk Backlinks" }, { linkTo = { vim.api.nvim_buf_get_name(0) } })
+  _list_notes(opts, { prompt_title = "Zk Backlinks" }, make_note_args({ linkTo = { vim.api.nvim_buf_get_name(0) } }))
 end
 
 local function list_tags(opts)
   opts = opts or {}
-  request_tags(0, function(tags)
+  zk.tag.list(make_tag_args(), function(tags)
     pickers.new(opts, {
       prompt_title = "Zk Tags",
       finder = finders.new_table({
