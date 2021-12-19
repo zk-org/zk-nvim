@@ -16,7 +16,7 @@ local function request_notes(bufnr, options, cb)
       vim.tbl_extend("error", { select = { "title", "absPath", "rawContent" } }, options or {}),
     },
   }, function(err, res)
-    assert(not err, err)
+    assert(not err, tostring(err))
     if res then
       cb(res)
     end
@@ -28,7 +28,7 @@ local function request_tags(bufnr, cb)
     command = "zk.tag.list",
     arguments = { vim.api.nvim_buf_get_name(bufnr) },
   }, function(err, res)
-    assert(not err, err)
+    assert(not err, tostring(err))
     if res then
       cb(res)
     end
@@ -70,14 +70,17 @@ local function _list_notes(user_opts, local_opts, lsp_opts)
 end
 
 local function list_notes(opts)
+  opts = opts or {}
   _list_notes(opts, { prompt_title = "Zk Notes" }, nil)
 end
 
 local function list_links_to_current_note(opts)
+  opts = opts or {}
   _list_notes(opts, { prompt_title = "Zk Backlinks" }, { linkTo = { vim.api.nvim_buf_get_name(0) } })
 end
 
 local function list_tags(opts)
+  opts = opts or {}
   request_tags(0, function(tags)
     pickers.new(opts, {
       prompt_title = "Zk Tags",
@@ -118,7 +121,7 @@ local function list_tags(opts)
 
           actions.close(prompt_bufnr)
 
-          _list_notes(opts, { tags = selection })
+          _list_notes(opts, { prompt_title = "Zk Notes for tag(s) " .. vim.inspect(selection) }, { tags = selection })
         end)
         return true
       end,
