@@ -52,7 +52,7 @@ require("zk").setup({
 
 ```vim
 :ZkIndex
-:ZkNew <title>
+:ZkNew [<directory>]
 ```
 or via Lua
 ```lua
