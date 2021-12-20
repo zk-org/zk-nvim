@@ -93,21 +93,104 @@ zk.new = function(lsp_opts, wrapper_opts)
   end)
 end
 
--- wrapper for `zk list`
-zk.list = function()
-  local handle = vim.loop.spawn('zk', {
-    args = {
-      'list',
-      '-q',
-      '-P',
-      '--format',
-      '{{ abs-path }}\t{{ title }}',
+-- lists notes
+zk.list = function(lsp_opts, wrapper_opts)
+  -- set default options to pass to LSP server
+  local lsp_defaults = {
+    select = {
+      'title',
+      'filename',
+      'created',
+      'lead',
     },
-  }, function(code, signal)
-    print()
+    hrefs = nil,
+    limit = nil,
+    match = nil,
+    exactMatch = nil,
+    excludeHrefs = nil,
+    tags = nil,
+    mention = nil,
+    mentionedBy = nil,
+    linkTo = nil,
+    linkedBy = nil,
+    orphan = nil,
+    related = nil,
+    maxDistance = nil,
+    recursive = nil,
+    created = nil,
+    createdBefore = nil,
+    createdAfter = nil,
+    modified = nil,
+    modifiedBefore = nil,
+    modifiedAfter = nil,
+    sort = nil,
+  }
+  lsp_opts = lsp_opts and vim.tbl_extend('keep', lsp_opts, lsp_defaults) or lsp_defaults
+
+  -- options for this wrapper function
+  local wrapper_defaults = {
+    edit_cmd = 'edit',
+    debug = false,
+  }
+  wrapper_opts = wrapper_opts and vim.tbl_extend('keep', wrapper_opts, wrapper_defaults) or wrapper_defaults
+
+  table.insert(lsp_opts, 1, vim.api.nvim_buf_get_name(0))
+
+  if debug then
+    utils.debug_tbl(lsp_opts, 'LSP Options')
+  end
+
+  vim.lsp.buf_request(0, 'workspace/executeCommand', {
+    command = 'zk.list',
+    arguments = lsp_opts,
+  }, function(err, result, _, _)
+    if debug then
+      utils.debug_tbl(err, 'LSP Error Message')
+      utils.debug_tbl(result, 'LSP Result')
+    end
+
+    if not err then
+      return result
+    end
   end)
 end
 
+-- lists tags out
+zk.list_tags = function(wrapper_opts, lsp_opts)
+  -- set default options to pass to LSP server
+  local lsp_defaults = {
+    sort = nil,
+  }
+  lsp_opts = lsp_opts and vim.tbl_extend('keep', lsp_opts, lsp_defaults) or lsp_defaults
+
+  -- options for this wrapper function
+  local wrapper_defaults = {
+    path = '',
+  }
+  wrapper_opts = wrapper_opts and vim.tbl_extend('keep', wrapper_opts, wrapper_defaults) or wrapper_defaults
+
+  table.insert(lsp_opts, 1, vim.api.nvim_buf_get_name(0))
+
+  if debug then
+    utils.debug_tbl(lsp_opts, 'LSP Options')
+  end
+
+  vim.lsp.buf_request(0, 'workspace/executeCommand', {
+    command = 'zk.tag.list',
+    arguments = lsp_opts,
+  }, function(err, result, _, _)
+    if debug then
+      utils.debug_tbl(err, 'LSP Error Message')
+      utils.debug_tbl(result, 'LSP Result')
+    end
+
+    if not err then
+      return result
+    end
+  end)
+end
+
+-- telescope picker
 zk.find_notes = function(handler)
   if handler == 'telescope' then
     local pickers = require 'telescope.pickers'
@@ -137,6 +220,20 @@ zk.daily = function()
   else
     vim.notify('Please setup a directory for your daily notes in the `daily_dir` config option in zk.setup()', 'error')
   end
+end
+
+-- jump to the next link
+zk.next_link = function()
+  vim.diagnostic.goto_next {
+    severity = vim.diagnostic.severity.HINT,
+  }
+end
+
+-- jump to the previous link
+zk.prev_link = function()
+  vim.diagnostic.goto_prev {
+    severity = vim.diagnostic.severity.HINT,
+  }
 end
 
 return zk
