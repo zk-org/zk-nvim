@@ -1,6 +1,7 @@
 local M = {}
 
 M.defaults = {
+  create_user_commands = true,
   lsp = {
     auto_attach = {
       enabled = true,
