@@ -5,7 +5,6 @@ M.defaults = {
     auto_attach = {
       enabled = true,
       filetypes = { "markdown" },
-      root_dir = require("lspconfig.util").root_pattern(".zk"),
     },
     config = {
       cmd = { "zk", "lsp" },

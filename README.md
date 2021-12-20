@@ -28,12 +28,10 @@ require("telescope").load_extension("zk")
 ```lua
 require("zk").setup({
   lsp = {
-    -- automatically attach buffers that match the given filetypes and root_dir
+    -- automatically attach buffers in a zk notebook that match the given filetypes
     auto_attach = {
       enabled = true,
       filetypes = { "markdown" },
-      -- same as the nvim-lspconfig `root_dir` function
-      root_dir = require("lspconfig.util").root_pattern(".zk"),
     },
 
     -- `config` is passed to `vim.lsp.start_client(config)`
@@ -74,9 +72,9 @@ require('telescope').extensions.zk.tags()
 require('telescope').extensions.zk.backlinks()
 ```
 By default, this plugin will use the path of the current buffer to determine the location of your notebook.
-You can also explicitly specify a notebook by providing the path to any file or folder within the notebook like so `:Telescope zk notes path=/foo/bar` or so `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
-Note that if `zk` can't locate your notebook, it will fallback to the value of `$ZK_NOTEBOOK_DIR`.
-If you have this environment variable set, it is unlikely you will ever need to explicitly specify the path of a notebook.
+Note that if the current buffer does not belong to a notebook, `$ZK_NOTEBOOK_DIR` will be used to locate your notebook.
+
+If you want, you can also explicitly specify a notebook by providing the path to any file or folder within the notebook like so `:Telescope zk notes path=/foo/bar` or so `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
 
 ## API
 
