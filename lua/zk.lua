@@ -17,6 +17,6 @@ function M.setup(options)
 end
 
 vim.cmd("command! ZkIndex lua require('zk').cmd.index()")
-vim.cmd("command! -nargs=? ZkNew lua require('zk').cmd.new(nil, { title = [=[<args>]=]})")
+vim.cmd("command! -nargs=? ZkNew lua require('zk').cmd.new(nil, { dir = [=[<args>]=]})")
 
 return M
