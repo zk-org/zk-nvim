@@ -9,6 +9,7 @@ use {
   "mickael-menu/zk-nvim",
   requires = { "neovim/nvim-lspconfig" }
 }
+
 -- Telescope is optional
 use {
   'nvim-telescope/telescope.nvim',
@@ -20,8 +21,8 @@ Using [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
 Plug "mickael-menu/zk-nvim"
 Plug "neovim/nvim-lspconfig"
-Plug 'nvim-telescope/telescope.nvim' -- optional
-Plug 'nvim-lua/plenary.nvim' -- optional, dependency for Telescope
+Plug 'nvim-telescope/telescope.nvim' " optional
+Plug 'nvim-lua/plenary.nvim' " optional, dependency for Telescope
 ```
 
 ## Setup
