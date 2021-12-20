@@ -9,12 +9,19 @@ use {
   "mickael-menu/zk-nvim",
   requires = { "neovim/nvim-lspconfig" }
 }
+-- Telescope is optional
+use {
+  'nvim-telescope/telescope.nvim',
+  requires = { {'nvim-lua/plenary.nvim'} }
+}
 ```
 
 Using [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
 Plug "mickael-menu/zk-nvim"
 Plug "neovim/nvim-lspconfig"
+Plug 'nvim-telescope/telescope.nvim' -- optional
+Plug 'nvim-lua/plenary.nvim' -- optional, dependency for Telescope
 ```
 
 ## Setup
@@ -54,22 +61,26 @@ require("zk").setup({
 ```
 or via Lua
 ```lua
-require("zk").cmd.index(path, args) -- path and args are optional
-require("zk").cmd.new(path, args) -- path and args are optional
+require("zk").index(path, args) -- path and args are optional
+require("zk").new(path, args) -- path and args are optional
 ```
 
 ### Telescope
 
 ```vim
 :Telescope zk notes
-:Telescope zk tags
 :Telescope zk backlinks
+:Telescope zk links
+:Telescope zk related
+:Telescope zk tags
 ```
 or via Lua
 ```lua
 require('telescope').extensions.zk.notes()
-require('telescope').extensions.zk.tags()
 require('telescope').extensions.zk.backlinks()
+require('telescope').extensions.zk.links()
+require('telescope').extensions.zk.related()
+require('telescope').extensions.zk.tags()
 ```
 By default, this plugin will use the path of the current buffer to determine the location of your notebook.
 Note that if the current buffer does not belong to a notebook, `$ZK_NOTEBOOK_DIR` will be used to locate your notebook.
@@ -78,7 +89,7 @@ If you want, you can also explicitly specify a notebook by providing the path to
 
 ## API
 
-The difference between `require("zk").api` (this) and `require("zk").cmd` is that this lets you handle the API results yourself in case you need the extra flexibility.
+The difference between e.g. `require("zk").api.new` and `require("zk").new` is that the former lets you handle the API results yourself for more flexibility.
 
 ```lua
 -- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
@@ -118,7 +129,7 @@ end)
 ```lua
 vim.api.nvim_set_keymap(
   "n",
-  "<Leader>zl",
+  "<Leader>zn",
   "<cmd>lua require('telescope').extensions.zk.notes()<CR>",
   { noremap = true }
 )
@@ -127,6 +138,13 @@ vim.api.nvim_set_keymap(
   "n",
   "<Leader>zb",
   "<cmd>lua require('telescope').extensions.zk.backlinks()<CR>",
+  { noremap = true }
+)
+
+vim.api.nvim_set_keymap(
+  "n",
+  "<Leader>zl",
+  "<cmd>lua require('telescope').extensions.zk.links()<CR>",
   { noremap = true }
 )
 
