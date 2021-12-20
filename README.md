@@ -34,6 +34,9 @@ require("telescope").load_extension("zk")
 #### Default configuration
 ```lua
 require("zk").setup({
+  -- create user commands such as :ZkNew
+  create_user_commands = true,
+
   lsp = {
     -- automatically attach buffers in a zk notebook that match the given filetypes
     auto_attach = {

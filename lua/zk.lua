@@ -9,8 +9,14 @@ M.lsp = require("zk.lsp")
 
 function M.setup(options)
   config.options = vim.tbl_deep_extend("force", config.defaults, options or {})
+
   if config.options.lsp.auto_attach.enabled then
     util.setup_lsp_auto_attach()
+  end
+
+  if config.options.create_user_commands then
+    vim.cmd("command! ZkIndex lua require('zk').index()")
+    vim.cmd("command! -nargs=? ZkNew lua require('zk').new(nil, { dir = [=[<args>]=]})")
   end
 end
 
@@ -27,8 +33,5 @@ function M.new(path, args)
     vim.cmd("edit " .. res.path)
   end)
 end
-
-vim.cmd("command! ZkIndex lua require('zk').index()")
-vim.cmd("command! -nargs=? ZkNew lua require('zk').new(nil, { dir = [=[<args>]=]})")
 
 return M
