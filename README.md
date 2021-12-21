@@ -73,6 +73,7 @@ require("zk").new(path, args) -- path and args are optional
 
 ```vim
 :Telescope zk notes
+:Telescope zk orphans
 :Telescope zk backlinks
 :Telescope zk links
 :Telescope zk related
@@ -81,6 +82,7 @@ require("zk").new(path, args) -- path and args are optional
 or via Lua
 ```lua
 require('telescope').extensions.zk.notes()
+require('telescope').extensions.zk.orphans()
 require('telescope').extensions.zk.backlinks()
 require('telescope').extensions.zk.links()
 require('telescope').extensions.zk.related()
@@ -135,6 +137,13 @@ vim.api.nvim_set_keymap(
   "n",
   "<Leader>zn",
   "<cmd>lua require('telescope').extensions.zk.notes()<CR>",
+  { noremap = true }
+)
+
+vim.api.nvim_set_keymap(
+  "n",
+  "<Leader>zo",
+  "<cmd>lua require('telescope').extensions.zk.orphans()<CR>",
   { noremap = true }
 )
 
