@@ -8,6 +8,13 @@ local function show_notes(opts)
   end)
 end
 
+local function show_orphans(opts)
+  opts = vim.tbl_extend("keep", opts or {}, { prompt_title = "Zk Orphans" })
+  zk.api.list(opts.path, util.wrap_note_args({ orphan = true }), function(notes)
+    util.show_note_picker(opts, notes)
+  end)
+end
+
 local function show_backlinks(opts)
   opts = vim.tbl_extend("keep", opts or {}, { prompt_title = "Zk Backlinks" })
   zk.api.list(opts.path, util.wrap_note_args({ linkTo = { vim.api.nvim_buf_get_name(0) } }), function(notes)
@@ -44,6 +51,7 @@ end
 return require("telescope").register_extension({
   exports = {
     notes = show_notes,
+    orphans = show_orphans,
     backlinks = show_backlinks,
     links = show_links,
     related = show_related,
