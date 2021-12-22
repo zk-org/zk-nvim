@@ -10,7 +10,7 @@ local previewers = require("telescope.previewers")
 
 local M = {}
 
-function M.wrap_note_args(opts)
+function M.wrap_note_options(opts)
   return vim.tbl_deep_extend(
     "force",
     { select = { "title", "absPath", "rawContent" }, sort = { "created" } },
@@ -18,7 +18,7 @@ function M.wrap_note_args(opts)
   )
 end
 
-function M.wrap_tag_args(opts)
+function M.wrap_tag_options(opts)
   return vim.tbl_deep_extend("force", { sort = { "note-count" } }, opts or {})
 end
 
@@ -66,7 +66,6 @@ function M.make_note_previewer()
 end
 
 function M.show_note_picker(opts, notes)
-  -- zk.api.list(opts.path, zk_args, function(notes)
   opts = opts or {}
   pickers.new(opts, {
     finder = finders.new_table({
@@ -76,11 +75,9 @@ function M.show_note_picker(opts, notes)
     sorter = conf.file_sorter(opts),
     previewer = M.make_note_previewer(),
   }):find()
-  -- end)
 end
 
 function M.show_tag_picker(opts, tags, cb)
-  -- zk.api.tag.list(opts.path, make_tag_args(), function(tags)
   opts = opts or {}
   pickers.new(opts, {
     finder = finders.new_table({
@@ -101,13 +98,11 @@ function M.show_tag_picker(opts, tags, cb)
 
         actions.close(prompt_bufnr)
 
-        -- _list_notes(opts, { prompt_title = "Zk Notes for tag(s) " .. vim.inspect(selection) }, { tags = selection })
         cb(selection)
       end)
       return true
     end,
   }):find()
-  -- end)
 end
 
 return M
