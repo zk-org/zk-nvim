@@ -17,15 +17,12 @@ function M.setup(options)
   end
 
   if config.options.create_user_commands then
-    vim.cmd("command! ZkIndex lua require('zk').index()")
-    vim.cmd("command! -nargs=? ZkNew lua require('zk').new(nil, { dir = <q-args> })") -- the command arg (directory) is interpreted relative to the notebook root
-    -- vim.cmd("command! -nargs=? -complete=dir ZkNew lua require('zk').new(nil, { dir = vim.fn.fnamemodify(<q-args>, ':p') })") -- this would interpret the command arg (dir) relative to the cwd instead
-    vim.cmd(
-      "command! -nargs=? -complete=lua ZkList lua require('zk').list(nil, assert(loadstring('return ' .. <q-args>))())"
-    )
-    vim.cmd(
-      "command! -nargs=? -complete=lua ZkTagList lua require('zk').tag.list(nil, assert(loadstring('return ' .. <q-args>))())"
-    )
+    vim.cmd([[
+      command! -nargs=? -complete=lua ZkIndex   lua require('zk').index(nil, assert(loadstring('return ' .. <q-args>))())
+      command! -nargs=? -complete=lua ZkNew     lua require('zk').new(nil, assert(loadstring('return ' .. <q-args>))())
+      command! -nargs=? -complete=lua ZkList    lua require('zk').list(nil, assert(loadstring('return ' .. <q-args>))())
+      command! -nargs=? -complete=lua ZkTagList lua require('zk').tag.list(nil, assert(loadstring('return ' .. <q-args>))())
+    ]])
   end
 end
 

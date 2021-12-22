@@ -75,12 +75,14 @@ However, this is always optional, and usually not necessary.
 ### VimL
 ```vim
 " Indexes the notebook
-:ZkIndex
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+:ZkIndex [<options>]
 
 " Creates and opens a new note
 " params
-"   (optional) directory for the new note, relative to the notebook root
-:ZkNew [<directory>]
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+:ZkNew [<options>]
 
 " Opens a Telescope picker
 " params
@@ -96,7 +98,7 @@ where `options` can be any valid *Lua* expression that evaluates to a table.
 
 *Examples:*
 ```vim
-:ZkNew daily
+:ZkNew { dir = "daily", date = "yesterday" }
 :ZkList { createdAfter = "3 days ago", tags = { "work" } }
 ```
 
@@ -159,7 +161,7 @@ require('telescope').extensions.zk.tags()
 ```
 
 The Telescope pickers also allow you to explicitly specify a notebook like so `:Telescope zk notes path=/foo/bar` or so `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
-However, specifing a `path` is optional, and is usually not necessary; see [Notebook Directory Discovery](#notebook-directory-discovery).
+However, specifying a `path` is optional, and is usually not necessary; see [Notebook Directory Discovery](#notebook-directory-discovery).
 
 You can even pass the same additional options to the Telescope pickers as described in [list and tag list commands](#commands).
 
