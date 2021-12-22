@@ -45,7 +45,14 @@ end
 ---@param options table additional options
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 function M.new(path, options)
+  -- neovim does not yet support window/showDocument, therefore we handle options.edit locally
+  if options and options.edit then
+    options.edit = nil -- nil means true in this context
+  end
   M.api.new(path, options, function(res)
+    if options and options.edit == false then
+      return
+    end
     vim.cmd("edit " .. res.path)
   end)
 end

@@ -38,6 +38,10 @@ end
 ---@param options table?
 ---@param cb function?
 local function execute_command(cmd, path, options, cb)
+  if options and vim.tbl_isempty(options) then
+    -- an empty table would be send as an empty list, which causes an error on the server
+    options = nil
+  end
   local bufnr = 0
   lsp.start()
   lsp.client().request("workspace/executeCommand", {
