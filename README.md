@@ -21,6 +21,7 @@ Using [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
 Plug "mickael-menu/zk-nvim"
 Plug "neovim/nvim-lspconfig"
+
 Plug 'nvim-telescope/telescope.nvim' " optional
 Plug 'nvim-lua/plenary.nvim' " optional, dependency for Telescope
 ```
@@ -32,19 +33,13 @@ require("telescope").load_extension("zk")
 ```
 > :warning: This plugin will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
 
-#### Default configuration
+**Default configuration**
 ```lua
 require("zk").setup({
   -- create user commands such as :ZkNew
   create_user_commands = true,
 
   lsp = {
-    -- automatically attach buffers in a zk notebook that match the given filetypes
-    auto_attach = {
-      enabled = true,
-      filetypes = { "markdown" },
-    },
-
     -- `config` is passed to `vim.lsp.start_client(config)`
     config = {
       cmd = { "zk", "lsp" },
@@ -53,24 +48,98 @@ require("zk").setup({
       -- on_attach = ...
       -- etc, see `:h vim.lsp.start_client()`
     },
+
+    -- automatically attach buffers in a zk notebook that match the given filetypes
+    auto_attach = {
+      enabled = true,
+      filetypes = { "markdown" },
+    },
   },
 })
 ```
 
+### Notebook Directory Discovery
+When you run a notebook command, this plugin will look for a notebook in the following places and order:
+1. the current buffer path (i.e. the file you are currently editing),
+2. the current working directory,
+3. the `$ZK_NOTEBOOK_DIR` environment variable.
+
+We recommend you to export the `$ZK_NOTEBOOK_DIR` environment variable, so that a notebook can always be found.
+
+It is worth noting that for some notebook commands you can explicitly specify a notebook by providing a path to any file or directory within the notebook.
+An explicitly provided path will always take precedence and override the automatic notebook discovery.
+However, this is always optional, and usually not necessary.
+
 ## Commands
 
+### VimL
 ```vim
+" Indexes the notebook
 :ZkIndex
+
+" Creates and opens a new note
+" params
+"   (optional) directory for the new note, relative to the notebook root
 :ZkNew [<directory>]
+
+" Opens a Telescope picker
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+:ZkList [<options>]
+
+" Opens a Telescope picker
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+:ZkTagList [<options>]
 ```
-or via Lua
+where `options` can be any valid *Lua* expression that evaluates to a table.
+
+*Examples:*
+```vim
+:ZkNew daily
+:ZkList { createdAfter = "3 days ago", tags = { "work" } }
+```
+
+### Lua
 ```lua
-require("zk").index(path, args) -- path and args are optional
-require("zk").new(path, args) -- path and args are optional
+---Indexes the notebook
+--
+---@param path? string path to explicitly specify the notebook
+---@param options table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+require("zk").index(path, options)
+
+---Creates and opens a new note
+--
+---@param path? string path to explicitly specify the notebook
+---@param options table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+require("zk").new(path, options)
+
+---Opens a Telescope picker
+--
+---@param path? string path to explicitly specify the notebook
+---@param options table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+require("zk").list(path, options)
+
+---Opens a Telescope picker
+--
+---@param path? string path to explicitly specify the notebook
+---@param options table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+require("zk").tag.list(path, options)
 ```
+
+*Examples:*
+```lua
+require("zk").new(nil, { dir = "daily" })
+require("zk").list(nil, { createdAfter = "3 days ago", tags = { "work" } })
+```
+
+As you can see, the `path` is optional, and can usually be omitted; see [Notebook Directory Discovery](#notebook-directory-discovery).
 
 ### Telescope
-
 ```vim
 :Telescope zk notes
 :Telescope zk orphans
@@ -88,27 +157,42 @@ require('telescope').extensions.zk.links()
 require('telescope').extensions.zk.related()
 require('telescope').extensions.zk.tags()
 ```
-By default, this plugin will use the path of the current buffer to determine the location of your notebook.
-Note that if the current buffer does not belong to a notebook, `$ZK_NOTEBOOK_DIR` will be used to locate your notebook.
 
-If you want, you can also explicitly specify a notebook by providing the path to any file or folder within the notebook like so `:Telescope zk notes path=/foo/bar` or so `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
+The Telescope pickers also allow you to explicitly specify a notebook like so `:Telescope zk notes path=/foo/bar` or so `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
+However, specifing a `path` is optional, and is usually not necessary; see [Notebook Directory Discovery](#notebook-directory-discovery).
+
+You can even pass the same additional options to the Telescope pickers as described in [list and tag list commands](#commands).
+
+*Example VimL:*
+```vim
+:Telescope zk notes createdAfter=3\ days\ ago
+```
+
+*Example Lua:*
+```lua
+require('telescope').extensions.zk.notes({ createdAfter = "3 days ago", tags = { "work" } })
+```
+
+As you can see, the VimL API is a bit constrained. Whitespace must be escaped and lists and dictionaries are not supported.
+It is therefore recommended to use the `:ZkList` and `:ZkTagList` [commands](#commands) instead.
 
 ## API
 
-The difference between e.g. `require("zk").api.new` and `require("zk").new` is that the former lets you handle the API results yourself for more flexibility.
+The functions in the API module give you maximum flexibility and provide only a thin Lua friendly layer around zk's API.
+You can use it to write your own specialized functions for interacting with zk.
 
 ```lua
 -- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
--- path and args are optional
-require("zk").api.index(path, args, function(stats)
+-- path and options are optional
+require("zk").api.index(path, options, function(stats)
   -- do something with the stats
 end)
 ```
 
 ```lua
 -- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
--- path and args are optional
-require("zk").api.new(path, args, function(res)
+-- path and options are optional
+require("zk").api.new(path, options, function(res)
   file_path = res.path
   -- do something with the new file path
 end)
@@ -116,17 +200,17 @@ end)
 
 ```lua
 -- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
--- path is optional, args.select is required
--- args = { select = { "title", "absPath", "rawContent" }, sort = { "created" } }
-require("zk").api.list(path, args, function(notes)
+-- path is optional, options.select is required
+-- options = { select = { "title", "absPath", "rawContent" }, sort = { "created" } }
+require("zk").api.list(path, options, function(notes)
   -- do something with the notes
 end)
 ```
 
 ```lua
 -- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
--- path and args are optional
-require("zk").api.tag.list(path, args, function(tags)
+-- path and options are optional
+require("zk").api.tag.list(path, options, function(tags)
   -- do something with the tags
 end)
 ```
