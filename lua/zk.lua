@@ -18,15 +18,22 @@ function M.setup(options)
 
   if config.options.create_user_commands then
     vim.cmd([[
+      " Core Commands
       command! -nargs=? -complete=lua ZkIndex   lua require('zk').index(nil, assert(loadstring('return ' .. <q-args>))())
       command! -nargs=? -complete=lua ZkNew     lua require('zk').new(nil, assert(loadstring('return ' .. <q-args>))())
       command! -nargs=? -complete=lua ZkList    lua require('zk').list(nil, assert(loadstring('return ' .. <q-args>))())
       command! -nargs=? -complete=lua ZkTagList lua require('zk').tag.list(nil, assert(loadstring('return ' .. <q-args>))())
+
+      " Convenience Commands
+      command! -range -nargs=? -complete=lua ZkNewLink lua assert(<range> == 2, "ZkNewLink must be called with '<,'> range. Try :'<'>ZkNewLink"); require('zk').new_link(nil, assert(loadstring('return ' .. <q-args>))())
     ]])
+    -- The definition of :ZkNewLink is kind of a hack.
+    -- The lua function that is called by ZkNewLink will always use the '<,'> marks to get the selection.
+    -- The only way that this command can be called that makes semantical sense is :'<,'>ZkNewLink.
   end
 end
 
--- Commands
+-- Core Commands
 
 ---Indexes the notebook
 --
@@ -39,7 +46,7 @@ function M.index(path, options)
   end)
 end
 
----Creates and opens a new note
+---Creates a new note
 --
 ---@param path? string path to explicitly specify the notebook
 ---@param options table additional options
@@ -87,6 +94,22 @@ function M.tag.list(path, options)
     options.path = path
   end
   require("telescope._extensions.zk").exports.tags(options)
+end
+
+-- Convenience Commands
+
+---Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
+--
+---@param path? string path to explicitly specify the notebook
+---@param options table additional options
+function M.new_link(path, options)
+  local location = util.make_lsp_location()
+  local selected_text = util.get_text_in_range(location.range)
+  if not selected_text then
+    vim.notify("Selection not set", vim.log.levels.ERROR)
+    return
+  end
+  M.new(path, vim.tbl_extend("keep", options or {}, { insertLinkAtLocation = location, title = selected_text }))
 end
 
 return M
