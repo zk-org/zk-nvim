@@ -75,12 +75,19 @@ However, this is always optional, and usually not necessary.
 ### VimL
 ```vim
 " Indexes the notebook
-:ZkIndex
-
-" Creates and opens a new note
 " params
-"   (optional) directory for the new note, relative to the notebook root
-:ZkNew [<directory>]
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+:ZkIndex [<options>]
+
+" Creates a new note
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+:ZkNew [<options>]
+
+" Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+:ZkNewLink [<options>]
 
 " Opens a Telescope picker
 " params
@@ -96,8 +103,9 @@ where `options` can be any valid *Lua* expression that evaluates to a table.
 
 *Examples:*
 ```vim
-:ZkNew daily
+:ZkNew { dir = "daily", date = "yesterday" }
 :ZkList { createdAfter = "3 days ago", tags = { "work" } }
+:'<,'>ZkNewLink " this will use your last visual mode selection. Note that you *must* call this command with the '<,'> range.
 ```
 
 ### Lua
@@ -115,6 +123,12 @@ require("zk").index(path, options)
 ---@param options table additional options
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 require("zk").new(path, options)
+
+---Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
+--
+---@param path? string path to explicitly specify the notebook
+---@param options table additional options
+require("zk").new_link(path, options)
 
 ---Opens a Telescope picker
 --
@@ -135,6 +149,7 @@ require("zk").tag.list(path, options)
 ```lua
 require("zk").new(nil, { dir = "daily" })
 require("zk").list(nil, { createdAfter = "3 days ago", tags = { "work" } })
+require("zk").new_link() -- this will use your last visual mode selection
 ```
 
 As you can see, the `path` is optional, and can usually be omitted; see [Notebook Directory Discovery](#notebook-directory-discovery).
@@ -159,7 +174,7 @@ require('telescope').extensions.zk.tags()
 ```
 
 The Telescope pickers also allow you to explicitly specify a notebook like so `:Telescope zk notes path=/foo/bar` or so `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
-However, specifing a `path` is optional, and is usually not necessary; see [Notebook Directory Discovery](#notebook-directory-discovery).
+However, specifying a `path` is optional, and is usually not necessary; see [Notebook Directory Discovery](#notebook-directory-discovery).
 
 You can even pass the same additional options to the Telescope pickers as described in [list and tag list commands](#commands).
 
@@ -217,6 +232,25 @@ end)
 
 ## Example Mappings
 ```lua
+
+-- Create notes / links
+
+vim.api.nvim_set_keymap(
+  "n",
+  "<Leader>zc",
+  "<cmd>lua require('zk').new()<CR>",
+  { noremap = true }
+)
+
+vim.api.nvim_set_keymap(
+  "x",
+  "<Leader>zc",
+  "<esc><cmd>lua require('zk').new_link()<CR>",
+  { noremap = true }
+)
+
+-- Show Telescope pickers
+
 vim.api.nvim_set_keymap(
   "n",
   "<Leader>zn",

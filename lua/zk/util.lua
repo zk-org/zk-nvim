@@ -36,4 +36,26 @@ function M.lsp_buf_auto_add(bufnr)
   lsp.buf_add(bufnr)
 end
 
+function M.make_lsp_location()
+  local params = vim.lsp.util.make_given_range_params()
+  params.uri = params.textDocument.uri
+  params.textDocument = nil
+  return params
+end
+
+--- needed until https://github.com/neovim/neovim/pull/13896 is merged
+---@param range table LSP range object
+function M.get_text_in_range(range)
+  local A = range["start"]
+  local B = range["end"]
+
+  local lines = vim.api.nvim_buf_get_lines(0, A.line, B.line + 1, true)
+  if vim.tbl_isempty(lines) then
+    return nil
+  end
+  lines[#lines] = string.sub(lines[#lines], 1, B.character)
+  lines[1] = string.sub(lines[1], A.character + 1)
+  return table.concat(lines, "\n")
+end
+
 return M
