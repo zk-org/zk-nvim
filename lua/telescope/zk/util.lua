@@ -10,17 +10,11 @@ local previewers = require("telescope.previewers")
 
 local M = {}
 
-function M.wrap_note_options(opts)
-  return vim.tbl_deep_extend(
-    "force",
-    { select = { "title", "absPath", "rawContent" }, sort = { "created" } },
-    opts or {}
-  )
-end
+M.note_picker_api_options = { select = { "title", "absPath", "rawContent" }, sort = { "created" } }
 
-function M.wrap_tag_options(opts)
-  return vim.tbl_deep_extend("force", { sort = { "note-count" } }, opts or {})
-end
+M.tag_picker_api_options = {
+  sort = { "note-count" },
+}
 
 function M.create_note_entry_maker(_)
   return function(note)
@@ -65,8 +59,8 @@ function M.make_note_previewer()
   })
 end
 
-function M.show_note_picker(opts, notes)
-  opts = opts or {}
+function M.show_note_picker(notes, opts)
+  opts = vim.tbl_extend("keep", opts or {}, { prompt_title = "Zk Notes" })
   pickers.new(opts, {
     finder = finders.new_table({
       results = notes,
@@ -77,8 +71,8 @@ function M.show_note_picker(opts, notes)
   }):find()
 end
 
-function M.show_tag_picker(opts, tags, cb)
-  opts = opts or {}
+function M.show_tag_picker(tags, opts, cb)
+  opts = vim.tbl_extend("keep", opts or {}, { prompt_title = "Zk Tags" })
   pickers.new(opts, {
     finder = finders.new_table({
       results = tags,

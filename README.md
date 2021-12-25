@@ -1,6 +1,8 @@
 # zk-nvim
 Neovim extension for [zk](https://github.com/mickael-menu/zk).
 
+> :warning: This README is currently outdated. Will be updated once new API is stable.
+
 ## Install
 
 Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
