@@ -63,7 +63,7 @@ function M.setup(options)
   config.options = vim.tbl_deep_extend(
     "force",
     config.defaults,
-    { commands = require("zk.builtin.commands") },
+    { commands = require("zk.commands.builtin") },
     options or {}
   )
 

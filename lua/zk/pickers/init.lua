@@ -10,11 +10,11 @@ function M.note_picker(notes, title, picker)
   picker = picker or config.options.picker
   title = title or "Zk Notes"
   if picker == "telescope" then
-    require("telescope.zk.util").show_note_picker(notes, { prompt_title = title })
+    require("zk.pickers.telescope").show_note_picker(notes, { prompt_title = title })
   elseif picker == "fzf" then
-    require("zk.fzf").show_note_picker(notes, { "--header=" .. title })
+    require("zk.pickers.fzf").show_note_picker(notes, { "--header=" .. title })
   elseif picker == "select" then
-    require("zk.select").show_note_picker(notes, { prompt = title })
+    require("zk.pickers.select").show_note_picker(notes, { prompt = title })
   else
     error(invalid_picker(picker))
   end
@@ -25,11 +25,11 @@ function M.make_note_picker_api_options(defaults, options, picker)
 
   local function api_options()
     if picker == "telescope" then
-      return require("telescope.zk.util").note_picker_api_options
+      return require("zk.pickers.telescope").note_picker_api_options
     elseif picker == "fzf" then
-      return require("zk.fzf").note_picker_api_options
+      return require("zk.pickers.fzf").note_picker_api_options
     elseif picker == "select" then
-      return require("zk.select").note_picker_api_options
+      return require("zk.pickers.select").note_picker_api_options
     else
       error(invalid_picker(picker))
     end
@@ -42,11 +42,11 @@ function M.tag_picker(tags, title, cb, picker)
   picker = picker or config.options.picker
   title = title or "Zk Tags"
   if picker == "telescope" then
-    require("telescope.zk.util").show_tag_picker(tags, { prompt_title = title }, cb)
+    require("zk.pickers.telescope").show_tag_picker(tags, { prompt_title = title }, cb)
   elseif picker == "fzf" then
-    require("zk.fzf").show_tag_picker(tags, { "--header=" .. title }, cb)
+    require("zk.pickers.fzf").show_tag_picker(tags, { "--header=" .. title }, cb)
   elseif picker == "select" then
-    require("zk.select").show_tag_picker(tags, { prompt = title }, cb)
+    require("zk.pickers.select").show_tag_picker(tags, { prompt = title }, cb)
   else
     invalid_picker(picker)
   end
@@ -57,11 +57,11 @@ function M.make_tag_picker_api_options(defaults, options, picker)
 
   local function api_options()
     if picker == "telescope" then
-      return require("telescope.zk.util").tag_picker_api_options
+      return require("zk.pickers.telescope").tag_picker_api_options
     elseif picker == "fzf" then
-      return require("zk.fzf").tag_picker_api_options
+      return require("zk.pickers.fzf").tag_picker_api_options
     elseif picker == "select" then
-      return require("zk.select").tag_picker_api_options
+      return require("zk.pickers.select").tag_picker_api_options
     else
       error(invalid_picker(picker))
     end

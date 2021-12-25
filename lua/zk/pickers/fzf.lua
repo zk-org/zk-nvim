@@ -53,7 +53,6 @@ function M.show_tag_picker(tags, options, cb)
       "--ansi",
     }, options or {}),
     sinklist = function(lines)
-      table.remove(lines, 1) -- the first item is the keybinding that was used
       tags = vim.tbl_map(function(v)
         return string.match(v, "([^" .. delimiter .. "]+)", 2)
       end, lines)
