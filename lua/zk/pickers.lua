@@ -13,6 +13,8 @@ function M.note_picker(notes, title, picker)
     require("telescope.zk.util").show_note_picker(notes, { prompt_title = title })
   elseif picker == "fzf" then
     require("zk.fzf").show_note_picker(notes, { "--header=" .. title })
+  elseif picker == "select" then
+    require("zk.select").show_note_picker(notes, { prompt = title })
   else
     error(invalid_picker(picker))
   end
@@ -26,6 +28,8 @@ function M.make_note_picker_api_options(defaults, options, picker)
       return require("telescope.zk.util").note_picker_api_options
     elseif picker == "fzf" then
       return require("zk.fzf").note_picker_api_options
+    elseif picker == "select" then
+      return require("zk.select").note_picker_api_options
     else
       error(invalid_picker(picker))
     end
@@ -41,6 +45,8 @@ function M.tag_picker(tags, title, cb, picker)
     require("telescope.zk.util").show_tag_picker(tags, { prompt_title = title }, cb)
   elseif picker == "fzf" then
     require("zk.fzf").show_tag_picker(tags, { "--header=" .. title }, cb)
+  elseif picker == "select" then
+    require("zk.select").show_tag_picker(tags, { prompt = title }, cb)
   else
     invalid_picker(picker)
   end
@@ -54,6 +60,8 @@ function M.make_tag_picker_api_options(defaults, options, picker)
       return require("telescope.zk.util").tag_picker_api_options
     elseif picker == "fzf" then
       return require("zk.fzf").tag_picker_api_options
+    elseif picker == "select" then
+      return require("zk.select").tag_picker_api_options
     else
       error(invalid_picker(picker))
     end

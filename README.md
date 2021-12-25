@@ -57,7 +57,7 @@ require("zk").setup({
       filetypes = { "markdown" },
     },
 
-    -- can be "telescope" or "fzf"
+    -- can be "telescope" or "fzf" or "select"
     picker = "telescope",
   },
 })
