@@ -206,36 +206,6 @@ require("zk.commands").new_from_title_selection() -- this will use your last vis
 
 As you can see, the `path` is optional, and can usually be omitted; see [Notebook Directory Discovery](#notebook-directory-discovery).
 
-### Telescope
-It's not really necessary to use this interface, instead we recommend you to use the provided [commands](#commands).
-
-```lua
-require("telescope").load_extension("zk")
-```
-
-```vim
-:Telescope zk notes
-:Telescope zk tags
-```
-or via Lua
-```lua
-require('telescope').extensions.zk.notes()
-require('telescope').extensions.zk.tags()
-```
-
-*Example VimL:*
-```vim
-:Telescope zk notes createdAfter=3\ days\ ago
-```
-
-*Example Lua:*
-```lua
-require('telescope').extensions.zk.notes({ createdAfter = "3 days ago", tags = { "work" } })
-```
-
-As you can see, the VimL API is a bit constrained, whitespace must be escaped and lists and dictionaries are not supported.
-It is therefore recommended to use the `:ZkNotes` and `:ZkTags` [commands](#commands) instead.
-
 ## Custom Commands
 
 > :warning: This documentation is not complete. More details coming soon.
@@ -251,21 +221,48 @@ As the builtin commands do, the vim user command the was created for us also acc
 We can then call it like so `:ZkOrphans { tags = "work" }` for example.
 
 ```lua
-local api = require("zk.api")
-local pickers = require("zk.pickers")
-
-require("zk").setup({
+local zk = require("zk")
+zk.setup({
+  picker = "telescope",
+  lsp = {
+    config = vim.tbl_extend("force", get_config("zk"), config or {}),
+  },
   commands = {
     orphans = { -- will make `fn` available as `require("zk.commands").orphans(options, path)`
       command = "ZkOrphans", -- will create a `:ZkOrphans [<options>]` command for you
       fn = function(options, path)
-        options = pickers.make_note_picker_api_options({ orphan = true }, options)
-        api.list(path, options, function(notes)
-          pickers.note_picker(notes, "Zk Orphans") -- will open the users picker (telescope/fzf/select)
-        end)
+        options = vim.tbl_extend("force", { orphan = true }, options or {})
+        zk.edit(options, { title = "Zk Orphans" }, path)
       end,
     },
+  },
+})
+```
+
+Chances are this will not be our only custom command following this pattern.
+So let's make it a bit more reusable.
+
+```lua
+local zk = require("zk")
+local function make_edit_cmd(name, defaults, picker_options)
+  return {
+    command = name,
+    fn = function(options, path)
+      options = vim.tbl_extend("force", defaults, options or {})
+      zk.edit(options, picker_options, path)
+    end,
   }
+end
+zk.setup({
+  picker = "telescope",
+  lsp = {
+    config = vim.tbl_extend("force", get_config("zk"), config or {}),
+  },
+  commands = {
+    orphans = make_edit_cmd("ZkOrphans", { orphan = true }, { title = "Zk Orphans" }),
+    recents = make_edit_cmd("ZkRecents", { createdAfter = "2 weeks ago" }, { title = "Zk Recents" }),
+    daily = make_edit_cmd("ZkDaily", { hrefs = { "daily" } }, { title = "Zk Daily" }),
+  },
 })
 ```
 
@@ -363,4 +360,34 @@ end)
 <!--   "<cmd>lua require('telescope').extensions.zk.tags()<CR>", -->
 <!--   { noremap = true } -->
 <!-- ) -->
-<!-- ``` -->
+<!-- ``` -->o
+
+## Telescope
+It's not really necessary to use this interface, instead we recommend you to use the provided [commands](#commands).
+
+```lua
+require("telescope").load_extension("zk")
+```
+
+```vim
+:Telescope zk notes
+:Telescope zk tags
+```
+or via Lua
+```lua
+require('telescope').extensions.zk.notes()
+require('telescope').extensions.zk.tags()
+```
+
+*Example VimL:*
+```vim
+:Telescope zk notes createdAfter=3\ days\ ago
+```
+
+*Example Lua:*
+```lua
+require('telescope').extensions.zk.notes({ createdAfter = "3 days ago", tags = { "work" } })
+```
+
+As you can see, the VimL API is a bit constrained, whitespace must be escaped and lists and dictionaries are not supported.
+It is therefore recommended to use the `:ZkNotes` and `:ZkTags` [commands](#commands) instead.
