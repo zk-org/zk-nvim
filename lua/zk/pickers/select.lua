@@ -2,7 +2,7 @@ local M = {}
 
 M.note_picker_list_api_selection = { "title", "absPath" }
 
-function M.show_note_picker(notes, options, action)
+function M.show_note_picker(notes, options, cb)
   options = options or {}
   local select_options = vim.tbl_extend("force", {
     prompt = options.title,
@@ -15,19 +15,15 @@ function M.show_note_picker(notes, options, action)
       -- user aborted
       return
     end
-    if action == "edit" then
-      vim.cmd("e " .. item.absPath)
+    if options.multi_select then
+      cb({ item })
     else
-      if options.multi_select then
-        action({ item })
-      else
-        action(item)
-      end
+      cb(item)
     end
   end)
 end
 
-function M.show_tag_picker(tags, options, action)
+function M.show_tag_picker(tags, options, cb)
   options = options or {}
   local select_options = vim.tbl_extend("force", {
     prompt = "Zk Tags",
@@ -41,9 +37,9 @@ function M.show_tag_picker(tags, options, action)
       return
     end
     if options.multi_select then
-      action({ item })
+      cb({ item })
     else
-      action(item)
+      cb(item)
     end
   end)
 end

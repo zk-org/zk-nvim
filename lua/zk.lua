@@ -120,11 +120,17 @@ function M.pick_tags(options, picker_options, action, path)
 end
 
 function M.edit(options, picker_options, path)
-  M.pick_notes(options, picker_options, "edit", path)
+  M.pick_notes(options, picker_options, function(notes)
+    if picker_options.multi_select == false then
+      notes = { notes }
+    end
+    for _, note in ipairs(notes) do
+      vim.cmd("e " .. note.absPath)
+    end
+  end, path)
 end
 
 function M.edit_from_tags(options, picker_options, path)
-  picker_options = vim.tbl_extend("keep", { multi_select = true }, picker_options or {})
   M.pick_tags(options, picker_options, function(tags)
     tags = vim.tbl_map(function(v)
       return v.name

@@ -55,35 +55,9 @@ function M.make_note_previewer()
   })
 end
 
-function M.show_note_picker(notes, options, action)
+function M.show_note_picker(notes, options, cb)
   options = options or {}
   local telescope_options = vim.tbl_extend("force", { prompt_title = options.title }, options.telescope or {})
-
-  local attach_mappings
-  if action == "edit" then
-    attach_mappings = nil
-  else
-    assert(type(action) == "function", "action must be a function")
-    attach_mappings = function(prompt_bufnr)
-      actions.select_default:replace(function()
-        if options.multi_select then
-          local selection = {}
-          action_utils.map_selections(prompt_bufnr, function(entry, _)
-            table.insert(selection, entry.value.name)
-          end)
-          if vim.tbl_isempty(selection) then
-            selection = { action_state.get_selected_entry().value }
-          end
-          actions.close(prompt_bufnr)
-          action(selection)
-        else
-          actions.close(prompt_bufnr)
-          action(action_state.get_selected_entry().value)
-        end
-      end)
-      return true
-    end
-  end
 
   pickers.new(telescope_options, {
     finder = finders.new_table({
@@ -92,7 +66,25 @@ function M.show_note_picker(notes, options, action)
     }),
     sorter = conf.file_sorter(options),
     previewer = M.make_note_previewer(),
-    attach_mappings = attach_mappings,
+    attach_mappings = function(prompt_bufnr)
+      actions.select_default:replace(function()
+        if options.multi_select then
+          local selection = {}
+          action_utils.map_selections(prompt_bufnr, function(entry, _)
+            table.insert(selection, entry.value)
+          end)
+          if vim.tbl_isempty(selection) then
+            selection = { action_state.get_selected_entry().value }
+          end
+          actions.close(prompt_bufnr)
+          cb(selection)
+        else
+          actions.close(prompt_bufnr)
+          cb(action_state.get_selected_entry().value)
+        end
+      end)
+      return true
+    end,
   }):find()
 end
 

@@ -12,7 +12,7 @@ vim.cmd([[
 
 M.note_picker_list_api_selection = { "title", "absPath" }
 
-function M.show_note_picker(notes, options, action)
+function M.show_note_picker(notes, options, cb)
   options = options or {}
   vim.fn._fzf_wrap_and_run({
     source = vim.tbl_map(function(v)
@@ -26,8 +26,8 @@ function M.show_note_picker(notes, options, action)
       "--tabstop=4",
       [[--preview=command -v bat 1>/dev/null 2>&1 && bat -p --color always {1} || cat {1}]],
       "--preview-window=wrap",
-      options.title and "--header=" .. options.title,
-      options.multi_select and "--multi",
+      options.title and "--header=" .. options.title or nil,
+      options.multi_select and "--multi" or nil,
     }, options.fzf_options or {}),
     sinklist = function(lines)
       local notes_by_path = {}
@@ -38,23 +38,16 @@ function M.show_note_picker(notes, options, action)
         local path = string.match(line, "([^" .. delimiter .. "]+)")
         return notes_by_path[path]
       end, lines)
-      if action == "edit" then
-        -- TODO: we could allow some keybindings for edit in split etc
-        for _, note in ipairs(selected_notes) do
-          vim.cmd("e " .. note.absPath)
-        end
+      if options.multi_select then
+        cb(selected_notes)
       else
-        if options.multi_select then
-          action(selected_notes)
-        else
-          action(selected_notes[1])
-        end
+        cb(selected_notes[1])
       end
     end,
   })
 end
 
-function M.show_tag_picker(tags, options, action)
+function M.show_tag_picker(tags, options, cb)
   options = options or {}
   vim.fn._fzf_wrap_and_run({
     source = vim.tbl_map(function(v)
@@ -67,8 +60,8 @@ function M.show_tag_picker(tags, options, action)
       "--exact",
       "--tabstop=4",
       "--ansi",
-      options.title and "--header=" .. options.title,
-      options.multi_select and "--multi",
+      options.title and "--header=" .. options.title or nil,
+      options.multi_select and "--multi" or nil,
     }, options.fzf or {}),
     sinklist = function(lines)
       local tags_by_name = {}
@@ -80,9 +73,9 @@ function M.show_tag_picker(tags, options, action)
         return tags_by_name[name]
       end, lines)
       if options.multi_select then
-        action(selected_tags)
+        cb(selected_tags)
       else
-        action(selected_tags[1])
+        cb(selected_tags[1])
       end
     end,
   })

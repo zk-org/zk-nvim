@@ -3,12 +3,20 @@ local config = require("zk.config")
 local M = {}
 
 function M.pick_notes(notes, options, action)
-  options = vim.tbl_extend("force", { title = "Zk Notes", picker = config.options.picker }, options or {})
+  options = vim.tbl_extend(
+    "force",
+    { title = "Zk Notes", picker = config.options.picker, multi_select = true },
+    options or {}
+  )
   require("zk.pickers." .. options.picker).show_note_picker(notes, options, action)
 end
 
 function M.pick_tags(tags, options, cb)
-  options = vim.tbl_extend("force", { title = "Zk Tags", picker = config.options.picker }, options or {})
+  options = vim.tbl_extend(
+    "force",
+    { title = "Zk Tags", picker = config.options.picker, multi_select = true },
+    options or {}
+  )
   require("zk.pickers." .. options.picker).show_tag_picker(tags, options, cb)
 end
 
