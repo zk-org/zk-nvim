@@ -1,6 +1,7 @@
 local M = {}
 
 M.defaults = {
+  picker = "select",
   lsp = {
     config = {
       cmd = { "zk", "lsp" },
@@ -11,7 +12,6 @@ M.defaults = {
       filetypes = { "markdown" },
     },
   },
-  picker = "telescope",
 }
 
 M.options = M.defaults -- not necessary, but better code completion

@@ -28,6 +28,10 @@ require("zk").setup()
 **Default configuration**
 ```lua
 require("zk").setup({
+  -- can be "telescope", "fzf" or "select" (`vim.ui.select`)
+  -- we recommend you to use "telescope" or "fzf"
+  picker = "select",
+
   lsp = {
     -- `config` is passed to `vim.lsp.start_client(config)`
     config = {
@@ -43,14 +47,11 @@ require("zk").setup({
       enabled = true,
       filetypes = { "markdown" },
     },
-
-    -- can be "telescope", "fzf" or "select" (`vim.ui.select`)
-    picker = "telescope",
   },
 
   commands = {
     -- ... all the builtin commands, not listed here for brevity
-  }
+  },
 })
 ```
 
