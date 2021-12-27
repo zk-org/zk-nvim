@@ -10,11 +10,7 @@ local previewers = require("telescope.previewers")
 
 local M = {}
 
-M.note_picker_api_options = { select = { "title", "absPath", "rawContent" }, sort = { "created" } }
-
-M.tag_picker_api_options = {
-  sort = { "note-count" },
-}
+M.note_picker_list_api_selection = { "title", "absPath", "rawContent" }
 
 function M.create_note_entry_maker(_)
   return function(note)
@@ -59,40 +55,72 @@ function M.make_note_previewer()
   })
 end
 
-function M.show_note_picker(notes, opts)
-  opts = vim.tbl_extend("keep", opts or {}, { prompt_title = "Zk Notes" })
-  pickers.new(opts, {
+function M.show_note_picker(notes, options, action)
+  options = options or {}
+  local telescope_options = vim.tbl_extend("force", { prompt_title = options.title }, options.telescope or {})
+
+  local attach_mappings
+  if action == "edit" then
+    attach_mappings = nil
+  else
+    assert(type(action) == "function", "action must be a function")
+    attach_mappings = function(prompt_bufnr)
+      actions.select_default:replace(function()
+        if options.multi_select then
+          local selection = {}
+          action_utils.map_selections(prompt_bufnr, function(entry, _)
+            table.insert(selection, entry.value.name)
+          end)
+          if vim.tbl_isempty(selection) then
+            selection = { action_state.get_selected_entry().value }
+          end
+          actions.close(prompt_bufnr)
+          action(selection)
+        else
+          actions.close(prompt_bufnr)
+          action(action_state.get_selected_entry().value)
+        end
+      end)
+      return true
+    end
+  end
+
+  pickers.new(telescope_options, {
     finder = finders.new_table({
       results = notes,
-      entry_maker = M.create_note_entry_maker(opts),
+      entry_maker = M.create_note_entry_maker(options),
     }),
-    sorter = conf.file_sorter(opts),
+    sorter = conf.file_sorter(options),
     previewer = M.make_note_previewer(),
+    attach_mappings = attach_mappings,
   }):find()
 end
 
-function M.show_tag_picker(tags, opts, cb)
-  opts = vim.tbl_extend("keep", opts or {}, { prompt_title = "Zk Tags" })
-  pickers.new(opts, {
+function M.show_tag_picker(tags, options, cb)
+  options = options or {}
+  local telescope_options = vim.tbl_extend("force", { prompt_title = options.title }, options.telescope or {})
+
+  pickers.new(telescope_options, {
     finder = finders.new_table({
       results = tags,
-      entry_maker = M.create_tag_entry_maker(opts),
+      entry_maker = M.create_tag_entry_maker(options),
     }),
-    sorter = conf.generic_sorter(opts),
+    sorter = conf.generic_sorter(options),
     attach_mappings = function(prompt_bufnr, _)
       actions.select_default:replace(function()
-        local selection = {}
-        action_utils.map_selections(prompt_bufnr, function(entry, _)
-          table.insert(selection, entry.value.name)
-        end)
-
-        if vim.tbl_isempty(selection) then
-          selection = { action_state.get_selected_entry().value.name }
+        if options.multi_select then
+          local selection = {}
+          action_utils.map_selections(prompt_bufnr, function(entry, _)
+            table.insert(selection, entry.value)
+          end)
+          if vim.tbl_isempty(selection) then
+            selection = { action_state.get_selected_entry().value }
+          end
+          actions.close(prompt_bufnr)
+          cb(selection)
+        else
+          cb(action_state.get_selected_entry().value)
         end
-
-        actions.close(prompt_bufnr)
-
-        cb(selection)
       end)
       return true
     end,

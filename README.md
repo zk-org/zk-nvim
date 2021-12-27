@@ -11,27 +11,17 @@ use {
   "mickael-menu/zk-nvim",
   requires = { "neovim/nvim-lspconfig" }
 }
-
--- Telescope is optional
-use {
-  'nvim-telescope/telescope.nvim',
-  requires = { {'nvim-lua/plenary.nvim'} }
-}
 ```
 
 Using [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
 Plug "mickael-menu/zk-nvim"
 Plug "neovim/nvim-lspconfig"
-
-Plug 'nvim-telescope/telescope.nvim' " optional
-Plug 'nvim-lua/plenary.nvim' " optional, dependency for Telescope
 ```
 
 ## Setup
 ```lua
 require("zk").setup()
-require("telescope").load_extension("zk")
 ```
 > :warning: This plugin will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
 
@@ -217,6 +207,10 @@ As you can see, the `path` is optional, and can usually be omitted; see [Noteboo
 
 ### Telescope
 It's not really necessary to use this interface, instead we recommend you to use the provided [commands](#commands).
+
+```lua
+require("telescope").load_extension("zk")
+```
 
 ```vim
 :Telescope zk notes

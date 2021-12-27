@@ -1,28 +1,15 @@
-local api = require("zk.api")
-local pickers = require("zk.pickers")
+local zk = require("zk")
 local util = require("zk.util")
 
 return {
   index = {
     command = "ZkIndex",
-    fn = function(options, path)
-      api.index(path, options, function(stats)
-        vim.notify(vim.inspect(stats))
-      end)
-    end,
+    fn = zk.index,
   },
 
   new = {
     command = "ZkNew",
-    fn = function(options, path)
-      api.new(path, options, function(res)
-        if options and options.edit == false then
-          return
-        end
-        -- neovim does not yet support window/showDocument, therefore we handle options.edit locally
-        vim.cmd("edit " .. res.path)
-      end)
-    end,
+    fn = zk.new,
   },
 
   new_from_title_selection = {
@@ -30,17 +17,8 @@ return {
     fn = function(options, path)
       local location = util.get_lsp_location_from_selection()
       local selected_text = util.get_text_in_range(location.range)
-      api.new(
-        path,
-        vim.tbl_extend("keep", options or {}, { insertLinkAtLocation = location, title = selected_text }),
-        function(res)
-          if options and options.edit == false then
-            return
-          end
-          -- neovim does not yet support window/showDocument, therefore we handle options.edit locally
-          vim.cmd("edit " .. res.path)
-        end
-      )
+      assert(selected_text ~= nil, "No selected text")
+      zk.new(vim.tbl_extend("keep", options or {}, { insertLinkAtLocation = location, title = selected_text }), path)
     end,
   },
 
@@ -49,17 +27,8 @@ return {
     fn = function(options, path)
       local location = util.get_lsp_location_from_selection()
       local selected_text = util.get_text_in_range(location.range)
-      api.new(
-        path,
-        vim.tbl_extend("keep", options or {}, { insertLinkAtLocation = location, content = selected_text }),
-        function(res)
-          if options and options.edit == false then
-            return
-          end
-          -- neovim does not yet support window/showDocument, therefore we handle options.edit locally
-          vim.cmd("edit " .. res.path)
-        end
-      )
+      assert(selected_text ~= nil, "No selected text")
+      zk.new(vim.tbl_extend("keep", options or {}, { insertLinkAtLocation = location, content = selected_text }), path)
     end,
   },
 
@@ -67,42 +36,29 @@ return {
     command = function(fn_name)
       return string.format("command! ZkCd lua %s()", fn_name)
     end,
-    fn = function(path)
-      path = path or util.resolve_notebook_path(0)
-      local root = util.notebook_root(path)
-      if root then
-        vim.cmd("cd " .. root)
-      end
-    end,
+    fn = zk.cd,
   },
 
   notes = {
     command = "ZkNotes",
     fn = function(options, path)
-      options = pickers.make_note_picker_api_options(nil, options)
-      api.list(path, options, function(notes)
-        pickers.note_picker(notes, "Zk Notes")
-      end)
+      zk.edit(options, { title = "Zk Notes" }, path)
     end,
   },
 
   backlinks = {
     command = "ZkBacklinks",
     fn = function(options, path)
-      options = pickers.make_note_picker_api_options({ linkTo = { vim.api.nvim_buf_get_name(0) } }, options)
-      api.list(path, options, function(notes)
-        pickers.note_picker(notes, "Zk Backlinks")
-      end)
+      options = vim.tbl_deep_extend("force", { linkTo = { vim.api.nvim_buf_get_name(0) } }, options or {})
+      zk.edit(options, { title = "Zk Backlinks" }, path)
     end,
   },
 
   links = {
     command = "ZkLinks",
     fn = function(options, path)
-      options = pickers.make_note_picker_api_options({ linkedBy = { vim.api.nvim_buf_get_name(0) } }, options)
-      api.list(path, options, function(notes)
-        pickers.note_picker(notes, "Zk Links")
-      end)
+      options = vim.tbl_deep_extend("force", { linkedBy = { vim.api.nvim_buf_get_name(0) } }, options or {})
+      zk.edit(options, { title = "Zk Links" }, path)
     end,
   },
 
@@ -110,24 +66,16 @@ return {
     command = { name = "ZkMatch", range_only = true },
     fn = function(options, path)
       local selected_text = util.get_selected_text()
-      options = pickers.make_note_picker_api_options({ match = selected_text }, options)
-      api.list(path, options, function(notes)
-        pickers.note_picker(notes, "Zk Notes matching " .. selected_text)
-      end)
+      assert(selected_text ~= nil, "No selected text")
+      options = vim.tbl_deep_extend("force", { match = selected_text }, options or {})
+      zk.edit(options, { title = "Zk Notes matching" .. selected_text }, path)
     end,
   },
 
   tags = {
     command = "ZkTags",
     fn = function(options, path)
-      options = pickers.make_tag_picker_api_options(nil, options)
-      api.tag.list(path, options, function(tags)
-        pickers.tag_picker(tags, "Zk Tags", function(selected_tags)
-          api.list(path, pickers.make_note_picker_api_options({ tags = selected_tags }, nil), function(notes)
-            pickers.note_picker(notes, "Zk Notes for tag(s) " .. vim.inspect(selected_tags))
-          end)
-        end)
-      end)
+      zk.edit_from_tags(options, { title = "Zk Tags" }, path)
     end,
   },
 }

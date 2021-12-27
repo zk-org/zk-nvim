@@ -10,13 +10,10 @@ vim.cmd([[
   endfunction
 ]])
 
-M.note_picker_api_options = { select = { "title", "absPath" }, sort = { "created" } }
+M.note_picker_list_api_selection = { "title", "absPath" }
 
-M.tag_picker_api_options = {
-  sort = { "note-count" },
-}
-
-function M.show_note_picker(notes, options)
+function M.show_note_picker(notes, options, action)
+  options = options or {}
   vim.fn._fzf_wrap_and_run({
     source = vim.tbl_map(function(v)
       return table.concat({ v.absPath, v.title }, delimiter)
@@ -27,18 +24,38 @@ function M.show_note_picker(notes, options)
       "--with-nth=2",
       "--exact",
       "--tabstop=4",
-      "--multi",
       [[--preview=command -v bat 1>/dev/null 2>&1 && bat -p --color always {1} || cat {1}]],
       "--preview-window=wrap",
-    }, options or {}),
-    sink = function(line)
-      local absPath = string.match(line, "([^" .. delimiter .. "]+)")
-      vim.cmd("e " .. absPath)
+      options.title and "--header=" .. options.title,
+      options.multi_select and "--multi",
+    }, options.fzf_options or {}),
+    sinklist = function(lines)
+      local notes_by_path = {}
+      for _, note in ipairs(notes) do
+        notes_by_path[note.absPath] = note
+      end
+      local selected_notes = vim.tbl_map(function(line)
+        local path = string.match(line, "([^" .. delimiter .. "]+)")
+        return notes_by_path[path]
+      end, lines)
+      if action == "edit" then
+        -- TODO: we could allow some keybindings for edit in split etc
+        for _, note in ipairs(selected_notes) do
+          vim.cmd("e " .. note.absPath)
+        end
+      else
+        if options.multi_select then
+          action(selected_notes)
+        else
+          action(selected_notes[1])
+        end
+      end
     end,
   })
 end
 
-function M.show_tag_picker(tags, options, cb)
+function M.show_tag_picker(tags, options, action)
+  options = options or {}
   vim.fn._fzf_wrap_and_run({
     source = vim.tbl_map(function(v)
       return table.concat({ string.format("\x1b[31m%-4d\x1b[0m", v.note_count), v.name }, delimiter)
@@ -49,14 +66,24 @@ function M.show_tag_picker(tags, options, cb)
       "--nth=2",
       "--exact",
       "--tabstop=4",
-      "--multi",
       "--ansi",
-    }, options or {}),
+      options.title and "--header=" .. options.title,
+      options.multi_select and "--multi",
+    }, options.fzf or {}),
     sinklist = function(lines)
-      tags = vim.tbl_map(function(v)
-        return string.match(v, "([^" .. delimiter .. "]+)", 2)
+      local tags_by_name = {}
+      for _, tag in ipairs(tags) do
+        tags_by_name[tag.name] = tag
+      end
+      local selected_tags = vim.tbl_map(function(line)
+        local name = string.match(line, "([^" .. delimiter .. "]+)", 2)
+        return tags_by_name[name]
       end, lines)
-      cb(tags)
+      if options.multi_select then
+        action(selected_tags)
+      else
+        action(selected_tags[1])
+      end
     end,
   })
 end

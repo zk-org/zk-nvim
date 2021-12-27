@@ -1,6 +1,9 @@
 local lsp = require("zk.lsp")
 local config = require("zk.config")
 local commands = require("zk.commands")
+local ui = require("zk.ui")
+local api = require("zk.api")
+local util = require("zk.util")
 
 local M = {}
 
@@ -72,6 +75,62 @@ function M.setup(options)
   end
 
   setup_commands()
+end
+
+function M.cd(path)
+  path = path or util.resolve_notebook_path(0)
+  local root = util.notebook_root(path)
+  if root then
+    vim.cmd("cd " .. root)
+  end
+end
+
+function M.new(options, path)
+  api.new(path, options, function(res)
+    if options and options.edit == false then
+      return
+    end
+    -- neovim does not yet support window/showDocument, therefore we handle options.edit locally
+    vim.cmd("edit " .. res.path)
+  end)
+end
+
+function M.index(options, path)
+  api.index(path, options, function(stats)
+    vim.notify(vim.inspect(stats))
+  end)
+end
+
+function M.pick_notes(options, picker_options, action, path)
+  options = vim.tbl_extend(
+    "force",
+    { select = ui.get_pick_notes_list_api_selection(picker_options), sort = { "created" } },
+    options or {}
+  )
+  api.list(path, options, function(notes)
+    ui.pick_notes(notes, picker_options, action)
+  end)
+end
+
+function M.pick_tags(options, picker_options, action, path)
+  options = vim.tbl_extend("force", { sort = { "note-count" } }, options or {})
+  api.tag.list(path, options, function(tags)
+    ui.pick_tags(tags, picker_options, action)
+  end)
+end
+
+function M.edit(options, picker_options, path)
+  M.pick_notes(options, picker_options, "edit", path)
+end
+
+function M.edit_from_tags(options, picker_options, path)
+  picker_options = vim.tbl_extend("keep", { multi_select = true }, picker_options or {})
+  M.pick_tags(options, picker_options, function(tags)
+    tags = vim.tbl_map(function(v)
+      return v.name
+    end, tags)
+    M.edit({ tags = tags }, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
+  end, path)
 end
 
 return M
