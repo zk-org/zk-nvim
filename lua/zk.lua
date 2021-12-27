@@ -27,7 +27,7 @@ function M._lsp_buf_auto_add(bufnr)
     return
   end
 
-  if not M.notebook_root(vim.api.nvim_buf_get_name(bufnr)) then
+  if not util.notebook_root(vim.api.nvim_buf_get_name(bufnr)) then
     return
   end
 

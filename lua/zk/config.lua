@@ -11,9 +11,9 @@ M.defaults = {
       filetypes = { "markdown" },
     },
   },
-  picker = "telescope"
+  picker = "telescope",
 }
 
-M.config = M.defaults -- not necessary, but better code completion
+M.options = M.defaults -- not necessary, but better code completion
 
 return M
