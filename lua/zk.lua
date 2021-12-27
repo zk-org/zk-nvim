@@ -101,21 +101,21 @@ function M.index(options, path)
   end)
 end
 
-function M.pick_notes(options, picker_options, action, path)
+function M.pick_notes(options, picker_options, cb, path)
   options = vim.tbl_extend(
     "force",
     { select = ui.get_pick_notes_list_api_selection(picker_options), sort = { "created" } },
     options or {}
   )
   api.list(path, options, function(notes)
-    ui.pick_notes(notes, picker_options, action)
+    ui.pick_notes(notes, picker_options, cb)
   end)
 end
 
-function M.pick_tags(options, picker_options, action, path)
+function M.pick_tags(options, picker_options, cb, path)
   options = vim.tbl_extend("force", { sort = { "note-count" } }, options or {})
   api.tag.list(path, options, function(tags)
-    ui.pick_tags(tags, picker_options, action)
+    ui.pick_tags(tags, picker_options, cb)
   end)
 end
 
