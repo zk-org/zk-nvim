@@ -77,16 +77,17 @@ function M.setup(options)
   setup_commands()
 end
 
-function M.cd(path)
-  path = path or util.resolve_notebook_path(0)
-  local root = util.notebook_root(path)
+function M.cd(options)
+  local notebook_path = options.notebook_path or util.resolve_notebook_path(0)
+  local root = util.notebook_root(notebook_path)
   if root then
     vim.cmd("cd " .. root)
   end
 end
 
-function M.new(options, path)
-  api.new(path, options, function(res)
+function M.new(options)
+  options = options or {}
+  api.new(options.notebook_path, options, function(res)
     if options and options.edit == false then
       return
     end
@@ -95,31 +96,32 @@ function M.new(options, path)
   end)
 end
 
-function M.index(options, path)
-  api.index(path, options, function(stats)
+function M.index(options)
+  options = options or {}
+  api.index(options.notebook_path, options, function(stats)
     vim.notify(vim.inspect(stats))
   end)
 end
 
-function M.pick_notes(options, picker_options, cb, path)
+function M.pick_notes(options, picker_options, cb)
   options = vim.tbl_extend(
     "force",
     { select = ui.get_pick_notes_list_api_selection(picker_options), sort = { "created" } },
     options or {}
   )
-  api.list(path, options, function(notes)
+  api.list(options.notebook_path, options, function(notes)
     ui.pick_notes(notes, picker_options, cb)
   end)
 end
 
-function M.pick_tags(options, picker_options, cb, path)
+function M.pick_tags(options, picker_options, cb)
   options = vim.tbl_extend("force", { sort = { "note-count" } }, options or {})
-  api.tag.list(path, options, function(tags)
+  api.tag.list(options.notebook_path, options, function(tags)
     ui.pick_tags(tags, picker_options, cb)
   end)
 end
 
-function M.edit(options, picker_options, path)
+function M.edit(options, picker_options)
   M.pick_notes(options, picker_options, function(notes)
     if picker_options.multi_select == false then
       notes = { notes }
@@ -127,16 +129,16 @@ function M.edit(options, picker_options, path)
     for _, note in ipairs(notes) do
       vim.cmd("e " .. note.absPath)
     end
-  end, path)
+  end)
 end
 
-function M.edit_from_tags(options, picker_options, path)
+function M.edit_from_tags(options, picker_options)
   M.pick_tags(options, picker_options, function(tags)
     tags = vim.tbl_map(function(v)
       return v.name
     end, tags)
     M.edit({ tags = tags }, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
-  end, path)
+  end)
 end
 
 return M

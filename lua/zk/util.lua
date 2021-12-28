@@ -2,10 +2,10 @@ local M = {}
 
 ---Finds the root directory of the notebook of the given path
 --
----@param path string
+---@param notebook_path string
 ---@return string? root
-function M.notebook_root(path)
-  return require("lspconfig.util").root_pattern(".zk")(path)
+function M.notebook_root(notebook_path)
+  return require("lspconfig.util").root_pattern(".zk")(notebook_path)
 end
 
 ---Try to resolve a notebook path by checking the following locations in that order
