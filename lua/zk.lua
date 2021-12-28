@@ -78,6 +78,7 @@ function M.setup(options)
 end
 
 function M.cd(options)
+  options = options or {}
   local notebook_path = options.notebook_path or util.resolve_notebook_path(0)
   local root = util.notebook_root(notebook_path)
   if root then
