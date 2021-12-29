@@ -247,9 +247,9 @@ local zk = require("zk")
 local function make_edit_cmd(name, defaults, picker_options)
   return {
     command = name,
-    fn = function(options, path)
+    fn = function(options)
       options = vim.tbl_extend("force", defaults, options or {})
-      zk.edit(options, picker_options, path)
+      zk.edit(options, picker_options)
     end,
   }
 end
