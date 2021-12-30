@@ -1,6 +1,5 @@
 local lsp = require("zk.lsp")
 local config = require("zk.config")
-local commands = require("zk.commands")
 local ui = require("zk.ui")
 local api = require("zk.api")
 local util = require("zk.util")
@@ -34,58 +33,17 @@ function M._lsp_buf_auto_add(bufnr)
   lsp.buf_add(bufnr)
 end
 
-local function setup_commands()
-  local function add_command(cmd_name, fn, fn_name, range_only)
-    if vim.api.nvim_add_user_command then
-      vim.api.nvim_add_user_command(cmd_name, function(params)
-        if range_only then
-          assert(params.range == 2, "Must be called with '<,'> range. Try making a selection first.")
-        end
-        local options = loadstring("return " .. params.args)()
-        fn(options)
-      end, { nargs = "?", bang = true, range = range_only, complete = "lua" })
-    else
-      -- for compatibility. remove this sometime in the future when neovim 0.7.0 is released
-      vim.cmd(table.concat({
-        "command!",
-        range_only and "-range" or "",
-        "-nargs=?",
-        "-complete=lua",
-        cmd_name,
-        "lua",
-        range_only and [[assert(<range> == 2, "Must be called with '<,'> range. Try making a selection first.");]],
-        "require('zk.commands')." .. fn_name .. "(loadstring('return ' .. <q-args>)())",
-      }, " "))
-    end
-  end
-
-  for key, value in pairs(config.options.commands) do
-    commands[key] = value.fn
-
-    if type(value.command) == "string" then
-      add_command(value.command, value.fn, key)
-    elseif type(value.command) == "table" then
-      add_command(value.command[1], value.fn, key, value.command.range_only)
-    end
-  end
-end
-
 ---The entry point of the plugin
 --
 ---@param options? table user configuration options
 function M.setup(options)
-  config.options = vim.tbl_deep_extend(
-    "force",
-    config.defaults,
-    { commands = require("zk.commands.builtin") },
-    options or {}
-  )
+  config.options = vim.tbl_deep_extend("force", config.defaults, options or {})
 
   if config.options.lsp.auto_attach.enabled then
     setup_lsp_auto_attach()
   end
 
-  setup_commands()
+  require("zk.commands.builtin")
 end
 
 function M.cd(options)
