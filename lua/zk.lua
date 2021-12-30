@@ -35,26 +35,37 @@ function M._lsp_buf_auto_add(bufnr)
 end
 
 local function setup_commands()
-  local function make_command(name, fn_name, range_only)
-    return string.format(
-      [[command! %s -nargs=? -complete=lua %s lua %s require('zk.commands').%s(assert(loadstring('return ' .. <q-args>))())]],
-      range_only and "-range" or "",
-      name,
-      range_only and [[assert(<range> == 2, "%s must be called with '<,'> range. Try making a selection first.");]]
-        or "",
-      fn_name
-    )
+  local function add_command(cmd_name, fn, fn_name, range_only)
+    if vim.api.nvim_add_user_command then
+      vim.api.nvim_add_user_command(cmd_name, function(params)
+        if range_only then
+          assert(params.range == 2, "Must be called with '<,'> range. Try making a selection first.")
+        end
+        local options = loadstring("return " .. params.args)()
+        fn(options)
+      end, { nargs = "?", bang = true, range = range_only, complete = "lua" })
+    else
+      -- for compatibility. remove this sometime in the future when neovim 0.7.0 is released
+      vim.cmd(table.concat({
+        "command!",
+        range_only and "-range" or "",
+        "-nargs=?",
+        "-complete=lua",
+        cmd_name,
+        "lua",
+        range_only and [[assert(<range> == 2, "Must be called with '<,'> range. Try making a selection first.");]],
+        "require('zk.commands')." .. fn_name .. "(loadstring('return ' .. <q-args>)())",
+      }, " "))
+    end
   end
 
   for key, value in pairs(config.options.commands) do
     commands[key] = value.fn
 
     if type(value.command) == "string" then
-      vim.cmd(make_command(value.command, key))
-    elseif type(value.command) == "function" then
-      vim.cmd(value.command("require('zk.commands')." .. key))
+      add_command(value.command, value.fn, key)
     elseif type(value.command) == "table" then
-      vim.cmd(make_command(value.command[1], key, value.command.range_only))
+      add_command(value.command[1], value.fn, key, value.command.range_only)
     end
   end
 end
