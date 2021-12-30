@@ -46,6 +46,9 @@ function M.setup(options)
   require("zk.commands.builtin")
 end
 
+---Cd into the notebook root
+--
+---@param options? table
 function M.cd(options)
   options = options or {}
   local notebook_path = options.notebook_path or util.resolve_notebook_path(0)
@@ -55,6 +58,10 @@ function M.cd(options)
   end
 end
 
+---Creates and edits a new note
+--
+---@param options? table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 function M.new(options)
   options = options or {}
   api.new(options.notebook_path, options, function(res)
@@ -66,6 +73,10 @@ function M.new(options)
   end)
 end
 
+---Indexes the notebook
+--
+---@param options? table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
 function M.index(options)
   options = options or {}
   api.index(options.notebook_path, options, function(stats)
@@ -73,6 +84,13 @@ function M.index(options)
   end)
 end
 
+---Opens a notes picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see zk.ui.pick_notes
 function M.pick_notes(options, picker_options, cb)
   options = vim.tbl_extend(
     "force",
@@ -84,6 +102,13 @@ function M.pick_notes(options, picker_options, cb)
   end)
 end
 
+---Opens a tags picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see zk.ui.pick_tags
 function M.pick_tags(options, picker_options, cb)
   options = vim.tbl_extend("force", { sort = { "note-count" } }, options or {})
   api.tag.list(options.notebook_path, options, function(tags)
@@ -91,6 +116,12 @@ function M.pick_tags(options, picker_options, cb)
   end)
 end
 
+---Opens a notes picker, and edits the selected notes
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see zk.ui.pick_notes
 function M.edit(options, picker_options)
   M.pick_notes(options, picker_options, function(notes)
     if picker_options.multi_select == false then
@@ -102,6 +133,12 @@ function M.edit(options, picker_options)
   end)
 end
 
+---Opens a tags picker, then opens a notes picker for the selected tags, and finally edits the selected notes
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see zk.ui.pick_tags
 function M.edit_from_tags(options, picker_options)
   M.pick_tags(options, picker_options, function(tags)
     tags = vim.tbl_map(function(v)
