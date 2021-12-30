@@ -20,7 +20,7 @@ local function add_user_command(user_command, fn, fn_name, range_only)
       "-complete=lua",
       user_command,
       "lua",
-      range_only and [[assert(<range> == 2, "Must be called with '<,'> range. Try making a selection first.");]],
+      range_only and [[assert(<range> == 2, "Must be called with '<,'> range. Try making a selection first.");]] or "",
       "require('zk.commands')." .. fn_name .. "(loadstring('return ' .. <q-args>)())",
     }, " "))
   end
