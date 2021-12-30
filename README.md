@@ -7,13 +7,12 @@ This plugin requires Neovim v0.6.0 or later.
 
 Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
 ```lua
-use { "mickael-menu/zk-nvim", requires = { "neovim/nvim-lspconfig" } }
+use("mickael-menu/zk-nvim")
 ```
 
 Via [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
 Plug "mickael-menu/zk-nvim"
-Plug "neovim/nvim-lspconfig"
 ```
 
 To get the best experience, it's recommended to also install either [Telescope](https://github.com/nvim-telescope/telescope.nvim) or [FZF](https://github.com/junegunn/fzf).
