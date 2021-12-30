@@ -51,6 +51,9 @@ require("zk").setup({
 })
 ```
 
+Note that the `setup` function will not add any key mappings for you.
+If you want to add key mappings, see the [example mappings](#example-mappings).
+
 ### Notebook Directory Discovery
 When you run a notebook command, this plugin will look for a notebook in the following places and order:
 1. the current buffer path (i.e. the file you are currently editing),
@@ -63,6 +66,14 @@ It is worth noting that for some notebook commands you can explicitly specify a 
 An explicitly provided path will always take precedence and override the automatic notebook discovery.
 However, this is always optional, and usually not necessary.
 
+## Getting Started
+
+After you have installed the plugin and added the setup code to your config, you are good to go. If you are not familiar with zk, we recommed you to also read the [zk docs](https://github.com/mickael-menu/zk/tree/main/docs).
+
+When using the default config, the zk LSP client will automatically attach itself to buffers inside your notebook and provide capabilities like completion, hover and go-to-definition; see https://github.com/mickael-menu/zk/issues/22 for a full list of what is supported.
+
+Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`, see what they can do, and learn as you go.
+
 ## Built-in Commands
 
 **Via VimL**
@@ -74,7 +85,7 @@ However, this is always optional, and usually not necessary.
 ```
 
 ```vim
-" Creates a new note
+" Creates and edits a new note
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 :ZkNew [{options}]
@@ -158,7 +169,7 @@ In addition, `options.notebook_path` can be used to explicitly specify a noteboo
 require("zk.commands").index(options)
 ```
 ```lua
----Creates and opens a new note
+---Creates and edits a new note
 --
 ---@param options? table additional options
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
@@ -251,6 +262,9 @@ require("zk.commands").foo_bar = {
 ```
 This would add a `:ZkFooBar [{options}]` command which will call `fn` with the `options` Lua table as an argument.
 
+You will probably want to use the [high-level API](#high-level-api) inside of your custom commands.
+For example, the `zk.edit` function in the following examples is from the high-level API.
+
 *Example 1:*
 
 Let us add a custom `:ZkOrphans` command that will list all notes that are orphans, i.e. not referenced by any other note.
@@ -305,6 +319,76 @@ commands.orphans = make_edit_cmd("ZkOrphans", { orphan = true }, { title = "Zk O
 commands.recents = make_edit_cmd("ZkRecents", { createdAfter = "2 weeks ago" }, { title = "Zk Recents" })
 ```
 
+## High-level API
+
+The high-level API is inspired by the commands provided by the zk CLI tool; see `zk --help`.
+It's mainly used for the implementation of built-in and custom commands.
+
+```lua
+---Cd into the notebook root
+--
+---@param options? table
+require("zk").cd(options)
+```
+
+```lua
+---Creates and edits a new note
+--
+---@param options? table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+require("zk").new(options)
+```
+
+```lua
+---Indexes the notebook
+--
+---@param options? table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+require("zk").index(options)
+```
+
+```lua
+---Opens a notes picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see zk.ui.pick_notes
+require("zk").pick_notes(options, picker_options, cb)
+```
+
+```lua
+---Opens a tags picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see zk.ui.pick_tags
+require("zk").pick_tags(options, picker_options, cb)
+```
+
+```lua
+---Opens a notes picker, and edits the selected notes
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see zk.ui.pick_notes
+require("zk").edit(options, picker_options)
+```
+
+```lua
+---Opens a tags picker, then opens a notes picker for the selected tags, and finally edits the selected notes
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see zk.ui.pick_tags
+require("zk").edit_from_tags(options, picker_options)
+```
+
 ## API
 
 The functions in the API module give you maximum flexibility and provide only a thin Lua friendly layer around zk's API.
@@ -349,6 +433,36 @@ end)
 require("zk").api.tag.list(path, options, function(tags)
   -- do something with the tags
 end)
+```
+
+## Pickers
+
+Used by the [high-level API](#high-level-api) to display the results of the [API](#api).
+
+```lua
+---Opens a notes picker
+--
+---@param notes list
+---@param options? table containing {picker}, {title}, {multi_select} keys
+---@param cb function
+require("zk.ui").pick_notes(notes, options, cb)
+```
+
+```lua
+---Opens a tags picker
+--
+---@param tags list
+---@param options? table containing {picker}, {title}, {multi_select} keys
+---@param cb function
+require("zk.ui").pick_tags(tags, options, cb)
+```
+
+```lua
+---To be used in zk.api.list as the `selection` in the additional options table
+--
+---@param options table the same options that are use for pick_notes
+---@return table api selection
+require("zk.ui").get_pick_notes_list_api_selection(options)
 ```
 
 ## Example Mappings
