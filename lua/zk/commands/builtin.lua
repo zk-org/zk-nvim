@@ -18,7 +18,7 @@ return {
       local location = util.get_lsp_location_from_selection()
       local selected_text = util.get_text_in_range(location.range)
       assert(selected_text ~= nil, "No selected text")
-      zk.new(vim.tbl_extend("keep", options or {}, { insertLinkAtLocation = location, title = selected_text }))
+      zk.new(vim.tbl_extend("force", { insertLinkAtLocation = location, title = selected_text }, options or {}))
     end,
   },
 
@@ -28,7 +28,7 @@ return {
       local location = util.get_lsp_location_from_selection()
       local selected_text = util.get_text_in_range(location.range)
       assert(selected_text ~= nil, "No selected text")
-      zk.new(vim.tbl_extend("keep", options or {}, { insertLinkAtLocation = location, content = selected_text }))
+      zk.new(vim.tbl_extend("force", { insertLinkAtLocation = location, content = selected_text }, options or {}))
     end,
   },
 
@@ -47,7 +47,7 @@ return {
   backlinks = {
     command = "ZkBacklinks",
     fn = function(options)
-      options = vim.tbl_deep_extend("force", { linkTo = { vim.api.nvim_buf_get_name(0) } }, options or {})
+      options = vim.tbl_extend("force", { linkTo = { vim.api.nvim_buf_get_name(0) } }, options or {})
       zk.edit(options, { title = "Zk Backlinks" })
     end,
   },
@@ -55,7 +55,7 @@ return {
   links = {
     command = "ZkLinks",
     fn = function(options)
-      options = vim.tbl_deep_extend("force", { linkedBy = { vim.api.nvim_buf_get_name(0) } }, options or {})
+      options = vim.tbl_extend("force", { linkedBy = { vim.api.nvim_buf_get_name(0) } }, options or {})
       zk.edit(options, { title = "Zk Links" })
     end,
   },
@@ -65,7 +65,7 @@ return {
     fn = function(options)
       local selected_text = util.get_selected_text()
       assert(selected_text ~= nil, "No selected text")
-      options = vim.tbl_deep_extend("force", { match = selected_text }, options or {})
+      options = vim.tbl_extend("force", { match = selected_text }, options or {})
       zk.edit(options, { title = "Zk Notes matching " .. vim.inspect(selected_text) })
     end,
   },
