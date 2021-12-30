@@ -54,7 +54,7 @@ local function setup_commands()
     elseif type(value.command) == "function" then
       vim.cmd(value.command("require('zk.commands')." .. key))
     elseif type(value.command) == "table" then
-      vim.cmd(make_command(value.command.name, key, value.command.range_only))
+      vim.cmd(make_command(value.command[1], key, value.command.range_only))
     end
   end
 end
