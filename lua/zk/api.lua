@@ -31,7 +31,7 @@ local function execute_command(cmd, path, options, cb)
 end
 
 ---@param path? string path to explicitly specify the notebook
----@param options table additional options
+---@param options? table additional options
 ---@param cb function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
 function M.index(path, options, cb)
@@ -39,7 +39,7 @@ function M.index(path, options, cb)
 end
 
 ---@param path? string path to explicitly specify the notebook
----@param options table additional options
+---@param options? table additional options
 ---@param cb function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 function M.new(path, options, cb)
@@ -57,7 +57,7 @@ end
 M.tag = {}
 
 ---@param path? string path to explicitly specify the notebook
----@param options table additional options
+---@param options? table additional options
 ---@param cb function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
 function M.tag.list(path, options, cb)
