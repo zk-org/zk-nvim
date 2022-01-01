@@ -1,5 +1,5 @@
 # zk-nvim
-Neovim extension for the [zk](https://github.com/mickael-menu/zk) plain text note-taking assistant.
+Neovim extension for the [`zk`](https://github.com/mickael-menu/zk) plain text note-taking assistant.
 
 ## Installation
 
@@ -15,7 +15,7 @@ Via [vim-plug](https://github.com/junegunn/vim-plug)
 Plug "mickael-menu/zk-nvim"
 ```
 
-To get the best experience, it's recommended to also install either [Telescope](https://github.com/nvim-telescope/telescope.nvim) or [FZF](https://github.com/junegunn/fzf).
+To get the best experience, it's recommended to also install either [Telescope](https://github.com/nvim-telescope/telescope.nvim) or [fzf](https://github.com/junegunn/fzf).
 
 ## Setup
 
@@ -67,9 +67,9 @@ However, this is always optional, and usually not necessary.
 
 ## Getting Started
 
-After you have installed the plugin and added the setup code to your config, you are good to go. If you are not familiar with zk, we recommed you to also read the [zk docs](https://github.com/mickael-menu/zk/tree/main/docs).
+After you have installed the plugin and added the setup code to your config, you are good to go. If you are not familiar with `zk`, we recommend you to also read the [`zk` docs](https://github.com/mickael-menu/zk/tree/main/docs).
 
-When using the default config, the zk LSP client will automatically attach itself to buffers inside your notebook and provide capabilities like completion, hover and go-to-definition; see https://github.com/mickael-menu/zk/issues/22 for a full list of what is supported.
+When using the default config, the `zk` LSP client will automatically attach itself to buffers inside your notebook and provide capabilities like completion, hover and go-to-definition; see https://github.com/mickael-menu/zk/issues/22 for a full list of what is supported.
 
 Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`, see what they can do, and learn as you go.
 
@@ -118,14 +118,14 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 ```
 
 ```vim
-" Opens a notes picker
+" Opens a notes picker for the backlinks of the current buffer
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
 :ZkBacklinks [{options}]
 ```
 
 ```vim
-" Opens a notes picker
+" Opens a notes picker for the outbound links of the current buffer
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
 :ZkLinks [{options}]
@@ -139,14 +139,14 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 ```
 
 ```vim
-" Opens a notes picker
+" Opens a notes picker, filters for notes with the selected tags
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
 :ZkTags [{options}]
 ```
 
 The `options` parameter can be any valid *Lua* expression that evaluates to a table.
-For a list of available options, refer to the [zk docs](https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#custom-commands).
+For a list of available options, refer to the [`zk` docs](https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#custom-commands).
 In addition, `options.notebook_path` can be used to explicitly specify a notebook by providing a path to any file or directory within the notebook; see [Notebook Directory Discovery](#notebook-directory-discovery).
 
 *Examples:*
@@ -220,7 +220,7 @@ commands.add("ZkRecents", make_edit_fn({ createdAfter = "2 weeks ago" }, { title
 
 ## High-level API
 
-The high-level API is inspired by the commands provided by the zk CLI tool; see `zk --help`.
+The high-level API is inspired by the commands provided by the `zk` CLI tool; see `zk --help`.
 It's mainly used for the implementation of built-in and custom commands.
 
 ```lua
@@ -290,8 +290,8 @@ require("zk").edit_from_tags(options, picker_options)
 
 ## API
 
-The functions in the API module give you maximum flexibility and provide only a thin Lua friendly layer around zk's API.
-You can use it to write your own specialized functions for interacting with zk.
+The functions in the API module give you maximum flexibility and provide only a thin Lua friendly layer around `zk`'s LSP API.
+You can use it to write your own specialized functions for interacting with `zk`.
 
 ```lua
 ---@param path? string path to explicitly specify the notebook
@@ -392,9 +392,9 @@ autocmd Filetype markdown syn region markdownLink matchgroup=markdownLinkDelimit
 ```
 
 ## nvim-lsp-installer
-> Not recommeded, instead install the [zk](https://github.com/mickael-menu/zk) CLI tool and make it available in your `$PATH`.
+> Not recommended, instead install the [`zk`](https://github.com/mickael-menu/zk) CLI tool and make it available in your `$PATH`.
 
-If you insist to use nvim-lsp-installer for zk, the following code snippet should guide you on how to setup the zk server when installed via nvim-lsp-installer.
+If you insist to use nvim-lsp-installer for `zk`, the following code snippet should guide you on how to setup the `zk` server when installed via nvim-lsp-installer.
 
 ```lua
 require("nvim-lsp-installer").on_server_ready(function(server)
@@ -417,7 +417,7 @@ end)
 ```
 
 ## Telescope Plugin
-> Not recommeded, instead just use the [:ZkNotes and :ZkTags commands](#built-in-commands).
+> Not recommended, instead just use the [:ZkNotes and :ZkTags commands](#built-in-commands).
 
 It's possible (but unnecessary) to also load the notes / tags pickers as a telescope plugin.
 
