@@ -53,7 +53,7 @@ end
 ---Gets the text in the given range of the current buffer.
 ---Needed until https://github.com/neovim/neovim/pull/13896 is merged.
 --
----@param range table LSP range object
+---@param range table contains {start} and {end} tables with {line} and {character} values
 ---@return string? text in range
 function M.get_text_in_range(range)
   local A = range["start"]
@@ -74,7 +74,21 @@ end
 --
 ---@return string? selected text
 function M.get_selected_text()
-  return M.get_text_in_range(M.get_lsp_location_from_selection().range)
+  -- code adjusted from `vim.lsp.util.make_given_range_params`
+  -- we don't want to use character encoding offsets here
+
+  local A = vim.api.nvim_buf_get_mark(0, "<")
+  local B = vim.api.nvim_buf_get_mark(0, ">")
+  -- convert to 0-index
+  A[1] = A[1] - 1
+  B[1] = B[1] - 1
+  if vim.o.selection ~= "exclusive" then
+    B[2] = B[2] + 1
+  end
+  return M.get_text_in_range({
+    start = { line = A[1], character = A[2] },
+    ["end"] = { line = B[1], character = B[2] },
+  })
 end
 
 return M
