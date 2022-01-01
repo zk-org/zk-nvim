@@ -1,7 +1,7 @@
 local M = {}
 
 M.defaults = {
-  create_user_commands = true,
+  picker = "select",
   lsp = {
     config = {
       cmd = { "zk", "lsp" },
@@ -14,6 +14,6 @@ M.defaults = {
   },
 }
 
-M.options = M.defaults
+M.options = M.defaults -- not necessary, but better code completion
 
 return M

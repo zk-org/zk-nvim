@@ -1,50 +1,60 @@
-local lsp = require("zk.lsp")
-local config = require("zk.config")
-
 local M = {}
 
-function M.setup_lsp_auto_attach()
-  --- NOTE: modified version of code in nvim-lspconfig
-  local trigger
-  local filetypes = config.options.lsp.auto_attach.filetypes
-  if filetypes then
-    trigger = "FileType " .. table.concat(filetypes, ",")
-  else
-    trigger = "BufReadPost *"
-  end
-  vim.api.nvim_command(string.format("autocmd %s lua require'zk.util'.lsp_buf_auto_add(0)", trigger))
-end
-
----Checks whether the given path belongs to a notebook
----@param path string
+---Finds the root directory of the notebook of the given path
+--
+---@param notebook_path string
 ---@return string? root
-function M.notebook_root(path)
-  return require("lspconfig.util").root_pattern(".zk")(path)
+function M.notebook_root(notebook_path)
+  return require("zk.root_pattern_util").root_pattern(".zk")(notebook_path)
 end
 
----Automatically called via an |autocmd| if lsp.auto_attach is enabled.
----@param bufnr number
-function M.lsp_buf_auto_add(bufnr)
-  if vim.api.nvim_buf_get_option(bufnr, "buftype") == "nofile" then
-    return
+---Try to resolve a notebook path by checking the following locations in that order
+---1. current buffer path
+---2. current working directory
+---3. `$ZK_NOTEBOOK_DIR` environment variable
+---
+---Note that the path will not necessarily be the notebook root.
+--
+---@param bufnr number?
+---@return string? path inside a notebook
+function M.resolve_notebook_path(bufnr)
+  local path = vim.api.nvim_buf_get_name(bufnr)
+  local cwd = vim.fn.getcwd(0)
+  -- if the buffer has no name (i.e. it is empty), set the current working directory as it's path
+  if path == "" then
+    path = cwd
   end
-
-  if not M.notebook_root(vim.api.nvim_buf_get_name(bufnr)) then
-    return
+  if not M.notebook_root(path) then
+    if not M.notebook_root(cwd) then
+      -- if neither the buffer nor the cwd belong to a notebook, use $ZK_NOTEBOOK_DIR as fallback if available
+      if vim.env.ZK_NOTEBOOK_DIR then
+        path = vim.env.ZK_NOTEBOOK_DIR
+      end
+    else
+      -- the buffer doesn't belong to a notebook, but the cwd does!
+      path = cwd
+    end
   end
-
-  lsp.buf_add(bufnr)
+  -- at this point, the buffer either belongs to a notebook, or everything else failed
+  return path
 end
 
-function M.make_lsp_location()
+---Makes an LSP location object from the last selection in the current buffer.
+--
+---@return table LSP location object
+---@see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#location
+function M.get_lsp_location_from_selection()
   local params = vim.lsp.util.make_given_range_params()
   params.uri = params.textDocument.uri
   params.textDocument = nil
   return params
 end
 
---- needed until https://github.com/neovim/neovim/pull/13896 is merged
----@param range table LSP range object
+---Gets the text in the given range of the current buffer.
+---Needed until https://github.com/neovim/neovim/pull/13896 is merged.
+--
+---@param range table contains {start} and {end} tables with {line} and {character} values
+---@return string? text in range
 function M.get_text_in_range(range)
   local A = range["start"]
   local B = range["end"]
@@ -56,6 +66,29 @@ function M.get_text_in_range(range)
   lines[#lines] = string.sub(lines[#lines], 1, B.character)
   lines[1] = string.sub(lines[1], A.character + 1)
   return table.concat(lines, "\n")
+end
+
+---Gets the most recently selected text of the current buffer.
+---That is the text between the '<,'> marks.
+---Note that these marks are only updated *after* leaving the visual mode.
+--
+---@return string? selected text
+function M.get_selected_text()
+  -- code adjusted from `vim.lsp.util.make_given_range_params`
+  -- we don't want to use character encoding offsets here
+
+  local A = vim.api.nvim_buf_get_mark(0, "<")
+  local B = vim.api.nvim_buf_get_mark(0, ">")
+  -- convert to 0-index
+  A[1] = A[1] - 1
+  B[1] = B[1] - 1
+  if vim.o.selection ~= "exclusive" then
+    B[2] = B[2] + 1
+  end
+  return M.get_text_in_range({
+    start = { line = A[1], character = A[2] },
+    ["end"] = { line = B[1], character = B[2] },
+  })
 end
 
 return M

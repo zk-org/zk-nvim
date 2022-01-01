@@ -1,50 +1,42 @@
 # zk-nvim
-Neovim extension for [zk](https://github.com/mickael-menu/zk).
+Neovim extension for the [`zk`](https://github.com/mickael-menu/zk) plain text note-taking assistant.
 
-## Install
+## Installation
 
-Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
+This plugin requires Neovim v0.6.0 or later.
+
+Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
 ```lua
-use {
-  "mickael-menu/zk-nvim",
-  requires = { "neovim/nvim-lspconfig" }
-}
-
--- Telescope is optional
-use {
-  'nvim-telescope/telescope.nvim',
-  requires = { {'nvim-lua/plenary.nvim'} }
-}
+use("mickael-menu/zk-nvim")
 ```
 
-Using [vim-plug](https://github.com/junegunn/vim-plug)
+Via [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
 Plug "mickael-menu/zk-nvim"
-Plug "neovim/nvim-lspconfig"
-
-Plug 'nvim-telescope/telescope.nvim' " optional
-Plug 'nvim-lua/plenary.nvim' " optional, dependency for Telescope
 ```
+
+To get the best experience, it's recommended to also install either [Telescope](https://github.com/nvim-telescope/telescope.nvim) or [fzf](https://github.com/junegunn/fzf).
 
 ## Setup
-```lua
-require("zk").setup()
-require("telescope").load_extension("zk")
-```
+
 > :warning: This plugin will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
 
-**Default configuration**
+```lua
+require("zk").setup()
+```
+
+**The default configuration**
 ```lua
 require("zk").setup({
-  -- create user commands such as :ZkNew
-  create_user_commands = true,
+  -- can be "telescope", "fzf" or "select" (`vim.ui.select`)
+  -- it's recommended to use "telescope" or "fzf"
+  picker = "select",
 
   lsp = {
     -- `config` is passed to `vim.lsp.start_client(config)`
     config = {
       cmd = { "zk", "lsp" },
       name = "zk",
-      -- init_options = ...
       -- on_attach = ...
       -- etc, see `:h vim.lsp.start_client()`
     },
@@ -58,6 +50,9 @@ require("zk").setup({
 })
 ```
 
+Note that the `setup` function will not add any key mappings for you.
+If you want to add key mappings, see the [example mappings](#example-mappings).
+
 ### Notebook Directory Discovery
 When you run a notebook command, this plugin will look for a notebook in the following places and order:
 1. the current buffer path (i.e. the file you are currently editing),
@@ -70,143 +65,239 @@ It is worth noting that for some notebook commands you can explicitly specify a 
 An explicitly provided path will always take precedence and override the automatic notebook discovery.
 However, this is always optional, and usually not necessary.
 
-## Commands
+## Getting Started
 
-### VimL
+After you have installed the plugin and added the setup code to your config, you are good to go. If you are not familiar with `zk`, we recommend you to also read the [`zk` docs](https://github.com/mickael-menu/zk/tree/main/docs).
+
+When using the default config, the `zk` LSP client will automatically attach itself to buffers inside your notebook and provide capabilities like completion, hover and go-to-definition; see https://github.com/mickael-menu/zk/issues/22 for a full list of what is supported.
+
+Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`, see what they can do, and learn as you go.
+
+## Built-in Commands
+
 ```vim
 " Indexes the notebook
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
-:ZkIndex [<options>]
+:ZkIndex [{options}]
+```
 
-" Creates a new note
+```vim
+" Creates and edits a new note
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-:ZkNew [<options>]
+:ZkNew [{options}]
+```
 
+```vim
 " Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-:ZkNewLink [<options>]
+:'<,'>ZkNewFromTitleSelection [{options}]
+```
 
-" Opens a Telescope picker
+```vim
+" Creates a new note and uses the last visual selection as the content while replacing the selection with a link to the new note
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+:'<,'>ZkNewFromContentSelection [{options}]
+```
+
+```vim
+" cd into the notebook root
+" params
+"   (optional) additional options
+:ZkCd [{options}]
+```
+
+```vim
+" Opens a notes picker
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-:ZkList [<options>]
+:ZkNotes [{options}]
+```
 
-" Opens a Telescope picker
+```vim
+" Opens a notes picker for the backlinks of the current buffer
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+:ZkBacklinks [{options}]
+```
+
+```vim
+" Opens a notes picker for the outbound links of the current buffer
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+:ZkLinks [{options}]
+```
+
+```vim
+" Opens a notes picker, filters for notes that match the text in the last visual selection
+" params
+"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+:'<,'>ZkMatch [{options}]
+```
+
+```vim
+" Opens a notes picker, filters for notes with the selected tags
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
-:ZkTagList [<options>]
+:ZkTags [{options}]
 ```
-where `options` can be any valid *Lua* expression that evaluates to a table.
+
+The `options` parameter can be any valid *Lua* expression that evaluates to a table.
+For a list of available options, refer to the [`zk` docs](https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#custom-commands).
+In addition, `options.notebook_path` can be used to explicitly specify a notebook by providing a path to any file or directory within the notebook; see [Notebook Directory Discovery](#notebook-directory-discovery).
 
 *Examples:*
 ```vim
 :ZkNew { dir = "daily", date = "yesterday" }
-:ZkList { createdAfter = "3 days ago", tags = { "work" } }
-:'<,'>ZkNewLink " this will use your last visual mode selection. Note that you *must* call this command with the '<,'> range.
+:ZkNotes { createdAfter = "3 days ago", tags = { "work" } }
+:'<,'>ZkNewFromTitleSelection " this will use your last visual mode selection. Note that you *must* call this command with the '<,'> range.
+:ZkCd
 ```
 
-### Lua
-```lua
----Indexes the notebook
---
----@param path? string path to explicitly specify the notebook
----@param options table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
-require("zk").index(path, options)
+---
+**Via Lua**
 
----Creates and opens a new note
---
----@param path? string path to explicitly specify the notebook
----@param options table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-require("zk").new(path, options)
-
----Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
---
----@param path? string path to explicitly specify the notebook
----@param options table additional options
-require("zk").new_link(path, options)
-
----Opens a Telescope picker
---
----@param path? string path to explicitly specify the notebook
----@param options table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-require("zk").list(path, options)
-
----Opens a Telescope picker
---
----@param path? string path to explicitly specify the notebook
----@param options table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
-require("zk").tag.list(path, options)
-```
+You can access the underlying Lua function of a commands, with `require("zk.commands").get`.
 
 *Examples:*
 ```lua
-require("zk").new(nil, { dir = "daily" })
-require("zk").list(nil, { createdAfter = "3 days ago", tags = { "work" } })
-require("zk").new_link() -- this will use your last visual mode selection
+require("zk.commands").get("ZkNew")({ dir = "daily" })
+require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
+require("zk.commands").get("ZkNewFromTitleSelection")() -- this will use your last visual mode selection
 ```
 
-As you can see, the `path` is optional, and can usually be omitted; see [Notebook Directory Discovery](#notebook-directory-discovery).
+## Custom Commands
 
-### Telescope
-```vim
-:Telescope zk notes
-:Telescope zk orphans
-:Telescope zk backlinks
-:Telescope zk links
-:Telescope zk related
-:Telescope zk tags
-```
-or via Lua
 ```lua
-require('telescope').extensions.zk.notes()
-require('telescope').extensions.zk.orphans()
-require('telescope').extensions.zk.backlinks()
-require('telescope').extensions.zk.links()
-require('telescope').extensions.zk.related()
-require('telescope').extensions.zk.tags()
+---A thin wrapper around `vim.api.nvim_add_user_command` which parses the `params.args` of the command as a Lua table and passes it on to `fn`.
+---@param name string
+---@param fn function
+---@param opts? table {needs_selection} makes sure the command is called with a range
+---@see vim.api.nvim_add_user_command
+require("zk.commands").add(name, fn, opts)
 ```
 
-The Telescope pickers also allow you to explicitly specify a notebook like so `:Telescope zk notes path=/foo/bar` or so `require('telescope').extensions.zk.notes({ path = '/foo/bar'})`.
-However, specifying a `path` is optional, and is usually not necessary; see [Notebook Directory Discovery](#notebook-directory-discovery).
+*Example 1:*
 
-You can even pass the same additional options to the Telescope pickers as described in [list and tag list commands](#commands).
+Let us add a custom `:ZkOrphans` command that will list all notes that are orphans, i.e. not referenced by any other note.
 
-*Example VimL:*
-```vim
-:Telescope zk notes createdAfter=3\ days\ ago
-```
-
-*Example Lua:*
 ```lua
-require('telescope').extensions.zk.notes({ createdAfter = "3 days ago", tags = { "work" } })
+local zk = require("zk")
+local commands = require("zk.commands")
+
+commands.add("ZkOrphans", function(options)
+  options = vim.tbl_extend("force", { orphan = true }, options or {})
+  zk.edit(options, { title = "Zk Orphans" })
+end)
+```
+This adds the `:ZkOrphans [{options}]` vim user command, which accepts an `options` Lua table as an argument.
+We can execute it like this `:ZkOrphans { tags = "work" }` for example.
+
+> Note: The `zk.edit` function is from the [high-level API](#high-level-api), which also contains other functions that might be useful for your custom commands.
+
+*Example 2:*
+
+Chances are that this will not be our only custom command following this pattern.
+So let's also add a `:ZkRecents` command and make the pattern a bit more reusable.
+
+```lua
+local zk = require("zk")
+local commands = require("zk.commands")
+
+local function make_edit_fn(defaults, picker_options)
+  return function(options)
+    options = vim.tbl_extend("force", defaults, options or {})
+    zk.edit(options, picker_options)
+  end
+end
+
+commands.add("ZkOrphans", make_edit_fn({ orphan = true }, { title = "Zk Orphans" }))
+commands.add("ZkRecents", make_edit_fn({ createdAfter = "2 weeks ago" }, { title = "Zk Recents" }))
 ```
 
-As you can see, the VimL API is a bit constrained. Whitespace must be escaped and lists and dictionaries are not supported.
-It is therefore recommended to use the `:ZkList` and `:ZkTagList` [commands](#commands) instead.
+## High-level API
+
+The high-level API is inspired by the commands provided by the `zk` CLI tool; see `zk --help`.
+It's mainly used for the implementation of built-in and custom commands.
+
+```lua
+---Cd into the notebook root
+--
+---@param options? table
+require("zk").cd(options)
+```
+
+```lua
+---Creates and edits a new note
+--
+---@param options? table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+require("zk").new(options)
+```
+
+```lua
+---Indexes the notebook
+--
+---@param options? table additional options
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+require("zk").index(options)
+```
+
+```lua
+---Opens a notes picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see zk.ui.pick_notes
+require("zk").pick_notes(options, picker_options, cb)
+```
+
+```lua
+---Opens a tags picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see zk.ui.pick_tags
+require("zk").pick_tags(options, picker_options, cb)
+```
+
+```lua
+---Opens a notes picker, and edits the selected notes
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see zk.ui.pick_notes
+require("zk").edit(options, picker_options)
+```
 
 ## API
 
-The functions in the API module give you maximum flexibility and provide only a thin Lua friendly layer around zk's API.
-You can use it to write your own specialized functions for interacting with zk.
+The functions in the API module give you maximum flexibility and provide only a thin Lua friendly layer around `zk`'s LSP API.
+You can use it to write your own specialized functions for interacting with `zk`.
 
 ```lua
--- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
--- path and options are optional
+---@param path? string path to explicitly specify the notebook
+---@param options? table additional options
+---@param cb function callback function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
 require("zk").api.index(path, options, function(stats)
   -- do something with the stats
 end)
 ```
 
 ```lua
--- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
--- path and options are optional
+---@param path? string path to explicitly specify the notebook
+---@param options? table additional options
+---@param cb function callback function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 require("zk").api.new(path, options, function(res)
   file_path = res.path
   -- do something with the new file path
@@ -214,75 +305,117 @@ end)
 ```
 
 ```lua
--- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
--- path is optional, options.select is required
--- options = { select = { "title", "absPath", "rawContent" }, sort = { "created" } }
+---@param path? string path to explicitly specify the notebook
+---@param options table additional options
+---@param cb function callback function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
 require("zk").api.list(path, options, function(notes)
   -- do something with the notes
 end)
 ```
 
 ```lua
--- https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
--- path and options are optional
+---@param path? string path to explicitly specify the notebook
+---@param options? table additional options
+---@param cb function callback function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
 require("zk").api.tag.list(path, options, function(tags)
   -- do something with the tags
 end)
 ```
 
+## Pickers
+
+Used by the [high-level API](#high-level-api) to display the results of the [API](#api).
+
+```lua
+---Opens a notes picker
+--
+---@param notes list
+---@param options? table containing {picker}, {title}, {multi_select} keys
+---@param cb function
+require("zk.ui").pick_notes(notes, options, cb)
+```
+
+```lua
+---Opens a tags picker
+--
+---@param tags list
+---@param options? table containing {picker}, {title}, {multi_select} keys
+---@param cb function
+require("zk.ui").pick_tags(tags, options, cb)
+```
+
+```lua
+---To be used in zk.api.list as the `selection` in the additional options table
+--
+---@param options table the same options that are use for pick_notes
+---@return table api selection
+require("zk.ui").get_pick_notes_list_api_selection(options)
+```
+
 ## Example Mappings
 ```lua
+vim.api.nvim_set_keymap("n", "<Leader>zc", "<cmd>ZkNew<CR>", { noremap = true })
+vim.api.nvim_set_keymap("x", "<Leader>zc", ":'<'>ZkNewFromTitleSelection<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zn", "<cmd>ZkNotes<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zb", "<cmd>ZkBacklinks<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zl", "<cmd>ZkLinks<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zt", "<cmd>ZkTags<CR>", { noremap = true })
+```
 
--- Create notes / links
+# Miscellaneous
 
-vim.api.nvim_set_keymap(
-  "n",
-  "<Leader>zc",
-  "<cmd>lua require('zk').new()<CR>",
-  { noremap = true }
-)
+## Syntax Highlighting Tips
 
-vim.api.nvim_set_keymap(
-  "x",
-  "<Leader>zc",
-  "<esc><cmd>lua require('zk').new_link()<CR>",
-  { noremap = true }
-)
+These code snippets only work if you use Neovim's built-in Markdown syntax highlighting.
 
--- Show Telescope pickers
+*Proper syntax highlighting for Wikilinks.* [[This is a wiki link]].
+```vim
+autocmd Filetype markdown syn region markdownWikiLink matchgroup=markdownLinkDelimiter start="\[\[" end="\]\]" contains=markdownUrl keepend oneline concealends
+```
 
-vim.api.nvim_set_keymap(
-  "n",
-  "<Leader>zn",
-  "<cmd>lua require('telescope').extensions.zk.notes()<CR>",
-  { noremap = true }
-)
+*Conceal support for normal Markdown links.* Overwrite the syntax regions like so
+```vim
+autocmd Filetype markdown syn region markdownLinkText matchgroup=markdownLinkTextDelimiter start="!\=\[\%(\%(\_[^][]\|\[\_[^][]*\]\)*]\%( \=[[(]\)\)\@=" end="\]\%( \=[[(]\)\@=" nextgroup=markdownLink,markdownId skipwhite contains=@markdownInline,markdownLineStart concealends
+autocmd Filetype markdown syn region markdownLink matchgroup=markdownLinkDelimiter start="(" end=")" contains=markdownUrl keepend contained conceal
+```
 
-vim.api.nvim_set_keymap(
-  "n",
-  "<Leader>zo",
-  "<cmd>lua require('telescope').extensions.zk.orphans()<CR>",
-  { noremap = true }
-)
+## nvim-lsp-installer
+> Not recommended, instead install the [`zk`](https://github.com/mickael-menu/zk) CLI tool and make it available in your `$PATH`.
 
-vim.api.nvim_set_keymap(
-  "n",
-  "<Leader>zb",
-  "<cmd>lua require('telescope').extensions.zk.backlinks()<CR>",
-  { noremap = true }
-)
+If you insist to use nvim-lsp-installer for `zk`, the following code snippet should guide you on how to setup the `zk` server when installed via nvim-lsp-installer.
 
-vim.api.nvim_set_keymap(
-  "n",
-  "<Leader>zl",
-  "<cmd>lua require('telescope').extensions.zk.links()<CR>",
-  { noremap = true }
-)
+```lua
+require("nvim-lsp-installer").on_server_ready(function(server)
+  local opts = {
+    -- customize your options as usual
+    --
+    -- on_attach = ...
+    -- etc, see `:h vim.lsp.start_client()`
+  }
+  if server.name == "zk" then
+    require("zk").setup({
+      lsp = {
+        config = vim.tbl_extend("force", server:get_default_options(), opts),
+      },
+    })
+  else
+    server:setup(opts)
+  end
+end)
+```
 
-vim.api.nvim_set_keymap(
-  "n",
-  "<Leader>zt",
-  "<cmd>lua require('telescope').extensions.zk.tags()<CR>",
-  { noremap = true }
-)
+## Telescope Plugin
+> Not recommended, instead just use the [:ZkNotes command](#built-in-commands).
+
+It's possible (but unnecessary) to also load the notes picker as a telescope plugin.
+
+```lua
+require("telescope").load_extension("zk")
+```
+
+```vim
+:Telescope zk notes
+:Telescope zk notes createdAfter=3\ days\ ago
 ```
