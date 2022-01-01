@@ -1,61 +1,67 @@
-local commands = {}
+local M = {}
 
-local key_fn_map = {}
-local key_user_command_map = {}
+local name_fn_map = {}
 
-local function add_user_command(user_command, fn, fn_name, range_only)
+-- NOTE: remove this once `vim.api.nvim_add_user_command` is officially released
+M._name_command_map = {}
+
+-- NOTE: remove this helper once `vim.api.nvim_add_user_command` is officially released
+local function nvim_add_user_command(name, command, opts)
   if vim.api.nvim_add_user_command then
-    vim.api.nvim_add_user_command(user_command, function(params)
-      if range_only then
-        assert(params.range == 2, "Must be called with '<,'> range. Try making a selection first.")
-      end
-      fn(loadstring("return " .. params.args)())
-    end, { nargs = "?", force = true, range = range_only, complete = "lua" })
+    vim.api.nvim_add_user_command(name, command, opts)
   else
-    -- for compatibility. remove this sometime in the future when neovim 0.7.0 is released
+    assert(type(command) == "function", "Not supported in this version of Neovim.")
+    M._name_command_map[name] = command
     vim.cmd(table.concat({
-      "command!",
-      range_only and "-range" or "",
-      "-nargs=?",
-      "-complete=lua",
-      user_command,
-      "lua",
-      range_only and [[assert(<range> == 2, "Must be called with '<,'> range. Try making a selection first.");]] or "",
-      "require('zk.commands')." .. fn_name .. "(loadstring('return ' .. <q-args>)())",
+      "command" .. (opts.force and "!" or ""),
+      opts.range and "-range" or "",
+      opts.nargs and ("-nargs=" .. opts.nargs) or "",
+      opts.complete and ("-complete=" .. opts.complete) or "",
+      name,
+      string.format("lua require('zk.commands')._name_command_map['%s']({ args = <q-args>, range = <range> })", name),
     }, " "))
   end
 end
 
-local function del_user_command(user_command)
+-- NOTE: remove this helper once `vim.api.nvim_del_user_command` is officially released
+local function nvim_del_user_command(name)
   if vim.api.nvim_add_user_command then
-    vim.api.nvim_del_user_command(user_command)
+    vim.api.nvim_del_user_command(name)
   else
-    vim.cmd("delcommand " .. user_command)
+    M._name_command_map[name] = nil
+    vim.cmd("delcommand " .. name)
   end
 end
 
-return setmetatable(commands, {
-  __index = function(_, key)
-    return key_fn_map[key]
-  end,
-  __newindex = function(_, key, value)
-    if type(value) == "table" then
-      local user_command
-      if type(value.command) == "string" then
-        user_command = value.command
-        add_user_command(user_command, value.fn, key)
-      elseif type(value.command) == "table" then
-        user_command = value.command[1]
-        add_user_command(user_command, value.fn, key, value.command.range_only)
-      end
-      value = value.fn
-      key_user_command_map[key] = user_command
-    else
-      local user_command = key_user_command_map[key]
-      if user_command then
-        del_user_command(user_command)
-      end
+---A thin wrapper around `vim.api.nvim_add_user_command` which parses the `params.args` of the command as a Lua table and passes it on to `fn`.
+---@param name string
+---@param fn function
+---@param opts? table {needs_selection} makes sure the command is called with a range
+---@see vim.api.nvim_add_user_command
+function M.add(name, fn, opts)
+  opts = opts or {}
+  nvim_add_user_command(name, function(params) -- vim.api.nvim_add_user_command
+    if opts.needs_selection then
+      assert(
+        params.range == 2,
+        "Command needs a selection and must be called with '<,'> range. Try making a selection first."
+      )
     end
-    key_fn_map[key] = value
-  end,
-})
+    fn(loadstring("return " .. params.args)())
+  end, { nargs = "?", force = true, range = opts.needs_selection, complete = "lua" })
+  name_fn_map[name] = fn
+end
+
+function M.get(name)
+  return name_fn_map[name]
+end
+
+---Wrapper around `vim.api.nvim_del_user_command`
+---@param name string
+---@see vim.api.nvim_add_user_command
+function M.del(name)
+  name_fn_map[name] = nil
+  nvim_del_user_command(name) -- vim.api.nvim_del_user_command
+end
+
+return M

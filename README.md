@@ -75,7 +75,6 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 
 ## Built-in Commands
 
-**Via VimL**
 ```vim
 " Indexes the notebook
 " params
@@ -160,109 +159,26 @@ In addition, `options.notebook_path` can be used to explicitly specify a noteboo
 
 ---
 **Via Lua**
-```lua
----Indexes the notebook
---
----@param options table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
-require("zk.commands").index(options)
-```
-```lua
----Creates and edits a new note
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-require("zk.commands").new(options)
-```
-```lua
----Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-require("zk.commands").new_from_title_selection(options)
-```
-```lua
----Creates a new note and uses the last visual selection as the content while replacing the selection with a link to the new note
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-require("zk.commands").new_from_content_selection(options)
-```
-```lua
----cd into the notebook root
---
----@param options? table additional options
-require("zk.commands").cd(options)
-```
-```lua
----Opens a notes picker
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-require("zk.commands").notes(options)
-```
-```lua
----Opens a notes picker
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-require("zk.commands").backlinks(options)
-```
-```lua
----Opens a notes picker
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-require("zk.commands").links(options)
-```
-```lua
----Opens a notes picker, filters for notes that match the text in the last visual selection
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-require("zk.commands").match(options)
-```
-```lua
----Opens a notes picker
---
----@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
-require("zk.commands").tags(options)
-```
 
-For a list of available options, refer to the [zk docs](https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#custom-commands).
-In addition, `options.notebook_path` can be used to explicitly specify a notebook by providing a path to any file or directory within the notebook; see [Notebook Directory Discovery](#notebook-directory-discovery).
+You can access the underlying Lua function of a commands, with `require("zk.commands").get`.
 
 *Examples:*
 ```lua
-require("zk.commands").new({ dir = "daily" })
-require("zk.commands").notes({ createdAfter = "3 days ago", tags = { "work" } })
-require("zk.commands").new_from_title_selection() -- this will use your last visual mode selection
+require("zk.commands").get("ZkNew")({ dir = "daily" })
+require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
+require("zk.commands").get("ZkNewFromTitleSelection")() -- this will use your last visual mode selection
 ```
 
 ## Custom Commands
 
-You are free to add your own commands to the `require("zk.commands")` module.
-To do this, simply add your function like this:
 ```lua
-require("zk.commands").foo_bar = function()
-  -- Do something
-end
-vim.cmd("command! ZkFooBar lua require('zk.commands').foo_bar()")
+---A thin wrapper around `vim.api.nvim_add_user_command` which parses the `params.args` of the command as a Lua table and passes it on to `fn`.
+---@param name string
+---@param fn function
+---@param opts? table {needs_selection} makes sure the command is called with a range
+---@see vim.api.nvim_add_user_command
+require("zk.commands").add(name, fn, opts)
 ```
-For convenience, you can also add a matching vim user command all at once like this:
-```lua
-require("zk.commands").foo_bar = {
-  command = "ZkFooBar",
-  fn = function(options)
-    -- Do something
-  end,
-}
-```
-This would add a `:ZkFooBar [{options}]` command which will call `fn` with the `options` Lua table as an argument.
-
-You will probably want to use the [high-level API](#high-level-api) inside of your custom commands.
-For example, the `zk.edit` function in the following examples is from the high-level API.
 
 *Example 1:*
 
@@ -272,24 +188,15 @@ Let us add a custom `:ZkOrphans` command that will list all notes that are orpha
 local zk = require("zk")
 local commands = require("zk.commands")
 
-zk.setup({
-  -- your config ...
-})
-
-commands.orphans = {
-  command = "ZkOrphans",
-  fn = function(options)
-    options = vim.tbl_extend("force", { orphan = true }, options or {})
-    zk.edit(options, picker_options)
-  end,
-}
+commands.add("ZkOrphans", function(options)
+  options = vim.tbl_extend("force", { orphan = true }, options or {})
+  zk.edit(options, { title = "Zk Orphans" })
+end)
 ```
-The given code adds
-1. a `:ZkOrphans [{options}]` vim user command, and
-2. a Lua function `require("zk.commands").orphans`.
-
-Same as the builtin commands, the new command also accepts an options Lua table as an argument.
+This adds the `:ZkOrphans [{options}]` vim user command, which accepts an `options` Lua table as an argument.
 We can execute it like this `:ZkOrphans { tags = "work" }` for example.
+
+> Note: The `zk.edit` function is from the [high-level API](#high-level-api), which also contains other functions that might be useful for your custom commands.
 
 *Example 2:*
 
@@ -300,22 +207,15 @@ So let's also add a `:ZkRecents` command and make the pattern a bit more reusabl
 local zk = require("zk")
 local commands = require("zk.commands")
 
-zk.setup({
-  -- your config ...
-})
-
-local function make_edit_cmd(name, defaults, picker_options)
-  return {
-    command = name,
-    fn = function(options)
-      options = vim.tbl_extend("force", defaults, options or {})
-      zk.edit(options, picker_options)
-    end,
-  }
+local function make_edit_fn(defaults, picker_options)
+  return function(options)
+    options = vim.tbl_extend("force", defaults, options or {})
+    zk.edit(options, picker_options)
+  end
 end
 
-commands.orphans = make_edit_cmd("ZkOrphans", { orphan = true }, { title = "Zk Orphans" })
-commands.recents = make_edit_cmd("ZkRecents", { createdAfter = "2 weeks ago" }, { title = "Zk Recents" })
+commands.add("ZkOrphans", make_edit_fn({ orphan = true }, { title = "Zk Orphans" }))
+commands.add("ZkRecents", make_edit_fn({ createdAfter = "2 weeks ago" }, { title = "Zk Recents" }))
 ```
 
 ## High-level API
@@ -466,12 +366,12 @@ require("zk.ui").get_pick_notes_list_api_selection(options)
 
 ## Example Mappings
 ```lua
-vim.api.nvim_set_keymap("n", "<Leader>zc", "<cmd>lua require('zk.commands').new()<CR>", { noremap = true })
-vim.api.nvim_set_keymap("x", "<Leader>zc", "<esc><cmd>lua require('zk.commands').new_from_title_selection()<CR>", { noremap = true })
-vim.api.nvim_set_keymap("n", "<Leader>zn", "<cmd>lua require('zk.commands').notes()<CR>", { noremap = true })
-vim.api.nvim_set_keymap("n", "<Leader>zb", "<cmd>lua require('zk.commands').backlinks()<CR>", { noremap = true })
-vim.api.nvim_set_keymap("n", "<Leader>zl", "<cmd>lua require('zk.commands').links()<CR>", { noremap = true })
-vim.api.nvim_set_keymap("n", "<Leader>zt", "<cmd>lua require('zk.commands').tags()<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zc", "<cmd>ZkNew<CR>", { noremap = true })
+vim.api.nvim_set_keymap("x", "<Leader>zc", ":'<'>ZkNewFromTitleSelection<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zn", "<cmd>ZkNotes<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zb", "<cmd>ZkBacklinks<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zl", "<cmd>ZkLinks<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<Leader>zt", "<cmd>ZkTags<CR>", { noremap = true })
 ```
 
 # Miscellaneous
