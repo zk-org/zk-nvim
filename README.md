@@ -278,16 +278,6 @@ require("zk").pick_tags(options, picker_options, cb)
 require("zk").edit(options, picker_options)
 ```
 
-```lua
----Opens a tags picker, then opens a notes picker for the selected tags, and finally edits the selected notes
---
----@param options? table additional options
----@param picker_options? table options for the picker
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
----@see zk.ui.pick_tags
-require("zk").edit_from_tags(options, picker_options)
-```
-
 ## API
 
 The functions in the API module give you maximum flexibility and provide only a thin Lua friendly layer around `zk`'s LSP API.

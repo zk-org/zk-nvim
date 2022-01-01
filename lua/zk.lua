@@ -133,19 +133,4 @@ function M.edit(options, picker_options)
   end)
 end
 
----Opens a tags picker, then opens a notes picker for the selected tags, and finally edits the selected notes
---
----@param options? table additional options
----@param picker_options? table options for the picker
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
----@see zk.ui.pick_tags
-function M.edit_from_tags(options, picker_options)
-  M.pick_tags(options, picker_options, function(tags)
-    tags = vim.tbl_map(function(v)
-      return v.name
-    end, tags)
-    M.edit({ tags = tags }, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
-  end)
-end
-
 return M

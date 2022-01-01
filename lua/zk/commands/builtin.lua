@@ -44,5 +44,10 @@ commands.add("ZkMatch", function(options)
 end, { needs_selection = true })
 
 commands.add("ZkTags", function(options)
-  zk.edit_from_tags(options, { title = "Zk Tags" })
+  zk.pick_tags(options, picker_options, function(tags)
+    tags = vim.tbl_map(function(v)
+      return v.name
+    end, tags)
+    zk.edit({ tags = tags }, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
+  end)
 end)
