@@ -160,13 +160,13 @@ In addition, `options.notebook_path` can be used to explicitly specify a noteboo
 ---
 **Via Lua**
 
-You can access the underlying Lua function of a commands, with `require("zk.commands").get`.
+You can access the underlying Lua function of a command, with `require("zk.commands").get`.
 
 *Examples:*
 ```lua
 require("zk.commands").get("ZkNew")({ dir = "daily" })
 require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
-require("zk.commands").get("ZkNewFromTitleSelection")() -- this will use your last visual mode selection
+require("zk.commands").get("ZkNewFromTitleSelection")()
 ```
 
 ## Custom Commands
@@ -194,7 +194,7 @@ commands.add("ZkOrphans", function(options)
 end)
 ```
 This adds the `:ZkOrphans [{options}]` vim user command, which accepts an `options` Lua table as an argument.
-We can execute it like this `:ZkOrphans { tags = "work" }` for example.
+We can execute it like this `:ZkOrphans { tags = { "work" } }` for example.
 
 > Note: The `zk.edit` function is from the [high-level API](#high-level-api), which also contains other functions that might be useful for your custom commands.
 
