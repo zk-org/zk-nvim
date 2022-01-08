@@ -37,7 +37,7 @@ commands.add("ZkLinks", function(options)
 end)
 
 commands.add("ZkMatch", function(options)
-  local selected_text = util.get_selected_text()
+  local selected_text = util.get_text_in_range(util.get_selected_range())
   assert(selected_text ~= nil, "No selected text")
   options = vim.tbl_extend("force", { match = selected_text }, options or {})
   zk.edit(options, { title = "Zk Notes matching " .. vim.inspect(selected_text) })
