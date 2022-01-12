@@ -418,17 +418,30 @@ end
 
 ## Syntax Highlighting Tips
 
-These code snippets only work if you use Neovim's built-in Markdown syntax highlighting.
+You can extend Neovim's built-in Markdown syntax with proper highlighting and conceal support for `[[Wikilinks]]`, and conceal support for standard `[Markdown Links]()`.
+Create a new file under `~/.config/nvim/after/syntax/markdown.vim` for this purpose:
 
-*Proper syntax highlighting for Wikilinks.* [[This is a wiki link]].
 ```vim
-autocmd Filetype markdown syn region markdownWikiLink matchgroup=markdownLinkDelimiter start="\[\[" end="\]\]" contains=markdownUrl keepend oneline concealends
+" markdownWikiLink is a new region
+syn region markdownWikiLink matchgroup=markdownLinkDelimiter start="\[\[" end="\]\]" contains=markdownUrl keepend oneline concealends
+" markdownLinkText is copied from runtime files with 'concealends' appended
+syn region markdownLinkText matchgroup=markdownLinkTextDelimiter start="!\=\[\%(\%(\_[^][]\|\[\_[^][]*\]\)*]\%( \=[[(]\)\)\@=" end="\]\%( \=[[(]\)\@=" nextgroup=markdownLink,markdownId skipwhite contains=@markdownInline,markdownLineStart concealends
+" markdownLink is copied from runtime files with 'conceal' appended
+syn region markdownLink matchgroup=markdownLinkDelimiter start="(" end=")" contains=markdownUrl keepend contained conceal
 ```
 
-*Conceal support for normal Markdown links.* Overwrite the syntax regions like so
-```vim
-autocmd Filetype markdown syn region markdownLinkText matchgroup=markdownLinkTextDelimiter start="!\=\[\%(\%(\_[^][]\|\[\_[^][]*\]\)*]\%( \=[[(]\)\)\@=" end="\]\%( \=[[(]\)\@=" nextgroup=markdownLink,markdownId skipwhite contains=@markdownInline,markdownLineStart concealends
-autocmd Filetype markdown syn region markdownLink matchgroup=markdownLinkDelimiter start="(" end=")" contains=markdownUrl keepend contained conceal
+You can then enable conceal with `:setlocal conceallevel=2`, see `:h 'conceallevel'`.
+
+Note that if you are using `nvim-treesitter` for Markdown, don't forget to enable `additional_vim_regex_highlighting`:
+
+```lua
+require("nvim-treesitter.configs").setup({
+  -- ...
+  highlight = {
+    -- ...
+    additional_vim_regex_highlighting = { "markdown" }
+  },
+})
 ```
 
 ## nvim-lsp-installer
