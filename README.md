@@ -1,9 +1,12 @@
 # zk-nvim
 Neovim extension for the [`zk`](https://github.com/mickael-menu/zk) plain text note-taking assistant.
 
-## Installation
+## Requirements
 
-This plugin requires Neovim v0.6.0 or later.
+* Neovim >= 0.6.0
+* `zk` >= 0.9.0
+
+## Installation
 
 Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
 ```lua
