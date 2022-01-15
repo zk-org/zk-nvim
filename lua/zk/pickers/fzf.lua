@@ -10,13 +10,14 @@ vim.cmd([[
   endfunction
 ]])
 
-M.note_picker_list_api_selection = { "title", "absPath" }
+M.note_picker_list_api_selection = { "title", "path", "absPath" }
 
 function M.show_note_picker(notes, options, cb)
   options = options or {}
   vim.fn._fzf_wrap_and_run({
     source = vim.tbl_map(function(v)
-      return table.concat({ v.absPath, v.title }, delimiter)
+      local title = v.title or v.path
+      return table.concat({ v.absPath, title }, delimiter)
     end, notes),
     options = vim.list_extend({
       "--delimiter=" .. delimiter,

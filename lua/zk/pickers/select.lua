@@ -1,13 +1,13 @@
 local M = {}
 
-M.note_picker_list_api_selection = { "title", "absPath" }
+M.note_picker_list_api_selection = { "title", "path", "absPath" }
 
 function M.show_note_picker(notes, options, cb)
   options = options or {}
   local select_options = vim.tbl_extend("force", {
     prompt = options.title,
     format_item = function(item)
-      return item.title
+      return item.title or item.path
     end,
   }, options.select or {})
   vim.ui.select(notes, select_options, function(item)
