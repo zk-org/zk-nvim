@@ -10,15 +10,16 @@ local previewers = require("telescope.previewers")
 
 local M = {}
 
-M.note_picker_list_api_selection = { "title", "absPath", "rawContent" }
+M.note_picker_list_api_selection = { "title", "absPath", "path", "rawContent" }
 
 function M.create_note_entry_maker(_)
   return function(note)
+    local title = note.title or note.path
     return {
       value = note,
       path = note.absPath,
-      display = note.title,
-      ordinal = note.title,
+      display = title,
+      ordinal = title,
     }
   end
 end
