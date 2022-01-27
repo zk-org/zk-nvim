@@ -94,7 +94,7 @@ end
 function M.pick_notes(options, picker_options, cb)
   options = vim.tbl_extend(
     "force",
-    { select = ui.get_pick_notes_list_api_selection(picker_options), sort = { "created" } },
+    { select = ui.get_pick_notes_list_api_selection(picker_options), sort = { "modified" } },
     options or {}
   )
   api.list(options.notebook_path, options, function(notes)
