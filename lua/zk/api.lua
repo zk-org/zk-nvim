@@ -22,12 +22,7 @@ local function execute_command(cmd, path, options, cb)
       path or util.resolve_notebook_path(bufnr),
       options,
     },
-  }, function(err, res)
-    assert(not err, tostring(err))
-    if res and cb then
-      cb(res)
-    end
-  end, bufnr)
+  }, cb, bufnr)
 end
 
 ---@param path? string path to explicitly specify the notebook

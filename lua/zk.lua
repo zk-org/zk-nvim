@@ -64,7 +64,8 @@ end
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 function M.new(options)
   options = options or {}
-  api.new(options.notebook_path, options, function(res)
+  api.new(options.notebook_path, options, function(err, res)
+    assert(not err, tostring(err))
     if options and options.edit == false then
       return
     end
@@ -79,7 +80,8 @@ end
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
 function M.index(options)
   options = options or {}
-  api.index(options.notebook_path, options, function(stats)
+  api.index(options.notebook_path, options, function(err, stats)
+    assert(not err, tostring(err))
     vim.notify(vim.inspect(stats))
   end)
 end
@@ -93,7 +95,8 @@ end
 ---@see zk.ui.pick_notes
 function M.pick_notes(options, picker_options, cb)
   options = vim.tbl_extend("force", { select = ui.get_pick_notes_list_api_selection(picker_options) }, options or {})
-  api.list(options.notebook_path, options, function(notes)
+  api.list(options.notebook_path, options, function(err, notes)
+    assert(not err, tostring(err))
     ui.pick_notes(notes, picker_options, cb)
   end)
 end
@@ -107,7 +110,8 @@ end
 ---@see zk.ui.pick_tags
 function M.pick_tags(options, picker_options, cb)
   options = options or {}
-  api.tag.list(options.notebook_path, options, function(tags)
+  api.tag.list(options.notebook_path, options, function(err, tags)
+    assert(not err, tostring(err))
     ui.pick_tags(tags, picker_options, cb)
   end)
 end
