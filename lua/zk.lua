@@ -92,11 +92,7 @@ end
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 function M.pick_notes(options, picker_options, cb)
-  options = vim.tbl_extend(
-    "force",
-    { select = ui.get_pick_notes_list_api_selection(picker_options), sort = { "modified" } },
-    options or {}
-  )
+  options = vim.tbl_extend("force", { select = ui.get_pick_notes_list_api_selection(picker_options) }, options or {})
   api.list(options.notebook_path, options, function(notes)
     ui.pick_notes(notes, picker_options, cb)
   end)
@@ -110,7 +106,7 @@ end
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
 ---@see zk.ui.pick_tags
 function M.pick_tags(options, picker_options, cb)
-  options = vim.tbl_extend("force", { sort = { "note-count" } }, options or {})
+  options = options or {}
   api.tag.list(options.notebook_path, options, function(tags)
     ui.pick_tags(tags, picker_options, cb)
   end)

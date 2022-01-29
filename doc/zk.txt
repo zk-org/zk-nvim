@@ -1,21 +1,20 @@
-zk.txt *zk.txt* Neovim extension for the `zk` plain text note-taking assistant.
-
-
+zk.txt
 
 ================================================================================
 CONTENTS                                                             *zk-contents*
 
 1. zk-nvim............................................................|zk-zk-nvim|
-    1.1. Installation............................................|zk-installation|
-    1.2. Setup..........................................................|zk-setup|
-        1.2.1. Notebook Directory Discovery......|zk-notebook_directory_discovery|
-    1.3. Getting Started......................................|zk-getting_started|
-    1.4. Built-in Commands..................................|zk-built-in_commands|
-    1.5. Custom Commands......................................|zk-custom_commands|
-    1.6. High-level API........................................|zk-high-level_api|
-    1.7. API..............................................................|zk-api|
-    1.8. Pickers......................................................|zk-pickers|
-    1.9. Example Mappings....................................|zk-example_mappings|
+    1.1. Requirements............................................|zk-requirements|
+    1.2. Installation............................................|zk-installation|
+    1.3. Setup..........................................................|zk-setup|
+        1.3.1. Notebook Directory Discovery......|zk-notebook_directory_discovery|
+    1.4. Getting Started......................................|zk-getting_started|
+    1.5. Built-in Commands..................................|zk-built-in_commands|
+    1.6. Custom Commands......................................|zk-custom_commands|
+    1.7. High-level API........................................|zk-high-level_api|
+    1.8. API..............................................................|zk-api|
+    1.9. Pickers......................................................|zk-pickers|
+    1.10. Example Mappings...................................|zk-example_mappings|
 2. Miscellaneous................................................|zk-miscellaneous|
     2.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
     2.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
@@ -27,9 +26,13 @@ ZK-NVIM                                                               *zk-zk-nvi
 Neovim extension for the `zk` (https://github.com/mickael-menu/zk) plain text note-taking assistant.
 
 --------------------------------------------------------------------------------
-INSTALLATION                                                     *zk-installation*
+REQUIREMENTS                                                     *zk-requirements*
 
-This plugin requires Neovim v0.6.0 or later.
+*   Neovim >= 0.6.0
+*   `zk` >= 0.9.0
+
+--------------------------------------------------------------------------------
+INSTALLATION                                                     *zk-installation*
 
 Via packer.nvim (https://github.com/wbthomason/packer.nvim)
 >
@@ -368,11 +371,11 @@ Add these global mappings in your main Neovim config:
     -- Create a new note after asking for its title.
     vim.api.nvim_set_keymap("n", "<leader>zn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", opts)
     -- Open notes.
-    vim.api.nvim_set_keymap("n", "<leader>zo", "<Cmd>ZkNotes<CR>", opts)
+    vim.api.nvim_set_keymap("n", "<leader>zo", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", opts)
     -- Open notes associated with the selected tags.
     vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
     -- Search for the notes matching a given query.
-    vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { match = vim.fn.input('Search: ') }<CR>", opts)
+    vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { sort = { 'modified' }, match = vim.fn.input('Search: ') }<CR>", opts)
     -- Search for the notes matching the current visual selection.
     vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
 <
