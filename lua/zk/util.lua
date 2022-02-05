@@ -64,8 +64,9 @@ function M.get_text_in_range(range)
   if vim.tbl_isempty(lines) then
     return nil
   end
-  lines[#lines] = string.sub(lines[#lines], 1, B.character)
-  lines[1] = string.sub(lines[1], A.character + 1)
+  local MAX_STRING_SUB_INDEX = 2^31 - 1 -- LuaJIT only supports 32bit integers for `string.sub` (in block selection B.character is 2^31)
+  lines[#lines] = string.sub(lines[#lines], 1, math.min(B.character, MAX_STRING_SUB_INDEX))
+  lines[1] = string.sub(lines[1], math.min(A.character + 1, MAX_STRING_SUB_INDEX))
   return table.concat(lines, "\n")
 end
 
