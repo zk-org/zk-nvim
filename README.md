@@ -15,7 +15,7 @@ use("mickael-menu/zk-nvim")
 
 Via [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
-Plug "mickael-menu/zk-nvim"
+Plug 'mickael-menu/zk-nvim'
 ```
 
 To get the best experience, it's recommended to also install either [Telescope](https://github.com/nvim-telescope/telescope.nvim) or [fzf](https://github.com/junegunn/fzf).
