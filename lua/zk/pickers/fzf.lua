@@ -1,6 +1,6 @@
 local M = {}
 
-local delimiter = "\x01 "
+local delimiter = "\x01"
 
 -- we want can't do vim.fn["fzf#wrap"] because the sink/sinklist funcrefs
 -- are reset to vim.NIL when they are converted to Lua
