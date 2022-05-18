@@ -50,7 +50,8 @@ end
 function M.make_note_previewer()
   return previewers.new_buffer_previewer({
     define_preview = function(self, entry)
-      vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(entry.value.rawContent, "\n"))
+      lines = vim.split(entry.value.rawContent or "", "\n")
+      vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
       putils.highlighter(self.state.bufnr, "markdown")
     end,
   })
