@@ -291,7 +291,7 @@ You can use it to write your own specialized functions for interacting with `zk`
 ---@param options? table additional options
 ---@param cb function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
-require("zk").api.index(path, options, function(err, stats)
+require("zk.api").index(path, options, function(err, stats)
   -- do something with the stats
 end)
 ```
@@ -301,7 +301,7 @@ end)
 ---@param options? table additional options
 ---@param cb function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-require("zk").api.new(path, options, function(err, res)
+require("zk.api").new(path, options, function(err, res)
   file_path = res.path
   -- do something with the new file path
 end)
@@ -312,7 +312,7 @@ end)
 ---@param options table additional options
 ---@param cb function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
-require("zk").api.list(path, options, function(err, notes)
+require("zk.api").list(path, options, function(err, notes)
   -- do something with the notes
 end)
 ```
@@ -322,7 +322,7 @@ end)
 ---@param options? table additional options
 ---@param cb function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
-require("zk").api.tag.list(path, options, function(err, tags)
+require("zk.api").tag.list(path, options, function(err, tags)
   -- do something with the tags
 end)
 ```
