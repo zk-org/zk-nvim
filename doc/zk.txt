@@ -391,10 +391,10 @@ Then, create a new file under `~/.config/nvim/ftplugin/markdown.lua` to setup th
     if require("zk.util").notebook_root(vim.fn.expand('%:p')) ~= nil then
       local function map(...) vim.api.nvim_buf_set_keymap(0, ...) end
       local opts = { noremap=true, silent=false }
-      
+
       -- Open the link under the caret.
       map("n", "<CR>", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
-      
+
       -- Create a new note after asking for its title.
       -- This overrides the global `<leader>zn` mapping to create the note in the same directory as the current buffer.
       map("n", "<leader>zn", "<Cmd>ZkNew { dir = vim.fn.expand('%:p:h'), title = vim.fn.input('Title: ') }<CR>", opts)
@@ -408,7 +408,7 @@ Then, create a new file under `~/.config/nvim/ftplugin/markdown.lua` to setup th
       --map('n', '<leader>zb', '<Cmd>lua vim.lsp.buf.references()<CR>', opts)
       -- Open notes linked by the current buffer.
       map("n", "<leader>zl", "<Cmd>ZkLinks<CR>", opts)
-      
+
       -- Preview a linked note.
       map("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
       -- Open the code actions for a visual selection.
@@ -476,15 +476,17 @@ If you insist to use nvim-lsp-installer for `zk`, the following code snippet sho
 --------------------------------------------------------------------------------
 TELESCOPE PLUGIN                                             *zk-telescope_plugin*
 >
-    Not recommended, instead just use the :ZkNotes command (#built-in-commands).
+    Not recommended, instead just use the :ZkNotes or :ZkTags commands (#built-in-commands).
 <
 
-It's possible (but unnecessary) to also load the notes picker as a telescope plugin.
+It's possible (but unnecessary) to also load the notes and tags pickers as a telescope plugin.
 >
     require("telescope").load_extension("zk")
 <
 >
     :Telescope zk notes
     :Telescope zk notes createdAfter=3\ days\ ago
+    :Telescope zk tags
+    :Telescope zk tags created=today
 <
 

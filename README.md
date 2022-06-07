@@ -473,9 +473,9 @@ end)
 ```
 
 ## Telescope Plugin
-> Not recommended, instead just use the [:ZkNotes command](#built-in-commands).
+> Not recommended, instead just use the [:ZkNotes or :ZkTags commands](#built-in-commands).
 
-It's possible (but unnecessary) to also load the notes picker as a telescope plugin.
+It's possible (but unnecessary) to also load the notes and tags pickers as a telescope plugin.
 
 ```lua
 require("telescope").load_extension("zk")
@@ -484,4 +484,6 @@ require("telescope").load_extension("zk")
 ```vim
 :Telescope zk notes
 :Telescope zk notes createdAfter=3\ days\ ago
+:Telescope zk tags
+:Telescope zk tags created=today
 ```
