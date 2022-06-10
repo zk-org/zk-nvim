@@ -70,7 +70,7 @@ function M.show_tag_picker(tags, options, cb)
         tags_by_name[tag.name] = tag
       end
       local selected_tags = vim.tbl_map(function(line)
-        local name = string.match(line, "([^" .. delimiter .. "]+)", 2)
+        local name = string.match(line, "%d+%s+" .. delimiter .. "(.+)")
         return tags_by_name[name]
       end, lines)
       if options.multi_select then
