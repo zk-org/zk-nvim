@@ -76,13 +76,15 @@ end
 
 ---Indexes the notebook
 --
----@param options? table additional options
+---@param options? table additional options including cb for processing stats
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
 function M.index(options)
   options = options or {}
+  local cb = options.cb or function(stats) vim.notify(stats) end
+  options.cb=nil
   api.index(options.notebook_path, options, function(err, stats)
     assert(not err, tostring(err))
-    vim.notify(vim.inspect(stats))
+    cb(vim.inspect(stats))
   end)
 end
 
