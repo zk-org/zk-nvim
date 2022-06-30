@@ -81,10 +81,10 @@ end
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
 function M.index(options, cb)
   options = options or {}
-  cb = cb or function(stats) vim.notify(stats) end
+  cb = cb or function(stats) vim.notify(vim.inspect(stats)) end
   api.index(options.notebook_path, options, function(err, stats)
     assert(not err, tostring(err))
-    cb(vim.inspect(stats))
+    cb(stats)
   end)
 end
 
