@@ -475,7 +475,7 @@ end)
 ## Telescope Plugin
 > Not recommended, instead just use the [:ZkNotes or :ZkTags commands](#built-in-commands).
 
-It's possible (but unnecessary) to also load the notes and tags pickers as a telescope plugin.
+It's possible (but not required) to also load the notes and tags pickers as a telescope plugin.
 
 ```lua
 require("telescope").load_extension("zk")
