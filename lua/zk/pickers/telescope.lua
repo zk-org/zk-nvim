@@ -10,7 +10,7 @@ local previewers = require("telescope.previewers")
 
 local M = {}
 
-M.note_picker_list_api_selection = { "title", "absPath", "path", "rawContent" }
+M.note_picker_list_api_selection = { "title", "absPath", "path" }
 
 function M.create_note_entry_maker(_)
   return function(note)
@@ -50,9 +50,11 @@ end
 function M.make_note_previewer()
   return previewers.new_buffer_previewer({
     define_preview = function(self, entry)
-      lines = vim.split(entry.value.rawContent or "", "\n")
-      vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
-      putils.highlighter(self.state.bufnr, "markdown")
+      conf.buffer_previewer_maker(
+        entry.value.absPath,
+        self.state.bufnr,
+        { bufname = entry.value.title or entry.value.path }
+      )
     end,
   })
 end
