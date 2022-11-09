@@ -107,7 +107,12 @@ end
 ---@return table range with characters positioned by chars
 function M.convert_byteidx_to_charidx(range)
   range.start.character = vim.fn.charidx(vim.fn.getline(range.start.line + 1), range.start.character)
-  range['end'].character = vim.fn.charidx(vim.fn.getline(range['end'].line + 1), range['end'].character)
+  local end_character = vim.fn.charidx(vim.fn.getline(range["end"].line + 1), range["end"].character)
+  if end_character == -1 then
+    range["end"].character = vim.fn.charidx(vim.fn.getline(range["end"].line + 1), range["end"].character - 1) + 1
+  else
+    range["end"].character = end_character
+  end
   return range
 end
 
