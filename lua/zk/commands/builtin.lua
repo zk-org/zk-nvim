@@ -10,6 +10,7 @@ commands.add("ZkNewFromTitleSelection", function(options)
   local location = util.get_lsp_location_from_selection()
   local selected_text = util.get_text_in_range(location.range)
   assert(selected_text ~= nil, "No selected text")
+  location.range = util.convert_byteidx_to_charidx(location.range)
   zk.new(vim.tbl_extend("force", { insertLinkAtLocation = location, title = selected_text }, options or {}))
 end, { needs_selection = true })
 

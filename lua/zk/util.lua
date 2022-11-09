@@ -64,6 +64,12 @@ function M.get_text_in_range(range)
   if vim.tbl_isempty(lines) then
     return nil
   end
+
+  -- Need to add one byte if last character is not in ascii range
+  if vim.fn.byteidx(lines[#lines], B.character) ~= B.character then
+      B.character = B.character + 1
+  end
+
   local MAX_STRING_SUB_INDEX = 2^31 - 1 -- LuaJIT only supports 32bit integers for `string.sub` (in block selection B.character is 2^31)
   lines[#lines] = string.sub(lines[#lines], 1, math.min(B.character, MAX_STRING_SUB_INDEX))
   lines[1] = string.sub(lines[1], math.min(A.character + 1, MAX_STRING_SUB_INDEX))
@@ -92,6 +98,17 @@ function M.get_selected_range()
     start = { line = A[1], character = A[2] },
     ["end"] = { line = B[1], character = B[2] },
   }
+end
+
+---Convert character position from byteidx to charidx
+---Which is helpfull to work with character that are not ascii range
+--
+---@param range table with characters positioned by bytes
+---@return table range with characters positioned by chars
+function M.convert_byteidx_to_charidx(range)
+  range.start.character = vim.fn.charidx(vim.fn.getline(range.start.line + 1), range.start.character)
+  range['end'].character = vim.fn.charidx(vim.fn.getline(range['end'].line + 1), range['end'].character)
+  return range
 end
 
 return M
