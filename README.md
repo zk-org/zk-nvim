@@ -87,6 +87,9 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 
 ```vim
 " Creates and edits a new note
+"
+" Use the `inline = true` option to insert the content of the created note at the caret position, instead of writing the note on the file system.
+"
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 :ZkNew [{options}]
@@ -94,6 +97,9 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 
 ```vim
 " Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
+"
+" Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
+"
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 :'<,'>ZkNewFromTitleSelection [{options}]
@@ -101,6 +107,9 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 
 ```vim
 " Creates a new note and uses the last visual selection as the content while replacing the selection with a link to the new note
+"
+" Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
+"
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
 :'<,'>ZkNewFromContentSelection [{options}]
