@@ -4,20 +4,54 @@ local commands = require("zk.commands")
 
 commands.add("ZkIndex", zk.index)
 
-commands.add("ZkNew", zk.new)
+commands.add("ZkNew", function(options)
+  options = options or {}
+
+  if options.inline == true then
+    options.inline = nil
+    options.dryRun = true
+    options.insertContentAtLocation = util.get_lsp_location_from_caret()
+  end
+
+  zk.new(options)
+end)
 
 commands.add("ZkNewFromTitleSelection", function(options)
   local location = util.get_lsp_location_from_selection()
   local selected_text = util.get_text_in_range(location.range)
   assert(selected_text ~= nil, "No selected text")
-  zk.new(vim.tbl_extend("force", { insertLinkAtLocation = location, title = selected_text }, options or {}))
+
+  options = options or {}
+  options.title = selected_text
+
+  if options.inline == true then
+    options.inline = nil
+    options.dryRun = true
+    options.insertContentAtLocation = location
+  else
+    options.insertLinkAtLocation = location
+  end
+
+  zk.new(options)
 end, { needs_selection = true })
 
 commands.add("ZkNewFromContentSelection", function(options)
   local location = util.get_lsp_location_from_selection()
   local selected_text = util.get_text_in_range(location.range)
   assert(selected_text ~= nil, "No selected text")
-  zk.new(vim.tbl_extend("force", { insertLinkAtLocation = location, content = selected_text }, options or {}))
+
+  options = options or {}
+  options.content = selected_text
+
+  if options.inline == true then
+    options.inline = nil
+    options.dryRun = true
+    options.insertContentAtLocation = location
+  else
+    options.insertLinkAtLocation = location
+  end
+
+  zk.new(options)
 end, { needs_selection = true })
 
 commands.add("ZkCd", zk.cd)

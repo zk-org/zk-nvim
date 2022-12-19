@@ -45,10 +45,28 @@ end
 ---@see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#location
 function M.get_lsp_location_from_selection()
   local params = vim.lsp.util.make_given_range_params()
-  params.uri = params.textDocument.uri
-  params.textDocument = nil
-  params.range = M.get_selected_range() -- workaround for neovim 0.6.1 bug (https://github.com/mickael-menu/zk-nvim/issues/19)
-  return params
+  return {
+    uri = params.textDocument.uri,
+    range = M.get_selected_range() -- workaround for neovim 0.6.1 bug (https://github.com/mickael-menu/zk-nvim/issues/19)
+  }
+end
+
+---Makes an LSP location object from the caret position in the current buffer.
+--
+---@return table LSP location object
+---@see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#location
+function M.get_lsp_location_from_caret()
+  local params = vim.lsp.util.make_given_range_params()
+
+  local row,col = unpack(vim.api.nvim_win_get_cursor(0))
+  local position = { line = row, character = col }
+  return {
+    uri = params.textDocument.uri,
+    range = {
+      start = position,
+      ["end"] = position
+    }
+  }
 end
 
 ---Gets the text in the given range of the current buffer.
