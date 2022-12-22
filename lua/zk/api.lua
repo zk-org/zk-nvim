@@ -41,6 +41,15 @@ function M.new(path, options, cb)
   execute_command("new", path, options, cb)
 end
 
+---@param target string path to note you want to link to
+---@param location string LSP location at current caret
+---@param path? string path to explicitly specify the notebook
+---@param cb? function callback function
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+function M.link(target, location, path, cb)
+  execute_command("link", path, {path = target, location = location}, cb)
+end
+
 ---@param path? string path to explicitly specify the notebook
 ---@param options table additional options
 ---@param cb function callback function
