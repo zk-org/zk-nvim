@@ -42,12 +42,15 @@ function M.new(path, options, cb)
 end
 
 ---@param target string path to note you want to link to
----@param location string LSP location at current caret
+---@param location table LSP location at current caret
 ---@param path? string path to explicitly specify the notebook
+---@param options? table Extra options; table in form {title: string}
 ---@param cb? function callback function
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
-function M.link(target, location, path, cb)
-  execute_command("link", path, {path = target, location = location}, cb)
+function M.link(target, location, path, options, cb)
+  options = vim.tbl_extend("force", { path = target, location = location }, options or {})
+
+  execute_command("link", path, options, cb)
 end
 
 ---@param path? string path to explicitly specify the notebook
