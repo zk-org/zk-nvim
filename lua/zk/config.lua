@@ -12,6 +12,9 @@ M.defaults = {
       filetypes = { "markdown" },
     },
   },
+  mappings = {
+    telescope_link_note = { {"i", "n"}, "<C-Y>" }
+  }
 }
 
 M.options = M.defaults -- not necessary, but better code completion
