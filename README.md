@@ -148,9 +148,9 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 " params
 "   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
 "   One additional option is `matchSelected` (boolean) which is only applicable to inserting a link around selected text. If `true`, the note picker will search for notes similar to the selected text. Otherwise, the note picker will load all notes to filter through.
-"    e.g. :'<'>ZkInsertLink {matchSelected = true}
-:ZkInsertLink [{options}]
-:'<,'>ZkInsertLink [{options}]
+"    e.g. :'<'>ZkInsertLinkAtSelection {matchSelected = true}
+:ZkInsertLink 
+:'<,'>ZkInsertLinkAtSelection [{options}]
 ```
 
 ```vim
