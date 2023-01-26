@@ -46,7 +46,7 @@ end
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table Extra options; table in form {title: string}
 ---@param cb? function callback function
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklink
 function M.link(target, location, path, options, cb)
   options = vim.tbl_extend("force", { path = target, location = location }, options or {})
 
