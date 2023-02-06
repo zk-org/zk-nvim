@@ -51,6 +51,29 @@ function M.get_lsp_location_from_selection()
   }
 end
 
+---Fix to correct cursor location
+--
+---When working on link insertion, it was discovered that there may be
+---an off-by-one error for single point locations in glsp. This function
+---corrects that error.
+---@param location table An LSP location object representing a single cell
+---@return table The LSP location corrected one row up and one column right
+---@internal
+local function fix_cursor_location(location)
+  -- Cursor LSP position is a little weird.
+  -- It inserts one line down. Seems like an off by one error somewhere
+  local pos = location['range']['start']
+
+  pos['line'] = pos['line'] - 1
+  pos['character'] = pos['character'] + 1
+
+  location['range']['start'] = pos
+  location['range']['end'] = pos
+
+  return location
+end
+
+
 ---Makes an LSP location object from the caret position in the current buffer.
 --
 ---@return table LSP location object
@@ -58,15 +81,15 @@ end
 function M.get_lsp_location_from_caret()
   local params = vim.lsp.util.make_given_range_params()
 
-  local row,col = unpack(vim.api.nvim_win_get_cursor(0))
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local position = { line = row, character = col }
-  return {
+  return fix_cursor_location({
     uri = params.textDocument.uri,
     range = {
       start = position,
       ["end"] = position
     }
-  }
+  })
 end
 
 ---Gets the text in the given range of the current buffer.
