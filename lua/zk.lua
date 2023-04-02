@@ -125,7 +125,7 @@ end
 ---@see zk.ui.pick_notes
 function M.edit(options, picker_options)
   M.pick_notes(options, picker_options, function(notes)
-    if picker_options.multi_select == false then
+    if picker_options and picker_options.multi_select == false then
       notes = { notes }
     end
     for _, note in ipairs(notes) do
