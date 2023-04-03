@@ -47,7 +47,7 @@ function M.get_lsp_location_from_selection()
   local params = vim.lsp.util.make_given_range_params()
   return {
     uri = params.textDocument.uri,
-    range = M.get_selected_range() -- workaround for neovim 0.6.1 bug (https://github.com/mickael-menu/zk-nvim/issues/19)
+    range = M.get_selected_range(), -- workaround for neovim 0.6.1 bug (https://github.com/mickael-menu/zk-nvim/issues/19)
   }
 end
 
@@ -62,17 +62,16 @@ end
 local function fix_cursor_location(location)
   -- Cursor LSP position is a little weird.
   -- It inserts one line down. Seems like an off by one error somewhere
-  local pos = location['range']['start']
+  local pos = location["range"]["start"]
 
-  pos['line'] = pos['line'] - 1
-  pos['character'] = pos['character'] + 1
+  pos["line"] = pos["line"] - 1
+  pos["character"] = pos["character"] + 1
 
-  location['range']['start'] = pos
-  location['range']['end'] = pos
+  location["range"]["start"] = pos
+  location["range"]["end"] = pos
 
   return location
 end
-
 
 ---Makes an LSP location object from the caret position in the current buffer.
 --
@@ -87,8 +86,8 @@ function M.get_lsp_location_from_caret()
     uri = params.textDocument.uri,
     range = {
       start = position,
-      ["end"] = position
-    }
+      ["end"] = position,
+    },
   })
 end
 
@@ -105,7 +104,7 @@ function M.get_text_in_range(range)
   if vim.tbl_isempty(lines) then
     return nil
   end
-  local MAX_STRING_SUB_INDEX = 2^31 - 1 -- LuaJIT only supports 32bit integers for `string.sub` (in block selection B.character is 2^31)
+  local MAX_STRING_SUB_INDEX = 2 ^ 31 - 1 -- LuaJIT only supports 32bit integers for `string.sub` (in block selection B.character is 2^31)
   lines[#lines] = string.sub(lines[#lines], 1, math.min(B.character, MAX_STRING_SUB_INDEX))
   lines[1] = string.sub(lines[1], math.min(A.character + 1, MAX_STRING_SUB_INDEX))
   return table.concat(lines, "\n")

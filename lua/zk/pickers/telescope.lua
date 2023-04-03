@@ -4,7 +4,6 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local action_utils = require("telescope.actions.utils")
-local putils = require("telescope.previewers.utils")
 local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
 
@@ -62,64 +61,68 @@ function M.show_note_picker(notes, options, cb)
   options = options or {}
   local telescope_options = vim.tbl_extend("force", { prompt_title = options.title }, options.telescope or {})
 
-  pickers.new(telescope_options, {
-    finder = finders.new_table({
-      results = notes,
-      entry_maker = M.create_note_entry_maker(options),
-    }),
-    sorter = conf.file_sorter(options),
-    previewer = M.make_note_previewer(),
-    attach_mappings = function(prompt_bufnr)
-      actions.select_default:replace(function()
-        if options.multi_select then
-          local selection = {}
-          action_utils.map_selections(prompt_bufnr, function(entry, _)
-            table.insert(selection, entry.value)
-          end)
-          if vim.tbl_isempty(selection) then
-            selection = { action_state.get_selected_entry().value }
+  pickers
+    .new(telescope_options, {
+      finder = finders.new_table({
+        results = notes,
+        entry_maker = M.create_note_entry_maker(options),
+      }),
+      sorter = conf.file_sorter(options),
+      previewer = M.make_note_previewer(),
+      attach_mappings = function(prompt_bufnr)
+        actions.select_default:replace(function()
+          if options.multi_select then
+            local selection = {}
+            action_utils.map_selections(prompt_bufnr, function(entry, _)
+              table.insert(selection, entry.value)
+            end)
+            if vim.tbl_isempty(selection) then
+              selection = { action_state.get_selected_entry().value }
+            end
+            actions.close(prompt_bufnr)
+            cb(selection)
+          else
+            actions.close(prompt_bufnr)
+            cb(action_state.get_selected_entry().value)
           end
-          actions.close(prompt_bufnr)
-          cb(selection)
-        else
-          actions.close(prompt_bufnr)
-          cb(action_state.get_selected_entry().value)
-        end
-      end)
-      return true
-    end,
-  }):find()
+        end)
+        return true
+      end,
+    })
+    :find()
 end
 
 function M.show_tag_picker(tags, options, cb)
   options = options or {}
   local telescope_options = vim.tbl_extend("force", { prompt_title = options.title }, options.telescope or {})
 
-  pickers.new(telescope_options, {
-    finder = finders.new_table({
-      results = tags,
-      entry_maker = M.create_tag_entry_maker(options),
-    }),
-    sorter = conf.generic_sorter(options),
-    attach_mappings = function(prompt_bufnr, _)
-      actions.select_default:replace(function()
-        if options.multi_select then
-          local selection = {}
-          action_utils.map_selections(prompt_bufnr, function(entry, _)
-            table.insert(selection, entry.value)
-          end)
-          if vim.tbl_isempty(selection) then
-            selection = { action_state.get_selected_entry().value }
+  pickers
+    .new(telescope_options, {
+      finder = finders.new_table({
+        results = tags,
+        entry_maker = M.create_tag_entry_maker(options),
+      }),
+      sorter = conf.generic_sorter(options),
+      attach_mappings = function(prompt_bufnr, _)
+        actions.select_default:replace(function()
+          if options.multi_select then
+            local selection = {}
+            action_utils.map_selections(prompt_bufnr, function(entry, _)
+              table.insert(selection, entry.value)
+            end)
+            if vim.tbl_isempty(selection) then
+              selection = { action_state.get_selected_entry().value }
+            end
+            actions.close(prompt_bufnr)
+            cb(selection)
+          else
+            cb(action_state.get_selected_entry().value)
           end
-          actions.close(prompt_bufnr)
-          cb(selection)
-        else
-          cb(action_state.get_selected_entry().value)
-        end
-      end)
-      return true
-    end,
-  }):find()
+        end)
+        return true
+      end,
+    })
+    :find()
 end
 
 return M

@@ -80,7 +80,7 @@ local function insert_link(selected, opts)
   if not selected then
     location = util.get_lsp_location_from_caret()
   else
-    if opts['matchSelected'] then
+    if opts["matchSelected"] then
       opts = vim.tbl_extend("force", { match = { selected_text } }, opts or {})
     end
   end
@@ -102,9 +102,12 @@ local function insert_link(selected, opts)
   end)
 end
 
-commands.add('ZkInsertLink', function(opts) insert_link(false, opts) end, { title = 'Insert Zk link' })
-commands.add('ZkInsertLinkAtSelection', function(opts) insert_link(true, opts) end,
-  { title = 'Insert Zk link', needs_selection = true })
+commands.add("ZkInsertLink", function(opts)
+  insert_link(false, opts)
+end, { title = "Insert Zk link" })
+commands.add("ZkInsertLinkAtSelection", function(opts)
+  insert_link(true, opts)
+end, { title = "Insert Zk link", needs_selection = true })
 
 commands.add("ZkMatch", function(options)
   local selected_text = util.get_text_in_range(util.get_selected_range())

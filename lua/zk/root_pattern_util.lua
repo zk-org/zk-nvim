@@ -9,7 +9,7 @@ local M = {}
 
 -- Some path utilities
 M.path = (function()
-  local is_windows = uv.os_uname().version:match 'Windows'
+  local is_windows = uv.os_uname().version:match("Windows")
 
   local function exists(filename)
     local stat = uv.fs_stat(filename)
@@ -18,31 +18,31 @@ M.path = (function()
 
   local function is_fs_root(path)
     if is_windows then
-      return path:match '^%a:$'
+      return path:match("^%a:$")
     else
-      return path == '/'
+      return path == "/"
     end
   end
 
   local function dirname(path)
-    local strip_dir_pat = '/([^/]+)$'
-    local strip_sep_pat = '/$'
+    local strip_dir_pat = "/([^/]+)$"
+    local strip_sep_pat = "/$"
     if not path or #path == 0 then
       return
     end
-    local result = path:gsub(strip_sep_pat, ''):gsub(strip_dir_pat, '')
+    local result = path:gsub(strip_sep_pat, ""):gsub(strip_dir_pat, "")
     if #result == 0 then
       if is_windows then
         return path:sub(1, 2):upper()
       else
-        return '/'
+        return "/"
       end
     end
     return result
   end
 
   local function path_join(...)
-    return table.concat(vim.tbl_flatten { ... }, '/')
+    return table.concat(vim.tbl_flatten({ ... }), "/")
   end
 
   -- Iterate the path until we find the rootdir.
@@ -70,7 +70,7 @@ M.path = (function()
 end)()
 
 function M.search_ancestors(startpath, func)
-  validate { func = { func, 'f' } }
+  validate({ func = { func, "f" } })
   if func(startpath) then
     return startpath
   end
@@ -89,7 +89,7 @@ function M.search_ancestors(startpath, func)
 end
 
 function M.root_pattern(...)
-  local patterns = vim.tbl_flatten { ... }
+  local patterns = vim.tbl_flatten({ ... })
   local function matcher(path)
     for _, pattern in ipairs(patterns) do
       for _, p in ipairs(vim.fn.glob(M.path.join(path, pattern), true, true)) do

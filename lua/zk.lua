@@ -67,8 +67,8 @@ function M.new(options)
   api.new(options.notebook_path, options, function(err, res)
     assert(not err, tostring(err))
     if options and options.dryRun ~= true and options.edit ~= false then
-        -- neovim does not yet support window/showDocument, therefore we handle options.edit locally
-        vim.cmd("edit " .. res.path)
+      -- neovim does not yet support window/showDocument, therefore we handle options.edit locally
+      vim.cmd("edit " .. res.path)
     end
   end)
 end
@@ -80,7 +80,9 @@ end
 ---@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
 function M.index(options, cb)
   options = options or {}
-  cb = cb or function(stats) vim.notify(vim.inspect(stats)) end
+  cb = cb or function(stats)
+    vim.notify(vim.inspect(stats))
+  end
   api.index(options.notebook_path, options, function(err, stats)
     assert(not err, tostring(err))
     cb(stats)
