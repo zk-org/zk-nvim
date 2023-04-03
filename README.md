@@ -3,8 +3,9 @@ Neovim extension for the [`zk`](https://github.com/mickael-menu/zk) plain text n
 
 ## Requirements
 
-* Neovim >= 0.6.0
-* `zk` >= 0.9.0
+| `zk-nvim` | `zk`   | Neovim |
+|-----------|--------|--------|
+| latest    | 0.13.0 | 0.8.0  |
 
 ## Installation
 
