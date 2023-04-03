@@ -50,11 +50,10 @@ end
 function M.make_note_previewer()
   return previewers.new_buffer_previewer({
     define_preview = function(self, entry)
-      conf.buffer_previewer_maker(
-        entry.value.absPath,
-        self.state.bufnr,
-        { bufname = entry.value.title or entry.value.path }
-      )
+      conf.buffer_previewer_maker(entry.value.absPath, self.state.bufnr, {
+        bufname = entry.value.title or entry.value.path,
+        winid = self.state.winid,
+      })
     end,
   })
 end
