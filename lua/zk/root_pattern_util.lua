@@ -11,6 +11,10 @@ local M = {}
 M.path = (function()
   local is_windows = uv.os_uname().version:match("Windows")
 
+  local function escape_wildcards(path)
+    return path:gsub("([%[%]%?%*])", "\\%1")
+  end
+
   local function exists(filename)
     local stat = uv.fs_stat(filename)
     return stat and stat.type or false
@@ -63,6 +67,7 @@ M.path = (function()
   end
 
   return {
+    escape_wildcards = escape_wildcards,
     exists = exists,
     join = path_join,
     iterate_parents = iterate_parents,
@@ -92,7 +97,7 @@ function M.root_pattern(...)
   local patterns = vim.tbl_flatten({ ... })
   local function matcher(path)
     for _, pattern in ipairs(patterns) do
-      for _, p in ipairs(vim.fn.glob(M.path.join(path, pattern), true, true)) do
+      for _, p in ipairs(vim.fn.glob(M.path.join(M.path.escape_wildcards(path), pattern), true, true)) do
         if M.path.exists(p) then
           return path
         end
