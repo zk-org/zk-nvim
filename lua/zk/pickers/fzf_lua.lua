@@ -28,7 +28,7 @@ end
 
 M.note_picker_list_api_selection = { "title", "absPath", "path" }
 
-function M.show_note_picker(notes, options, cb)
+function M.show_note_picker(notes, options)
     options = options or {}
     local fzf_opts = vim.tbl_extend("force", {
         prompt = options.title .. "> ",
@@ -39,6 +39,9 @@ function M.show_note_picker(notes, options, cb)
             ["--with-nth"] = 2,
             ["--tabstop"] = 4,
         },
+        -- we rely on `fzf-lua` to open notes from selections to take advantage of the plugin builtin
+        -- actions configured before, which clash/act weird if we use them while using `zk-nvim`
+        -- callback
         actions = {
             ["default"] = function(selected, opts)
                 local entries = path_from_selected(selected)
@@ -58,18 +61,14 @@ function M.show_note_picker(notes, options, cb)
             end,
         },
     }, options.fzf_lua or {})
-
     exec(function(fzf_cb)
         for _, note in ipairs(notes) do
             local title = note.title or note.path
             local entry = table.concat({ note.absPath, title }, delimiter)
-            notes_by_path[note.absPath] = note
             fzf_cb(entry)
         end
         fzf_cb() --EOF
     end, fzf_opts)
-
-    -- exec(notes, fzf_opts)
 end
 
 function M.show_tag_picker(tags, options, cb)
