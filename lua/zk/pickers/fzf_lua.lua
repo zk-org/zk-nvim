@@ -28,8 +28,9 @@ end
 
 M.note_picker_list_api_selection = { "title", "absPath", "path" }
 
-function M.show_note_picker(notes, options)
+function M.show_note_picker(notes, options, cb)
     options = options or {}
+    local notes_by_path = {}
     local fzf_opts = vim.tbl_extend("force", {
         prompt = options.title .. "> ",
         previewer = fzf_lua_previewer,
@@ -44,8 +45,21 @@ function M.show_note_picker(notes, options)
         -- callback
         actions = {
             ["default"] = function(selected, opts)
-                local entries = path_from_selected(selected)
-                actions.file_edit(entries, opts)
+                if options.title == "Zk Insert link" then
+                    local selected_notes = vim.tbl_map(function(line)
+                        local path = string.match(line, "([^" .. delimiter .. "]+)")
+                        return notes_by_path[path]
+                    end, selected)
+                    if options.multi_select then
+                        cb(selected_notes)
+                    else
+                        vim.notify(vim.inspect(selected_notes))
+                        cb(selected_notes[1])
+                    end
+                else
+                    local entries = path_from_selected(selected)
+                    actions.file_edit(entries, opts)
+                end
             end,
             ["ctrl-s"] = function(selected, opts)
                 local entries = path_from_selected(selected)
@@ -65,6 +79,7 @@ function M.show_note_picker(notes, options)
         for _, note in ipairs(notes) do
             local title = note.title or note.path
             local entry = table.concat({ note.absPath, title }, delimiter)
+            notes_by_path[note.absPath] = note
             fzf_cb(entry)
         end
         fzf_cb() --EOF
