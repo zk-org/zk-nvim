@@ -26,6 +26,16 @@ local function path_from_selected(selected)
     end, selected)
 end
 
+local function conflicts_with_fzf_lua(cmd_title)
+    local conflicting_cmds = {
+        "Zk Notes matching ",
+        "Zk Notes for tag(s) ",
+        "Zk Links ",
+        "Zk Backlinks "
+    }
+    return vim.tbl_contains(conflicting_cmds, cmd_title)
+end
+
 M.note_picker_list_api_selection = { "title", "absPath", "path" }
 
 function M.show_note_picker(notes, options, cb)
@@ -45,7 +55,7 @@ function M.show_note_picker(notes, options, cb)
         -- callback
         actions = {
             ["default"] = function(selected, opts)
-                if options.title == "Zk Insert link" then
+                if not conflicts_with_fzf_lua(options.title) then
                     local selected_notes = vim.tbl_map(function(line)
                         local path = string.match(line, "([^" .. delimiter .. "]+)")
                         return notes_by_path[path]
