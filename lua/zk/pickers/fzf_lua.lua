@@ -26,16 +26,6 @@ local function path_from_selected(selected)
     end, selected)
 end
 
-local function conflicts_with_fzf_lua(cmd_title)
-    local conflicting_cmds = {
-        "Zk Notes matching ",
-        "Zk Notes for tag(s) ",
-        "Zk Links ",
-        "Zk Backlinks "
-    }
-    return vim.tbl_contains(conflicting_cmds, cmd_title)
-end
-
 M.note_picker_list_api_selection = { "title", "absPath", "path" }
 
 function M.show_note_picker(notes, options, cb)
@@ -50,25 +40,18 @@ function M.show_note_picker(notes, options, cb)
             ["--with-nth"] = 2,
             ["--tabstop"] = 4,
         },
-        -- we rely on `fzf-lua` to open notes from selections to take advantage of the plugin builtin
-        -- actions configured before, which clash/act weird if we use them while using `zk-nvim`
-        -- callback
+        -- we rely on `fzf-lua` to open notes in any other case than the default (pressing enter) 
+        -- to take advantage of the plugin builtin actions like opening in a split
         actions = {
             ["default"] = function(selected, opts)
-                if not conflicts_with_fzf_lua(options.title) then
-                    local selected_notes = vim.tbl_map(function(line)
-                        local path = string.match(line, "([^" .. delimiter .. "]+)")
-                        return notes_by_path[path]
-                    end, selected)
-                    if options.multi_select then
-                        cb(selected_notes)
-                    else
-                        vim.notify(vim.inspect(selected_notes))
-                        cb(selected_notes[1])
-                    end
+                local selected_notes = vim.tbl_map(function(line)
+                    local path = string.match(line, "([^" .. delimiter .. "]+)")
+                    return notes_by_path[path]
+                end, selected)
+                if options.multi_select then
+                    cb(selected_notes)
                 else
-                    local entries = path_from_selected(selected)
-                    actions.file_edit(entries, opts)
+                    cb(selected_notes[1])
                 end
             end,
             ["ctrl-s"] = function(selected, opts)
@@ -85,6 +68,7 @@ function M.show_note_picker(notes, options, cb)
             end,
         },
     }, options.fzf_lua or {})
+
     exec(function(fzf_cb)
         for _, note in ipairs(notes) do
             local title = note.title or note.path
