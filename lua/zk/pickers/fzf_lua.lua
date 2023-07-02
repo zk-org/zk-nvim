@@ -31,8 +31,8 @@ M.note_picker_list_api_selection = { "title", "absPath", "path" }
 function M.show_note_picker(notes, options, cb)
     options = options or {}
     local notes_by_path = {}
-    local fzf_opts = vim.tbl_extend("force", {
-        prompt = options.title .. "> ",
+    local fzf_opts = vim.tbl_deep_extend("force", {
+        prompt = options.title .. " ❯ ",
         previewer = fzf_lua_previewer,
         fzf_opts = {
             ["--delimiter"] = delimiter,
