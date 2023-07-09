@@ -85,7 +85,7 @@ local function insert_link(selected, opts)
     end
   end
 
-  zk.pick_notes(opts, { multi_select = false }, function(note)
+  zk.pick_notes(opts, { title = "Zk Insert link", multi_select = false }, function(note)
     assert(note ~= nil, "Picker failed before link insertion: note is nil")
 
     local link_opts = {}
