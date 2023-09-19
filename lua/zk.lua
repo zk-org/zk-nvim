@@ -15,6 +15,7 @@ local function setup_lsp_auto_attach()
   else
     trigger = "BufReadPost *"
   end
+  M._lsp_buf_auto_add(0)
   vim.api.nvim_command(string.format("autocmd %s lua require'zk'._lsp_buf_auto_add(0)", trigger))
 end
 
