@@ -44,8 +44,8 @@ require("zk").setup()
 **The default configuration**
 ```lua
 require("zk").setup({
-  -- can be "telescope", "fzf" or "select" (`vim.ui.select`)
-  -- it's recommended to use "telescope" or "fzf"
+  -- can be "telescope", "fzf", "fzf_lua" or "select" (`vim.ui.select`)
+  -- it's recommended to use "telescope", "fzf" or "fzf_lua"
   picker = "select",
 
   lsp = {
