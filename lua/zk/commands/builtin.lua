@@ -76,9 +76,13 @@ local function insert_link(selected, opts)
 
   local location = util.get_lsp_location_from_selection()
   local selected_text = util.get_text_in_range(util.get_selected_range())
+  local custom_title = ""
 
   if not selected then
     location = util.get_lsp_location_from_caret()
+    if opts["title"] then
+      custom_title = opts["title"]
+    end
   else
     if opts["matchSelected"] then
       opts = vim.tbl_extend("force", { match = { selected_text } }, opts or {})
@@ -89,6 +93,10 @@ local function insert_link(selected, opts)
     assert(note ~= nil, "Picker failed before link insertion: note is nil")
 
     local link_opts = {}
+
+    if selected ~= nil then
+      link_opts.title = custom_title
+    end
 
     if selected and selected_text ~= nil then
       link_opts.title = selected_text
