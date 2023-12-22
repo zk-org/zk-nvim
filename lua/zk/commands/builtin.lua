@@ -94,7 +94,7 @@ local function insert_link(selected, opts)
 
     local link_opts = {}
 
-    if selected ~= nil then
+    if not selected and custom_title ~= "" then
       link_opts.title = custom_title
     end
 
