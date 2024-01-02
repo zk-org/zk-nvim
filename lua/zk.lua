@@ -50,15 +50,18 @@ end
 ---Cd into the notebook root
 --
 ---@param options? table
+---@return string? root
 function M.cd(options)
   options = options or {}
   local notebook_path = options.notebook_path or util.resolve_notebook_path(0)
   if notebook_path then
     local root = util.notebook_root(notebook_path)
-    if root then
+    if root and options.dryRun ~= true then
       vim.cmd("cd " .. root)
     end
+    return root
   end
+  return nil
 end
 
 ---Creates and edits a new note
