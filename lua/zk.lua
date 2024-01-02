@@ -53,9 +53,11 @@ end
 function M.cd(options)
   options = options or {}
   local notebook_path = options.notebook_path or util.resolve_notebook_path(0)
-  local root = util.notebook_root(notebook_path)
-  if root then
-    vim.cmd("cd " .. root)
+  if notebook_path then
+    local root = util.notebook_root(notebook_path)
+    if root then
+      vim.cmd("cd " .. root)
+    end
   end
 end
 
