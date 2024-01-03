@@ -47,7 +47,7 @@ function M.get_lsp_location_from_selection()
   local params = vim.lsp.util.make_given_range_params()
   return {
     uri = params.textDocument.uri,
-    range = M.get_selected_range(), -- workaround for neovim 0.6.1 bug (https://github.com/mickael-menu/zk-nvim/issues/19)
+    range = M.get_selected_range(), -- workaround for neovim 0.6.1 bug (https://github.com/zk-org/zk-nvim/issues/19)
   }
 end
 
