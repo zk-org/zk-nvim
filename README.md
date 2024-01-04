@@ -1,5 +1,5 @@
 # zk-nvim
-Neovim extension for the [`zk`](https://github.com/mickael-menu/zk) plain text note-taking assistant.
+Neovim extension for the [`zk`](https://github.com/zk-org/zk) plain text note-taking assistant.
 
 ## Requirements
 
@@ -11,18 +11,18 @@ Neovim extension for the [`zk`](https://github.com/mickael-menu/zk) plain text n
 
 Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
 ```lua
-use("mickael-menu/zk-nvim")
+use("zk-org/zk-nvim")
 ```
 
 Via [vim-plug](https://github.com/junegunn/vim-plug)
 ```viml
-Plug 'mickael-menu/zk-nvim'
+Plug 'zk-org/zk-nvim'
 ```
 
 Via [lazy.nvim](https://github.com/folke/lazy.nvim)
 ```lua
 {
-  "mickael-menu/zk-nvim",
+  "zk-org/zk-nvim",
   config = function()
     require("zk").setup({
       -- See Setup section below
@@ -83,9 +83,9 @@ However, this is always optional, and usually not necessary.
 
 ## Getting Started
 
-After you have installed the plugin and added the setup code to your config, you are good to go. If you are not familiar with `zk`, we recommend you to also read the [`zk` docs](https://github.com/mickael-menu/zk/tree/main/docs).
+After you have installed the plugin and added the setup code to your config, you are good to go. If you are not familiar with `zk`, we recommend you to also read the [`zk` docs](https://github.com/zk-org/zk/tree/main/docs).
 
-When using the default config, the `zk` LSP client will automatically attach itself to buffers inside your notebook and provide capabilities like completion, hover and go-to-definition; see https://github.com/mickael-menu/zk/issues/22 for a full list of what is supported.
+When using the default config, the `zk` LSP client will automatically attach itself to buffers inside your notebook and provide capabilities like completion, hover and go-to-definition; see https://github.com/zk-org/zk/issues/22 for a full list of what is supported.
 
 Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`, see what they can do, and learn as you go.
 
@@ -94,7 +94,7 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 ```vim
 " Indexes the notebook
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zkindex
 :ZkIndex [{options}]
 ```
 
@@ -104,7 +104,7 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 " Use the `inline = true` option to insert the content of the created note at the caret position, instead of writing the note on the file system.
 "
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zknew
 :ZkNew [{options}]
 ```
 
@@ -114,7 +114,7 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 " Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
 "
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zknew
 :'<,'>ZkNewFromTitleSelection [{options}]
 ```
 
@@ -124,7 +124,7 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 " Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
 "
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zknew
 :'<,'>ZkNewFromContentSelection [{options}]
 ```
 
@@ -138,28 +138,28 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 ```vim
 " Opens a notes picker
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 :ZkNotes [{options}]
 ```
 
 ```vim
 " Opens a notes picker for the backlinks of the current buffer
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 :ZkBacklinks [{options}]
 ```
 
 ```vim
 " Opens a notes picker for the outbound links of the current buffer
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 :ZkLinks [{options}]
 ```
 
 ```vim
 " Inserts a link at the cursor location or around the selected text.
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 "   One additional option is `matchSelected` (boolean) which is only applicable to inserting a link around selected text. If `true`, the note picker will search for notes similar to the selected text. Otherwise, the note picker will load all notes to filter through.
 "    e.g. :'<'>ZkInsertLinkAtSelection {matchSelected = true}
 :ZkInsertLink 
@@ -169,19 +169,19 @@ Try out different [commands](#built-in-commands) such as `:ZkNotes` or `:ZkNew`,
 ```vim
 " Opens a notes picker, filters for notes that match the text in the last visual selection
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 :'<,'>ZkMatch [{options}]
 ```
 
 ```vim
 " Opens a notes picker, filters for notes with the selected tags
 " params
-"   (optional) additional options, see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zktaglist
 :ZkTags [{options}]
 ```
 
 The `options` parameter can be any valid *Lua* expression that evaluates to a table.
-For a list of available options, refer to the [`zk` docs](https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#custom-commands).
+For a list of available options, refer to the [`zk` docs](https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#custom-commands).
 In addition, `options.notebook_path` can be used to explicitly specify a notebook by providing a path to any file or directory within the notebook; see [Notebook Directory Discovery](#notebook-directory-discovery).
 
 *Examples:*
@@ -269,7 +269,7 @@ require("zk").cd(options)
 ---Creates and edits a new note
 --
 ---@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zknew
 require("zk").new(options)
 ```
 
@@ -277,7 +277,7 @@ require("zk").new(options)
 ---Indexes the notebook
 --
 ---@param options? table additional options
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zkindex
 require("zk").index(options)
 ```
 
@@ -287,7 +287,7 @@ require("zk").index(options)
 ---@param options? table additional options
 ---@param picker_options? table options for the picker
 ---@param cb function
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 require("zk").pick_notes(options, picker_options, cb)
 ```
@@ -298,7 +298,7 @@ require("zk").pick_notes(options, picker_options, cb)
 ---@param options? table additional options
 ---@param picker_options? table options for the picker
 ---@param cb function
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zktaglist
 ---@see zk.ui.pick_tags
 require("zk").pick_tags(options, picker_options, cb)
 ```
@@ -308,7 +308,7 @@ require("zk").pick_tags(options, picker_options, cb)
 --
 ---@param options? table additional options
 ---@param picker_options? table options for the picker
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 require("zk").edit(options, picker_options)
 ```
@@ -322,7 +322,7 @@ You can use it to write your own specialized functions for interacting with `zk`
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table additional options
 ---@param cb function callback function
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zkindex
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zkindex
 require("zk.api").index(path, options, function(err, stats)
   -- do something with the stats
 end)
@@ -332,7 +332,7 @@ end)
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table additional options
 ---@param cb function callback function
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zknew
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zknew
 require("zk.api").new(path, options, function(err, res)
   file_path = res.path
   -- do something with the new file path
@@ -343,7 +343,7 @@ end)
 ---@param path? string path to explicitly specify the notebook
 ---@param options table additional options
 ---@param cb function callback function
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zklist
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
 require("zk.api").list(path, options, function(err, notes)
   -- do something with the notes
 end)
@@ -353,7 +353,7 @@ end)
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table additional options
 ---@param cb function callback function
----@see https://github.com/mickael-menu/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zktaglist
 require("zk.api").tag.list(path, options, function(err, tags)
   -- do something with the tags
 end)
@@ -480,7 +480,7 @@ require("nvim-treesitter.configs").setup({
 ```
 
 ## nvim-lsp-installer
-> Not recommended, instead install the [`zk`](https://github.com/mickael-menu/zk) CLI tool and make it available in your `$PATH`.
+> Not recommended, instead install the [`zk`](https://github.com/zk-org/zk) CLI tool and make it available in your `$PATH`.
 
 If you insist to use nvim-lsp-installer for `zk`, the following code snippet should guide you on how to setup the `zk` server when installed via nvim-lsp-installer.
 
