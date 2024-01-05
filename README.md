@@ -10,7 +10,7 @@ Neovim extension for the [`zk`](https://github.com/zk-org/zk) plain text note-ta
 > maintainers](https://github.com/zk-org/zk/discussions/371), which has
 > garnerned enough response to enable the project to continue! So zk is
 > definitely still here for you.
-> E.g, [kabouzeid](https://github.com/kabouzeid) who conceived the `zk-nvim` 
+> E.g., [kabouzeid](https://github.com/kabouzeid) who conceived the `zk-nvim` 
 > plugin has signed up as a maintainer too, which is excellent!
 >
 > During this transition phase, we are placing the project into a maintenance
@@ -64,7 +64,8 @@ To get the best experience, it's recommended to also install either [Telescope](
 
 ## Setup
 
-> :warning: This plugin will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
+> [!WARNING] 
+> This plugin will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
 
 ```lua
 require("zk").setup()
