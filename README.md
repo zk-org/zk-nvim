@@ -10,6 +10,8 @@ Neovim extension for the [`zk`](https://github.com/zk-org/zk) plain text note-ta
 > maintainers](https://github.com/zk-org/zk/discussions/371), which has
 > garnerned enough response to enable the project to continue! So zk is
 > definitely still here for you.
+> e.g, [kabouzeid](https://github.com/kabouzeid) who conceived the `zk-nvim` 
+> plugin and has signed up as a maintainer too, which is excellent!
 >
 > During this transition phase, we are placing the project into a maintenance
 > mode, which means we are going to address existing issues and any teething
