@@ -1,3 +1,6 @@
+local api = require("zk.api")
+local util = require("zk.util")
+
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local conf = require("telescope.config").values
@@ -57,6 +60,23 @@ function M.make_note_previewer()
   })
 end
 
+function M.link_note(prompt_bufnr)
+  require("telescope.actions").close(prompt_bufnr)
+
+  local absPath = require("telescope.actions.state").get_selected_entry().path
+  local path = vim.fn.fnamemodify(absPath, ":.")
+  if not path then
+    error("Failed to get relative path")
+  end
+
+  local location = util.get_lsp_location_from_caret()
+  api.link(path, location, nil, {}, function(err, res)
+    if not res then
+      error(err)
+    end
+  end)
+end
+
 function M.show_note_picker(notes, options, cb)
   options = options or {}
   local telescope_options = vim.tbl_extend("force", { prompt_title = options.title }, options.telescope or {})
@@ -69,7 +89,7 @@ function M.show_note_picker(notes, options, cb)
       }),
       sorter = conf.file_sorter(options),
       previewer = M.make_note_previewer(),
-      attach_mappings = function(prompt_bufnr)
+      attach_mappings = function(prompt_bufnr, map)
         actions.select_default:replace(function()
           if options.multi_select then
             local selection = {}
@@ -86,6 +106,9 @@ function M.show_note_picker(notes, options, cb)
             cb(action_state.get_selected_entry().value)
           end
         end)
+
+        map({ "i", "n" }, "<C-l>", M.link_note)
+
         return true
       end,
     })
