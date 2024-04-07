@@ -2,10 +2,8 @@ local M = {}
 local H = {}
 local minipick = require("mini.pick")
 
--- Picker from zk-nvim must implement this.
 M.note_picker_list_api_selection = { "title", "path", "absPath" }
 
--- Picker from zk-nvim must implement this.
 M.show_note_picker = function(notes, opts, cb)
   notes = vim.tbl_map(function(n)
     return { text = n.title, path = n.absPath, note = n }
@@ -31,7 +29,6 @@ M.show_note_picker = function(notes, opts, cb)
   end
 end
 
--- Picker from zk-nvim must implement this.
 M.show_tag_picker = function(tags, opts, cb)
   tags = vim.tbl_map(function(t)
     local padded_cnt = H.ensure_text_width(t.note_count, opts.note_count_width or 4)
