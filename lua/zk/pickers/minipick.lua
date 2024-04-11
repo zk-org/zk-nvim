@@ -5,8 +5,9 @@ local minipick = require("mini.pick")
 M.note_picker_list_api_selection = { "title", "path", "absPath" }
 
 M.show_note_picker = function(notes, opts, cb)
-  notes = vim.tbl_map(function(n)
-    return { text = n.title, path = n.absPath, note = n }
+  notes = vim.tbl_map(function(note)
+    local title = note.title or note.path
+    return { text = title, path = note.absPath, note = note }
   end, notes)
 
   opts = opts or {}
