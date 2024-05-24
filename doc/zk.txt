@@ -490,3 +490,5 @@ It's possible (but unnecessary) to also load the notes and tags pickers as a tel
     :Telescope zk tags created=today
 <
 
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:fdm=marker:cole=2:
