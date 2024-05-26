@@ -11,7 +11,12 @@ function M.external_client()
     client_name = "zk"
   end
 
-  local active_clients = vim.lsp.get_active_clients({ name = client_name })
+  local active_clients = {}
+  if vim.fn.has("nvim-0.10") then
+    active_clients = vim.lsp.get_clients({ name = client_name })
+  else
+    active_clients = vim.lsp.get_active_clients({ name = client_name })
+  end
 
   if active_clients == {} then
     return nil
