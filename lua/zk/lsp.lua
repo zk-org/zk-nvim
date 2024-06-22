@@ -18,13 +18,13 @@ function M.external_client()
     active_clients = vim.lsp.get_active_clients({ name = client_name })
   end
 
-  if active_clients == {} then
+  if vim.tbl_isempty(active_clients) then
     return nil
   end
 
   -- return first lsp server that is actually in use
   for _, v in ipairs(active_clients) do
-    if v.attached_buffers ~= {} then
+    if not vim.tbl_isempty(v.attached_buffers) then
       return v.id
     end
   end
