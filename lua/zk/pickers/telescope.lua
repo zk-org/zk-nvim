@@ -6,6 +6,7 @@ local action_state = require("telescope.actions.state")
 local action_utils = require("telescope.actions.utils")
 local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
+local sorters = require "telescope.sorters"
 
 local M = {}
 
@@ -90,6 +91,52 @@ function M.show_note_picker(notes, options, cb)
       end,
     })
     :find()
+end
+
+-- Picker definition
+function M.show_note_grep_picker(opts)
+  -- This is how Telescope's `live_grep` does it
+  -- local args = { "rg", "--color=never", "--no-heading", "--with-filename", "--line-number", "--column", "--smart-case" }
+
+  opts = opts or {}
+  -- Prepare the prompt
+  -- TODO: this should be a call to the lua api
+  local args = { "zk", "list", "--format=oneline", "-m" }
+
+  -- Prepare the asynchronous job
+  local live_zk = finders.new_job(
+    function(prompt)
+      -- Empty prompt would give bad results
+      if not prompt or prompt == "" then
+        return nil
+      end
+      return vim.tbl_flatten { args, prompt }
+    end,
+    -- Format entries
+    function(entry)
+      local _, _, title, filename, date_modified = string.find(entry, [[(..-) (%S+) %((.+)%)]])
+      return {
+        value = entry,  -- entire entry is searchable
+        display = title, -- only the title is displayed
+        ordinal = entry, -- TODO: what is this for?
+        -- TODO: remove hardcoded path below
+        path = "~/Areas/notes/" .. filename, -- store the path so we can open the file
+      }
+    end,
+    opts.max_results,
+    opts.cwd)
+
+  pickers.new(opts, {
+    prompt_title = "Live Zk",
+    finder = live_zk,
+    previewer = conf.grep_previewer(opts),
+    sorter = sorters.highlighter_only(opts),
+    attach_mappings = function(_, map)
+      map("i", "<c-space>", actions.to_fuzzy_refine)
+      return true
+    end,
+  })
+  :find()
 end
 
 function M.show_tag_picker(tags, options, cb)
