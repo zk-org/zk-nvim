@@ -61,6 +61,13 @@ commands.add("ZkNotes", function(options)
   zk.edit(options, { title = "Zk Notes" })
 end)
 
+commands.add("ZkGrep", function(options)
+  -- Insert an option to grep the notes
+  -- TODO: insert rather than overwrite
+  options = {grep=true}
+  zk.edit(options, { title = "Zk Grep" })
+end)
+
 commands.add("ZkBacklinks", function(options)
   options = vim.tbl_extend("force", { linkTo = { vim.api.nvim_buf_get_name(0) } }, options or {})
   zk.edit(options, { title = "Zk Backlinks" })
