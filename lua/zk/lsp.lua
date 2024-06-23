@@ -45,8 +45,11 @@ end
 ---@param bufnr number
 function M.buf_add(bufnr)
   bufnr = bufnr or 0
-  M.start()
-  vim.lsp.buf_attach_client(bufnr, client_id)
+  --Prevent multiple client starts in the same event loop
+  vim.schedule(function()
+    M.start()
+    vim.lsp.buf_attach_client(bufnr, client_id)
+  end)
 end
 
 ---Stops the LSP client managed by this plugin
