@@ -37,7 +37,9 @@ To get the best experience, it's recommended to also install either [Telescope](
 ## Setup
 
 > [!WARNING] 
-> This plugin will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
+> If you have the [zk cli](https://github.com/zk-org/zk) installed, then you do not need to install the `zk lsp` via the regular neovim paradigm (Mason, nvim-lsp, etc).
+> This is because `zk` has our lsp bundled with it, which `zk-nvim` hooks into.
+> Additionally, `zk-nvim` will setup and start the LSP server for you, do *not* call `require("lspconfig").zk.setup()`.
 
 ```lua
 require("zk").setup()
