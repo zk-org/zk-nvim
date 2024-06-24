@@ -1,8 +1,15 @@
 local config = require("zk.config")
 
-local client_id = nil
-
 local M = {}
+
+local _client
+
+local lsp_get_clients
+if vim.fn.has("nvim-0.10") == 1 then
+  lsp_get_clients = vim.lsp.get_clients
+else
+  lsp_get_clients = vim.lsp.get_active_clients
+end
 
 ---Tries to find a client by name
 function M.external_client()
@@ -11,59 +18,54 @@ function M.external_client()
     client_name = "zk"
   end
 
-  local active_clients = {}
-  if vim.fn.has("nvim-0.10") == 1 then
-    active_clients = vim.lsp.get_clients({ name = client_name })
-  else
-    active_clients = vim.lsp.get_active_clients({ name = client_name })
+  local active_clients = lsp_get_clients({ name = client_name })
+
+  if #active_clients == 0 then
+    return
   end
 
-  if next(active_clients) == nil then
-    return nil
+  if #active_clients > 1 then
+    vim.notify("Multiple Zk LSP client instances found.", vim.log.levels.WARN, { title = "Zk-nvim" })
   end
 
-  -- return first lsp server that is actually in use
-  for _, v in ipairs(active_clients) do
-    if next(v.attached_buffers) ~= nil then
-      return v.id
-    end
-  end
+  return active_clients[1]
 end
 
----Starts an LSP client if necessary
-function M.start()
-  if not client_id then
-    client_id = M.external_client()
-  end
-
-  if not client_id then
-    client_id = vim.lsp.start_client(config.options.lsp.config)
-  end
-end
-
----Starts an LSP client if necessary, and attaches the given buffer.
----@param bufnr number
+---Attaches the given buffer.
+---@param bufnr integer
 function M.buf_add(bufnr)
   bufnr = bufnr or 0
-  --Prevent multiple client starts in the same event loop
-  vim.schedule(function()
-    M.start()
-    vim.lsp.buf_attach_client(bufnr, client_id)
-  end)
+
+  vim.lsp.buf_attach_client(bufnr, M.client().id)
 end
 
 ---Stops the LSP client managed by this plugin
 function M.stop()
-  local client = M.client()
-  if client then
-    client.stop()
-  end
-  client_id = nil
+  M.client().stop()
 end
 
----Gets the LSP client managed by this plugin, might be nil
+---Gets the LSP client managed by this plugin
+---If there is no client, it will try to find an external one or starts a new one.
 function M.client()
-  return vim.lsp.get_client_by_id(client_id)
+  if _client ~= nil then
+    return _client
+  end
+
+  local client = M.external_client()
+  if client ~= nil then
+    _client = client
+    return client
+  end
+
+  local client_id, err = vim.lsp.start_client(config.options.lsp.config)
+  if client_id ~= nil then
+    client = vim.lsp.get_client_by_id(client_id)
+    ---@cast client -nil
+    _client = client
+    return client
+  else
+    error("Failed to start Zk LSP client: " .. err)
+  end
 end
 
 return M

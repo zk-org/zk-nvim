@@ -21,9 +21,9 @@ end
 
 ---Automatically called via an |autocmd| if lsp.auto_attach is enabled.
 --
----@param bufnr number
+---@param bufnr integer
 function M._lsp_buf_auto_add(bufnr)
-  if vim.api.nvim_buf_get_option(bufnr, "buftype") == "nofile" then
+  if vim.bo[bufnr].buftype == "nofile" then
     return
   end
 
