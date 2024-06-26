@@ -18,16 +18,7 @@ function M.external_client()
     active_clients = vim.lsp.get_active_clients({ name = client_name })
   end
 
-  if active_clients == {} then
-    return nil
-  end
-
-  -- return first lsp server that is actually in use
-  for _, v in ipairs(active_clients) do
-    if v.attached_buffers ~= {} then
-      return v.id
-    end
-  end
+  return active_clients[1]
 end
 
 ---Starts an LSP client if necessary
