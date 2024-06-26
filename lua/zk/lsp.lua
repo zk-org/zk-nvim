@@ -18,7 +18,11 @@ function M.external_client()
     active_clients = vim.lsp.get_active_clients({ name = client_name })
   end
 
-  return active_clients[1]
+  if next(active_clients) == nil then
+    return
+  end
+
+  return active_clients[1].id
 end
 
 ---Starts an LSP client if necessary
