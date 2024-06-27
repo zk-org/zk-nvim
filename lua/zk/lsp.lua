@@ -22,7 +22,12 @@ function M.external_client()
     return
   end
 
-  return active_clients[1].id
+  -- return first lsp server that is actually in use
+  for _, v in ipairs(active_clients) do
+    if next(v.attached_buffers) ~= nil then
+      return v.id
+    end
+  end
 end
 
 ---Starts an LSP client if necessary
