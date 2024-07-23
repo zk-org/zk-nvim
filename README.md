@@ -2,6 +2,8 @@
 
 Neovim extension for the [`zk`](https://github.com/zk-org/zk) plain text note-taking assistant.
 
+Checkout [Shivan's](https://github.com/shivan-s) video, [_Note-taking System ALL Programmers Should Consider_](https://www.youtube.com/watch?v=UzhZb7e4l4Y), to see it in action.
+
 ## Requirements
 
 | `zk-nvim` | `zk`   | Neovim |

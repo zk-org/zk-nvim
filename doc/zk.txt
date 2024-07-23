@@ -28,8 +28,8 @@ Neovim extension for the `zk` (https://github.com/zk-org/zk) plain text note-tak
 --------------------------------------------------------------------------------
 REQUIREMENTS                                                     *zk-requirements*
 
-*   Neovim >= 0.6.0
-*   `zk` >= 0.9.0
+*   Neovim >= 0.8.0
+*   `zk` >= 0.13.0
 
 --------------------------------------------------------------------------------
 INSTALLATION                                                     *zk-installation*
