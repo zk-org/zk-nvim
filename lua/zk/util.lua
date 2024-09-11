@@ -100,14 +100,16 @@ function M.get_text_in_range(range)
   local A = range["start"]
   local B = range["end"]
 
-  local lines = vim.api.nvim_buf_get_lines(0, A.line, B.line + 1, true)
-  if vim.tbl_isempty(lines) then
-    return nil
+  local region = vim.region(0, { A.line, A.character }, { B.line, B.character }, vim.fn.visualmode(), true)
+
+  local chunks = {}
+  local maxcol = vim.v.maxcol
+  for line, cols in vim.spairs(region) do
+    local endcol = cols[2] == maxcol and -1 or cols[2]
+    local chunk = vim.api.nvim_buf_get_text(0, line, cols[1], line, endcol, {})[1]
+    table.insert(chunks, chunk)
   end
-  local MAX_STRING_SUB_INDEX = 2 ^ 31 - 1 -- LuaJIT only supports 32bit integers for `string.sub` (in block selection B.character is 2^31)
-  lines[#lines] = string.sub(lines[#lines], 1, math.min(B.character, MAX_STRING_SUB_INDEX))
-  lines[1] = string.sub(lines[1], math.min(A.character + 1, MAX_STRING_SUB_INDEX))
-  return table.concat(lines, "\n")
+  return table.concat(chunks, "\n")
 end
 
 ---Gets the most recently selected range of the current buffer.
