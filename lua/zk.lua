@@ -62,7 +62,7 @@ end
 ---Creates and edits a new note
 --
 ---@param options? table additional options
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zknew
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
 function M.new(options)
   options = options or {}
   api.new(options.notebook_path, options, function(err, res)
@@ -78,7 +78,7 @@ end
 --
 ---@param options? table additional options
 ---@param cb? function for processing stats
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zkindex
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zkindex
 function M.index(options, cb)
   options = options or {}
   cb = cb or function(stats)
@@ -95,7 +95,7 @@ end
 ---@param options? table additional options
 ---@param picker_options? table options for the picker
 ---@param cb function
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 function M.pick_notes(options, picker_options, cb)
   options =
@@ -111,7 +111,7 @@ end
 ---@param options? table additional options
 ---@param picker_options? table options for the picker
 ---@param cb function
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zktaglist
 ---@see zk.ui.pick_tags
 function M.pick_tags(options, picker_options, cb)
   options = options or {}
@@ -125,7 +125,7 @@ end
 --
 ---@param options? table additional options
 ---@param picker_options? table options for the picker
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 function M.edit(options, picker_options)
   M.pick_notes(options, picker_options, function(notes)
