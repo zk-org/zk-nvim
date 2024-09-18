@@ -47,7 +47,7 @@ function M.get_lsp_location_from_selection()
   local params = vim.lsp.util.make_given_range_params()
   return {
     uri = params.textDocument.uri,
-    range = M.get_selected_range(), -- workaround for neovim 0.6.1 bug (https://github.com/zk-org/zk-nvim/issues/19)
+    range = params.range
   }
 end
 
@@ -91,47 +91,20 @@ function M.get_lsp_location_from_caret()
   })
 end
 
----Gets the text in the given range of the current buffer.
----Needed until https://github.com/neovim/neovim/pull/13896 is merged.
+---Gets the text in the last visual selection
 --
----@param range table contains {start} and {end} tables with {line} (0-indexed, end inclusive) and {character} (0-indexed, end exclusive) values
----@return string? text in range
-function M.get_text_in_range(range)
-  local A = range["start"]
-  local B = range["end"]
+---@return string text in range
+function M.get_selected_text()
+  local region = vim.region(0, "'<", "'>", vim.fn.visualmode(), true)
 
-  local lines = vim.api.nvim_buf_get_lines(0, A.line, B.line + 1, true)
-  if vim.tbl_isempty(lines) then
-    return nil
+  local chunks = {}
+  local maxcol = vim.v.maxcol
+  for line, cols in vim.spairs(region) do
+    local endcol = cols[2] == maxcol and -1 or cols[2]
+    local chunk = vim.api.nvim_buf_get_text(0, line, cols[1], line, endcol, {})[1]
+    table.insert(chunks, chunk)
   end
-  local MAX_STRING_SUB_INDEX = 2 ^ 31 - 1 -- LuaJIT only supports 32bit integers for `string.sub` (in block selection B.character is 2^31)
-  lines[#lines] = string.sub(lines[#lines], 1, math.min(B.character, MAX_STRING_SUB_INDEX))
-  lines[1] = string.sub(lines[1], math.min(A.character + 1, MAX_STRING_SUB_INDEX))
-  return table.concat(lines, "\n")
-end
-
----Gets the most recently selected range of the current buffer.
----That is the text between the '<,'> marks.
----Note that these marks are only updated *after* leaving the visual mode.
---
----@return table selected range, contains {start} and {end} tables with {line} (0-indexed, end inclusive) and {character} (0-indexed, end exclusive) values
-function M.get_selected_range()
-  -- code adjusted from `vim.lsp.util.make_given_range_params`
-  -- we don't want to use character encoding offsets here
-
-  local A = vim.api.nvim_buf_get_mark(0, "<")
-  local B = vim.api.nvim_buf_get_mark(0, ">")
-
-  -- convert to 0-index
-  A[1] = A[1] - 1
-  B[1] = B[1] - 1
-  if vim.o.selection ~= "exclusive" then
-    B[2] = B[2] + 1
-  end
-  return {
-    start = { line = A[1], character = A[2] },
-    ["end"] = { line = B[1], character = B[2] },
-  }
+  return table.concat(chunks, "\n")
 end
 
 return M
