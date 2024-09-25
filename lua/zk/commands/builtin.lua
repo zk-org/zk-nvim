@@ -62,9 +62,8 @@ commands.add("ZkNotes", function(options)
 end)
 
 commands.add("ZkGrep", function(options)
-  -- Insert an option to grep the notes
-  -- TODO: insert rather than overwrite
-  options = {grep=true}
+  options = options or {}
+  options.grep = true
   zk.edit(options, { title = "Zk Grep" })
 end)
 
