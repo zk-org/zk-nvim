@@ -11,11 +11,11 @@ function M.pick_notes(notes, options, cb)
   options =
     vim.tbl_extend("force", { title = "Zk Notes", picker = config.options.picker, multi_select = true }, options or {})
 
-  if options.picker ~= "telescope" then
-    print(":ZkGrep is only usable with Telescope for now. Maybe time for a PR? 😘")
-    return
-  end
   if options.grep ~= nil then
+    if options.picker ~= "telescope" then
+      print(":ZkGrep is only usable with Telescope for now. Maybe time for a PR? 😘")
+      return
+    end
     require("zk.pickers." .. options.picker).show_note_grep_picker(options, cb)
   else
     require("zk.pickers." .. options.picker).show_note_picker(notes, options, cb)
