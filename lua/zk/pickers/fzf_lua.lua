@@ -92,20 +92,19 @@ function M.show_tag_picker(tags, options, cb)
       ["--exact"] = "",
       ["--tabstop"] = 4,
     },
-    fn_selected = function(selected, _)
-      -- for some reason, fzf lua returns an empty string as the first selected line. this was
-      -- causing the tbl_map to generate a result zk-nvim can't resolve to open notes
-      table.remove(selected, 1)
-      local selected_tags = vim.tbl_map(function(line)
-        local name = string.match(line, "%d+%s+" .. delimiter .. "(.+)")
-        return tags_by_name[name]
-      end, selected)
-      if options.multi_select then
-        cb(selected_tags)
-      else
-        cb(selected_tags[1])
-      end
-    end,
+    actions = {
+      ["default"] = function(selected, _)
+        local selected_tags = vim.tbl_map(function(line)
+          local name = string.match(line, "%d+%s+" .. delimiter .. "(.+)")
+          return tags_by_name[name]
+        end, selected)
+        if options.multi_select then
+          cb(selected_tags)
+        else
+          cb(selected_tags[1])
+        end
+      end,
+    },
   }, options.fzf_lua or {})
 
   exec(function(fzf_cb)
