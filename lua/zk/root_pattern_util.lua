@@ -8,6 +8,15 @@ local uv = vim.loop
 local M = {}
 
 -- Some path utilities
+
+local function tbl_flatten(...)
+  if vim.fn.has("nvim-0.10") then
+    return vim.iter({ ... }):flatten():totable()
+  else
+    return vim.tbl_flatten({ ... })
+  end
+end
+
 M.path = (function()
   local is_windows = uv.os_uname().version:match("Windows")
 
@@ -46,7 +55,7 @@ M.path = (function()
   end
 
   local function path_join(...)
-    return table.concat(vim.tbl_flatten({ ... }), "/")
+    return table.concat(tbl_flatten({ ... }), "/")
   end
 
   -- Iterate the path until we find the rootdir.
@@ -94,7 +103,7 @@ function M.search_ancestors(startpath, func)
 end
 
 function M.root_pattern(...)
-  local patterns = vim.tbl_flatten({ ... })
+  local patterns = tbl_flatten({ ... })
   local function matcher(path)
     for _, pattern in ipairs(patterns) do
       for _, p in ipairs(vim.fn.glob(M.path.join(M.path.escape_wildcards(path), pattern), true, true)) do
