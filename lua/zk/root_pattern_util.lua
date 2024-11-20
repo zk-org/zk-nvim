@@ -10,7 +10,7 @@ local M = {}
 -- Some path utilities
 
 local function tbl_flatten(...)
-  if vim.fn.has("nvim-0.10") then
+  if vim.fn.has("nvim-0.10") == 1 then
     return vim.iter({ ... }):flatten():totable()
   else
     return vim.tbl_flatten({ ... })
