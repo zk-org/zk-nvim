@@ -28,7 +28,7 @@ end
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table additional options
 ---@param cb function callback function
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zkindex
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zkindex
 function M.index(path, options, cb)
   execute_command("index", path, options, cb)
 end
@@ -36,7 +36,7 @@ end
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table additional options
 ---@param cb function callback function
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zknew
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
 function M.new(path, options, cb)
   execute_command("new", path, options, cb)
 end
@@ -46,7 +46,7 @@ end
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table Extra options; table in form {title: string}
 ---@param cb? function callback function
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklink
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklink
 function M.link(target, location, path, options, cb)
   options = vim.tbl_extend("force", { path = target, location = location }, options or {})
 
@@ -56,7 +56,7 @@ end
 ---@param path? string path to explicitly specify the notebook
 ---@param options table additional options
 ---@param cb function callback function
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zklist
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 function M.list(path, options, cb)
   execute_command("list", path, options, cb)
 end
@@ -66,7 +66,7 @@ M.tag = {}
 ---@param path? string path to explicitly specify the notebook
 ---@param options? table additional options
 ---@param cb function callback function
----@see https://github.com/zk-org/zk/blob/main/docs/editors-integration.md#zktaglist
+---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zktaglist
 function M.tag.list(path, options, cb)
   execute_command("tag.list", path, options, cb)
 end
