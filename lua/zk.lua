@@ -98,12 +98,18 @@ end
 ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 function M.pick_notes(options, picker_options, cb)
-  options =
-    vim.tbl_extend("force", { select = ui.get_pick_notes_list_api_selection(picker_options) }, options or {})
-  api.list(options.notebook_path, options, function(err, notes)
-    assert(not err, tostring(err))
-    ui.pick_notes(notes, picker_options, cb)
-  end)
+  options = vim.tbl_extend("force", { select = ui.get_pick_notes_list_api_selection(picker_options) }, options or {})
+
+  if options.grep then
+    picker_options.grep = options.grep
+    ui.pick_notes({}, picker_options, cb)
+  else
+    api.list(options.notebook_path, options, function(err, notes)
+      assert(not err, tostring(err))
+      ui.pick_notes(notes, picker_options, cb)
+    end)
+  end
+
 end
 
 ---Opens a tags picker, and calls the callback with the selection
