@@ -173,6 +173,13 @@ see what they can do, and learn as you go.
 ```
 
 ```vim
+" Opens a notes picker for active buffers (showing notebook files only).
+" params
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
+:ZkBuffers [{options}]
+```
+
+```vim
 " Opens a notes picker for the backlinks of the current buffer
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
