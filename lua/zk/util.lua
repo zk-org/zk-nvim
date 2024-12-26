@@ -47,7 +47,7 @@ function M.get_lsp_location_from_selection()
   local params = vim.lsp.util.make_given_range_params()
   return {
     uri = params.textDocument.uri,
-    range = params.range
+    range = params.range,
   }
 end
 
@@ -91,7 +91,7 @@ function M.get_lsp_location_from_caret()
   })
 end
 
----Gets the text in the last visual selection
+---Gets the text in the last visual selection.
 --
 ---@return string text in range
 function M.get_selected_text()
@@ -105,6 +105,24 @@ function M.get_selected_text()
     table.insert(chunks, chunk)
   end
   return table.concat(chunks, "\n")
+end
+
+---Gets the file paths of active buffers.
+--
+---@return table Paths of currently active buffers.
+function M.get_buffer_paths()
+  local buffers = vim.api.nvim_list_bufs()
+  local paths = {}
+
+  for _, buf in ipairs(buffers) do
+    local path = vim.api.nvim_buf_get_name(buf)
+
+    if path ~= "" then
+      table.insert(paths, path)
+    end
+  end
+
+  return paths
 end
 
 return M

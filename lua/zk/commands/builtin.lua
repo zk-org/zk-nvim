@@ -61,6 +61,12 @@ commands.add("ZkNotes", function(options)
   zk.edit(options, { title = "Zk Notes" })
 end)
 
+commands.add("ZkBuffers", function(options)
+  local hrefs = util.get_buffer_paths()
+  options = vim.tbl_extend("force", { hrefs = hrefs }, options or {})
+  zk.edit(options, { title = "Zk Buffers" })
+end)
+
 commands.add("ZkBacklinks", function(options)
   options = vim.tbl_extend("force", { linkTo = { vim.api.nvim_buf_get_name(0) } }, options or {})
   zk.edit(options, { title = "Zk Backlinks" })
