@@ -126,9 +126,7 @@ see what they can do, and learn as you go.
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zkindex
 :ZkIndex [{options}]
-```
 
-```vim
 " Creates and edits a new note
 "
 " Use the `inline = true` option to insert the content of the created note at the caret position, instead of writing the note on the file system.
@@ -136,9 +134,7 @@ see what they can do, and learn as you go.
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
 :ZkNew [{options}]
-```
 
-```vim
 " Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
 "
 " Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
@@ -146,9 +142,7 @@ see what they can do, and learn as you go.
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
 :'<,'>ZkNewFromTitleSelection [{options}]
-```
 
-```vim
 " Creates a new note and uses the last visual selection as the content while replacing the selection with a link to the new note
 "
 " Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
@@ -156,44 +150,32 @@ see what they can do, and learn as you go.
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
 :'<,'>ZkNewFromContentSelection [{options}]
-```
 
-```vim
 " cd into the notebook root
 " params
 "   (optional) additional options
 :ZkCd [{options}]
-```
 
-```vim
 " Opens a notes picker
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 :ZkNotes [{options}]
-```
 
-```vim
 " Opens a notes picker for active buffers (showing notebook files only).
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 :ZkBuffers [{options}]
-```
 
-```vim
 " Opens a notes picker for the backlinks of the current buffer
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 :ZkBacklinks [{options}]
-```
 
-```vim
 " Opens a notes picker for the outbound links of the current buffer
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 :ZkLinks [{options}]
-```
 
-```vim
 " Inserts a link at the cursor location or around the selected text.
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
@@ -201,16 +183,12 @@ see what they can do, and learn as you go.
 "    e.g. :'<'>ZkInsertLinkAtSelection {matchSelected = true}
 :ZkInsertLink
 :'<,'>ZkInsertLinkAtSelection [{options}]
-```
 
-```vim
 " Opens a notes picker, filters for notes that match the text in the last visual selection
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 :'<,'>ZkMatch [{options}]
-```
 
-```vim
 " Opens a notes picker, filters for notes with the selected tags
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zktaglist
