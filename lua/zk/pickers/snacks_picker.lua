@@ -33,18 +33,16 @@ H.item_picker = function(items, opts, cb)
   local picker_opts = vim.tbl_deep_extend("force", {
     items = items,
     format = "text",
-    actions = {
-      confirm = function(picker, item)
-        picker:close()
-        if not opts.multi_select then
-          cb(item.value)
-        else
-          cb(vim.tbl_map(function(i)
-            return i.value
-          end, picker:selected({ fallback = true })))
-        end
-      end,
-    },
+    confirm = function(picker, item)
+      picker:close()
+      if not opts.multi_select then
+        cb(item.value)
+      else
+        cb(vim.tbl_map(function(i)
+          return i.value
+        end, picker:selected({ fallback = true })))
+      end
+    end,
   }, opts.snacks_picker or {})
   snacks_picker.pick(opts.title, picker_opts)
 end
