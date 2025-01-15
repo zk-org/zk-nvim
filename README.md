@@ -44,8 +44,9 @@ Via [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 To get the best experience, it's recommended to also install either
 [Telescope](https://github.com/nvim-telescope/telescope.nvim),
-[fzf](https://github.com/junegunn/fzf), or
-[mini.pick](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pick.md)
+[fzf](https://github.com/junegunn/fzf),
+[mini.pick](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pick.md),
+or [snacks.picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
 
 ## Setup
 
@@ -63,8 +64,9 @@ require("zk").setup()
 
 ```lua
 require("zk").setup({
-  -- can be "telescope", "fzf", "fzf_lua", "minipick", or "select" (`vim.ui.select`)
-  -- it's recommended to use "telescope", "fzf", "fzf_lua", or "minipick"
+  -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker", 
+  -- or select" (`vim.ui.select`). It's recommended to use "telescope", 
+  -- "fzf", "fzf_lua", "minipick", or "snacks_picker".
   picker = "select",
 
   lsp = {
