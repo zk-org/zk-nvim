@@ -15,14 +15,14 @@ end
 M.show_tag_picker = function(tags, opts, cb)
   opts.snacks_picker = opts.snacks_picker or {}
   opts.snacks_picker =
-    vim.tbl_deep_extend("keep", { previewer = "preview", layout = { preview = false } }, opts.snacks_picker)
+    vim.tbl_deep_extend("keep", { preview = "preview", layout = { preview = false } }, opts.snacks_picker)
   local width = H.max_note_count(tags)
   tags = vim.tbl_map(function(tag)
     local padded_count = H.pad(tag.note_count, width)
     return {
       text = string.format(" %s  %s", padded_count, tag.name),
       value = tag,
-      preview = { text = string.format("%s notes for %s tag", tag.note_count, tag.name) },
+      preview = { text = string.format("%s notes for #%s tag", tag.note_count, tag.name) },
     }
   end, tags)
   H.item_picker(tags, opts, cb)
