@@ -33,6 +33,7 @@ H.item_picker = function(items, opts, cb)
   local picker_opts = vim.tbl_deep_extend("force", {
     items = items,
     format = "text",
+    sort = { fields = { "score:desc", "idx" } },
     confirm = function(picker, item)
       picker:close()
       if not opts.multi_select then
