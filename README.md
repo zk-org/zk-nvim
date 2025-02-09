@@ -46,26 +46,33 @@ To get the best experience, it's recommended to also install either
 [Telescope](https://github.com/nvim-telescope/telescope.nvim),
 [fzf](https://github.com/junegunn/fzf),
 [mini.pick](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pick.md),
-or [snacks.picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
+or
+[snacks.picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
 
 ## Setup
 
-> [!WARNING] If you have the [zk cli](https://github.com/zk-org/zk) installed,
-> then you do not need to install the `zk lsp` via the regular neovim paradigm
-> (Mason, nvim-lsp, etc). This is because `zk` has our lsp bundled with it,
-> which `zk-nvim` hooks into. Additionally, `zk-nvim` will setup and start the
-> LSP server for you, do _not_ call `require("lspconfig").zk.setup()`.
+> [!IMPORTANT] \
+> If you have the [zk cli](https://github.com/zk-org/zk) installed, then you _do
+> not need to install `zk lsp`_ via Mason (or otherwise). This is because `zk`
+> has our lsp bundled with it, which `zk-nvim` hooks into. \
+> Additionally, `zk-nvim` will setup and start the LSP server for you, so you
+> _do not_ need to `require("lspconfig").zk.setup()`.
+
+Example `lazy.nvim` setup:
 
 ```lua
-require("zk").setup()
+return {
+  "zk-org/zk-nvim"
+  require("zk").setup()
+}
 ```
 
-**The default configuration**
+**...which uses the default configuration:**
 
 ```lua
 require("zk").setup({
-  -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker", 
-  -- or select" (`vim.ui.select`). It's recommended to use "telescope", 
+  -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker",
+  -- or select" (`vim.ui.select`). It's recommended to use "telescope",
   -- "fzf", "fzf_lua", "minipick", or "snacks_picker".
   picker = "select",
 
