@@ -160,6 +160,14 @@ see what they can do, and learn as you go.
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
 :'<,'>ZkNewFromContentSelection [{options}]
 
+" Creates a new note and uses the last visual selection as the title and content (delimited by newlines) while replacing the selection with a link to the new note
+"
+" Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
+"
+" params
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
+:'<,'>ZkNewFromTitleAndContentSelection [{options}]
+
 " cd into the notebook root
 " params
 "   (optional) additional options
@@ -477,6 +485,8 @@ if require("zk.util").notebook_root(vim.fn.expand('%:p')) ~= nil then
   map("v", "<leader>znt", ":'<,'>ZkNewFromTitleSelection { dir = vim.fn.expand('%:p:h') }<CR>", opts)
   -- Create a new note in the same directory as the current buffer, using the current selection for note content and asking for its title.
   map("v", "<leader>znc", ":'<,'>ZkNewFromContentSelection { dir = vim.fn.expand('%:p:h'), title = vim.fn.input('Title: ') }<CR>", opts)
+  -- Create a new note in the same directory as the current buffer, using the current selection for note title and content (delimited by newlines).
+  map("v", "<leader>znn", ":'<,'>ZkNewFromTitleAndContentSelection { dir = vim.fn.expand('%:p:h') }<CR>", opts)
 
   -- Open notes linking to the current buffer.
   map("n", "<leader>zb", "<Cmd>ZkBacklinks<CR>", opts)
