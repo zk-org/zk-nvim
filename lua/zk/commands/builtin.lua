@@ -61,7 +61,7 @@ commands.add("ZkNewFromTitleAndContentSelection", function(options)
   assert(selected_text ~= nil, "No selected text")
 
   local title, content = selected_text:match("%W*([^\n]+)\n+(.+)$")
-  assert(title ~= nil and content ~= nil, "No newline-delimited title and content found in selection")
+  assert(title ~= nil or content ~= nil, "No newline-delimited title and content found in selection")
 
   options = options or {}
   options.title = vim.fn.input("Title: ", title)
