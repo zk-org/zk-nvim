@@ -60,7 +60,7 @@ commands.add("ZkNewFromTitleAndContentSelection", function(options)
   local selected_text = util.get_selected_text()
   assert(selected_text ~= nil, "No selected text")
 
-  local title, content = selected_text:match("%W*([^\n]+)\n+([^\n]+)$")
+  local title, content = selected_text:match("%W*([^\n]+)\n+(.+)$")
   assert(title ~= nil and content ~= nil, "No newline-delimited title and content found in selection")
 
   options = options or {}
