@@ -55,6 +55,29 @@ commands.add("ZkNewFromContentSelection", function(options)
   zk.new(options)
 end, { needs_selection = true })
 
+commands.add("ZkNewFromTitleAndContentSelection", function(options)
+  local location = util.get_lsp_location_from_selection()
+  local selected_text = util.get_selected_text()
+  assert(selected_text ~= nil, "No selected text")
+
+  local title, content = selected_text:match("%W*([^\n]+)\n+([^\n]+)$")
+  assert(title ~= nil and content ~= nil, "No newline-separated title and content found in selection")
+
+  options = options or {}
+  options.title = vim.fn.input("Title: ", title)
+  options.content = content
+
+  if options.inline == true then
+    options.inline = nil
+    options.dryRun = true
+    options.insertContentAtLocation = location
+  else
+    options.insertLinkAtLocation = location
+  end
+
+  zk.new(options)
+end, { needs_selection = true })
+
 commands.add("ZkCd", zk.cd)
 
 commands.add("ZkNotes", function(options)
