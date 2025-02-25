@@ -19,6 +19,7 @@ CONTENTS                                                             *zk-content
     2.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
     2.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
     2.3. Telescope Plugin....................................|zk-telescope_plugin|
+    2.4. Picker Configuration............................|zk-picker_configuration|
 
 ================================================================================
 ZK-NVIM                                                               *zk-zk-nvim*
@@ -493,6 +494,29 @@ It's possible (but unnecessary) to also load the notes and tags pickers as a tel
     :Telescope zk notes createdAfter=3\ days\ ago
     :Telescope zk tags
     :Telescope zk tags created=today
+<
+
+--------------------------------------------------------------------------------
+PICKER CONFIGURATION                                     *zk-picker_configuration*
+
+You can define default configurations for the pickers opened by `zk-nvim`, allowing you to apply a specific theme or layout to `zk-nvim`. This works for all supported pickers, but you'll need to refer to the relevant configuration options for each picker.
+
+Example configuration:
+>
+  require("zk").setup({
+      picker_options = {
+          telescope = require("telescope.themes").get_ivy(),
+
+          -- or if you use snacks picker
+
+          snacks_picker = {
+              layout = {
+                  preset = "ivy",
+              }
+          },
+      },
+      ...
+  })
 <
 
 ==============================================================================
