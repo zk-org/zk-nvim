@@ -573,3 +573,24 @@ require("telescope").load_extension("zk")
 :Telescope zk tags
 :Telescope zk tags created=today
 ```
+
+## Picker Configuration
+
+You can define default configurations for the pickers opened by `zk-nvim`, allowing you to apply a specific theme or layout for `zk-nvim`. This works for all supported pickers, but you'll need to refer to the relevant configuration options for each picker.
+
+```lua
+require("zk").setup({
+    picker_options = {
+        telescope = require("telescope.themes").get_ivy(),
+
+        -- or if you use snacks picker
+
+        snacks_picker = {
+            layout = {
+                preset = "ivy",
+            }
+        },
+    },
+    ...
+})
+```
