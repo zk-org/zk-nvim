@@ -51,10 +51,9 @@ or
 
 ## Setup
 
-> [!IMPORTANT]
-> If you have the [zk cli](https://github.com/zk-org/zk) installed, then you _do
-> not need to install `zk lsp`_ via Mason (or otherwise). This is because `zk`
-> has our lsp bundled with it, which `zk-nvim` hooks into. \
+> [!IMPORTANT] If you have the [zk cli](https://github.com/zk-org/zk) installed,
+> then you _do not need to install `zk lsp`_ via Mason (or otherwise). This is
+> because `zk` has our lsp bundled with it, which `zk-nvim` hooks into. \
 > Additionally, `zk-nvim` will setup and start the LSP server for you, so you
 > _do not_ need to `require("lspconfig").zk.setup()`.
 
@@ -96,6 +95,30 @@ require("zk").setup({
 
 Note that the `setup` function will not add any key mappings for you. If you
 want to add key mappings, see the [example mappings](#example-mappings).
+
+### Picker Options
+
+You can define default configurations for the pickers opened by `zk-nvim`,
+allowing you to apply a specific theme or layout for `zk-nvim`. This works for
+all supported pickers, but you'll need to refer to the relevant configuration
+options for each picker.
+
+```lua
+require("zk").setup({
+    picker_options = {
+        telescope = require("telescope.themes").get_ivy(),
+
+        -- or if you use snacks picker
+
+        snacks_picker = {
+            layout = {
+                preset = "ivy",
+            }
+        },
+    },
+    ...
+})
+```
 
 ### Notebook Directory Discovery
 
@@ -572,25 +595,4 @@ require("telescope").load_extension("zk")
 :Telescope zk notes createdAfter=3\ days\ ago
 :Telescope zk tags
 :Telescope zk tags created=today
-```
-
-## Picker Configuration
-
-You can define default configurations for the pickers opened by `zk-nvim`, allowing you to apply a specific theme or layout for `zk-nvim`. This works for all supported pickers, but you'll need to refer to the relevant configuration options for each picker.
-
-```lua
-require("zk").setup({
-    picker_options = {
-        telescope = require("telescope.themes").get_ivy(),
-
-        -- or if you use snacks picker
-
-        snacks_picker = {
-            layout = {
-                preset = "ivy",
-            }
-        },
-    },
-    ...
-})
 ```
