@@ -51,7 +51,8 @@ or
 
 ## Setup
 
-> [!IMPORTANT] If you have the [zk cli](https://github.com/zk-org/zk) installed,
+> [!IMPORTANT] 
+> If you have the [zk cli](https://github.com/zk-org/zk) installed,
 > then you _do not need to install `zk lsp`_ via Mason (or otherwise). This is
 > because `zk` has our lsp bundled with it, which `zk-nvim` hooks into. \
 > Additionally, `zk-nvim` will setup and start the LSP server for you, so you
