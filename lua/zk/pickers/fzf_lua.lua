@@ -39,6 +39,7 @@ function M.show_note_picker(notes, options, cb)
       ["--tiebreak"] = "index",
       ["--with-nth"] = 2,
       ["--tabstop"] = 4,
+      ["--header"] = ansi_codes.blue("CTRL-E: create a note with the query as title"),
     },
     -- we rely on `fzf-lua` to open notes in any other case than the default (pressing enter)
     -- to take advantage of the plugin builtin actions like opening in a split
@@ -65,6 +66,10 @@ function M.show_note_picker(notes, options, cb)
       ["ctrl-t"] = function(selected, opts)
         local entries = path_from_selected(selected)
         actions.file_tabedit(entries, opts)
+      end,
+      ["ctrl-e"] = function()
+        local query = require("fzf-lua").config.__resume_data.last_query
+        require("zk").new({ title = query })
       end,
     },
   }, options.fzf_lua or {})
