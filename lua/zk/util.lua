@@ -62,7 +62,6 @@ end
 local function make_range_zk()
   local bufnr = vim.api.nvim_get_current_buf()
   local offset_encoding = get_offset_encoding(bufnr)
-  vim.notify(offset_encoding)
   -- This function has a warning if encoding is not passed
   return vim.lsp.util.make_given_range_params(nil, nil, bufnr, offset_encoding)
 end
