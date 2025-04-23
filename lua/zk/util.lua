@@ -53,6 +53,7 @@ local function get_offset_encoding(bufnr)
       string.format("ZK Client (id: %s) offset_encoding is nil. Do not unset offset_encoding.", zk_client.id),
       error_level
     )
+  else
     offset_encoding = zk_client.offset_encoding
   end
   return offset_encoding
