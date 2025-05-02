@@ -4,20 +4,6 @@
 local vim = vim
 local uv = vim.loop
 
-local function has_new_vim_validate()
-  return pcall(vim.validate, 'test', 'foo', 'string')
-end
-local function validate(args)
-  if has_new_vim_validate() then
-    for name, def in pairs(args) do
-      local value, validator, msg = def[1], def[2], def[3]
-      vim.validate(name, value, validator, msg)
-    end
-  else
-    vim.validate(args)
-  end
-end
-
 local M = {}
 
 -- Some path utilities
@@ -97,7 +83,7 @@ M.path = (function()
 end)()
 
 function M.search_ancestors(startpath, func)
-  validate({ func = { func, "f" } })
+  if type(func) ~= "function" then return end
   if func(startpath) then
     return startpath
   end
