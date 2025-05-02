@@ -2,8 +2,21 @@
 -- NOTE: we need this util until the code from lspconfig is merged into core
 
 local vim = vim
-local validate = vim.validate
 local uv = vim.loop
+
+local function has_new_vim_validate()
+  return pcall(vim.validate, 'test', 'foo', 'string')
+end
+local function validate(args)
+  if has_new_vim_validate() then
+    for name, def in pairs(args) do
+      local value, validator, msg = def[1], def[2], def[3]
+      vim.validate(name, value, validator, msg)
+    end
+  else
+    vim.validate(args)
+  end
+end
 
 local M = {}
 
