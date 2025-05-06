@@ -39,39 +39,12 @@ function M.resolve_notebook_path(bufnr)
   return path
 end
 
-local function get_offset_encoding(bufnr)
-  -- Modified from nvim's vim.lsp.util._get_offset_encoding()
-  vim.validate("bufnr", bufnr, "number", true)
-  local zk_client = vim.lsp.get_clients({ bufnr = bufnr, name = "zk" })[1]
-  local error_level = vim.log.levels.ERROR
-  local offset_encoding --- @type 'utf-8'|'utf-16'|'utf-32'
-  if zk_client == nil then
-    vim.notify_once("No zk client found for this buffer. Using default encoding of utf-16", error_level)
-    offset_encoding = "utf-16"
-  elseif zk_client.offset_encoding == nil then
-    vim.notify_once(
-      string.format("ZK Client (id: %s) offset_encoding is nil. Do not unset offset_encoding.", zk_client.id),
-      error_level
-    )
-  else
-    offset_encoding = zk_client.offset_encoding
-  end
-  return offset_encoding
-end
-
-local function make_range_zk()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local offset_encoding = get_offset_encoding(bufnr)
-  -- This function has a warning if encoding is not passed
-  return vim.lsp.util.make_given_range_params(nil, nil, bufnr, offset_encoding)
-end
-
 ---Makes an LSP location object from the last selection in the current buffer.
 --
 ---@return table LSP location object
 ---@see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#location
 function M.get_lsp_location_from_selection()
-  local params = make_range_zk()
+  local params = vim.lsp.util.make_given_range_params()
   return {
     uri = params.textDocument.uri,
     range = params.range,
@@ -105,7 +78,7 @@ end
 ---@return table LSP location object
 ---@see https://microsoft.github.io/language-server-protocol/specifications/specification-current/#location
 function M.get_lsp_location_from_caret()
-  local params = make_range_zk()
+  local params = vim.lsp.util.make_given_range_params()
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local position = { line = row, character = col }
