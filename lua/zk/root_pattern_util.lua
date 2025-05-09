@@ -91,6 +91,7 @@ function M.search_ancestors(startpath, func)
 
   local guard = 100
   for path in M.path.iterate_parents(startpath) do
+    -- prevent infinite recursion
     guard = guard - 1
     if guard == 0 then
       return
