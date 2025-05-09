@@ -12,11 +12,7 @@ function M.external_client()
   end
 
   local active_clients = {}
-  if vim.fn.has("nvim-0.10") == 1 then
-    active_clients = vim.lsp.get_clients({ name = client_name })
-  else
-    active_clients = vim.lsp.get_active_clients({ name = client_name })
-  end
+  active_clients = vim.lsp.get_clients({ name = client_name })
 
   if next(active_clients) == nil then
     return
@@ -37,7 +33,7 @@ function M.start()
   end
 
   if not client_id then
-    client_id = vim.lsp.start_client(config.options.lsp.config)
+    client_id = vim.lsp.start(config.options.lsp.config)
   end
 end
 
