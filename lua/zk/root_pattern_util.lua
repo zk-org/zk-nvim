@@ -83,13 +83,14 @@ M.path = (function()
 end)()
 
 function M.search_ancestors(startpath, func)
-  if type(func) ~= "function" then return end
+  vim.validate("func", func, "function")
+
   if func(startpath) then
     return startpath
   end
+
   local guard = 100
   for path in M.path.iterate_parents(startpath) do
-    -- Prevent infinite recursion if our algorithm breaks
     guard = guard - 1
     if guard == 0 then
       return
