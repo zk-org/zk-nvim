@@ -2,7 +2,6 @@
 -- NOTE: we need this util until the code from lspconfig is merged into core
 
 local vim = vim
-local validate = vim.validate
 local uv = vim.loop
 
 local M = {}
@@ -80,13 +79,15 @@ M.path = (function()
 end)()
 
 function M.search_ancestors(startpath, func)
-  validate({ func = { func, "f" } })
+  vim.validate("func", func, "function")
+
   if func(startpath) then
     return startpath
   end
+
   local guard = 100
   for path in M.path.iterate_parents(startpath) do
-    -- Prevent infinite recursion if our algorithm breaks
+    -- prevent infinite recursion
     guard = guard - 1
     if guard == 0 then
       return
