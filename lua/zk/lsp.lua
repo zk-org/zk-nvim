@@ -42,7 +42,9 @@ end
 function M.buf_add(bufnr)
   bufnr = bufnr or 0
   M.start()
-  vim.lsp.buf_attach_client(bufnr, client_id)
+  if client_id then
+    vim.lsp.buf_attach_client(bufnr, client_id)
+  end
 end
 
 ---Stops the LSP client managed by this plugin
@@ -56,7 +58,9 @@ end
 
 ---Gets the LSP client managed by this plugin, might be nil
 function M.client()
-  return vim.lsp.get_client_by_id(client_id)
+  if client_id then
+    return vim.lsp.get_client_by_id(client_id)
+  end
 end
 
 return M
