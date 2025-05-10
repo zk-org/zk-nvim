@@ -27,7 +27,15 @@ function M._lsp_buf_auto_add(bufnr)
     return
   end
 
-  if not util.notebook_root(vim.api.nvim_buf_get_name(bufnr)) then
+  local buf_name = vim.api.nvim_buf_get_name(bufnr)
+
+  -- if the buffer has no name (i.e. it is empty)
+  if buf_name == "" then
+    return
+  end
+
+  local buf_dir = vim.fn.fnamemodify(buf_name, ':h')
+  if not util.notebook_root(buf_dir) then
     return
   end
 
