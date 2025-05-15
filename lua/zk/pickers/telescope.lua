@@ -6,6 +6,8 @@ local action_state = require("telescope.actions.state")
 local action_utils = require("telescope.actions.utils")
 local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
+local sorters = require("telescope.sorters")
+local util = require("zk.util")
 
 local M = {}
 
@@ -70,6 +72,7 @@ function M.show_note_picker(notes, options, cb)
       sorter = conf.file_sorter(options),
       previewer = M.make_note_previewer(),
       attach_mappings = function(prompt_bufnr)
+        -- TODO: add an action here to grep the currently displayed notes with ZkGrep.
         actions.select_default:replace(function()
           if options.multi_select then
             local selection = {}
@@ -90,6 +93,69 @@ function M.show_note_picker(notes, options, cb)
       end,
     })
     :find()
+end
+
+function M.show_note_grep_picker(opts)
+  local root = util.resolve_notebook_path(0)
+  local collection = {}
+
+  -- Collect title info
+  require("zk.api").list(root, { select = { "title", "path", "absPath" } }, function(_, notes)
+    for _, note in ipairs(notes) do
+      collection[note.absPath] = note.title or note.path
+    end
+  end)
+
+  local displayer = entry_display.create({
+    separator = " ",
+    items = { {}, {} }, -- title, text
+  })
+
+  local entry_maker = function(line)
+    local filename, lnum, col, text = string.match(line, "([^:]+):(%d+):(%d+):(.*)")
+    lnum, col = tonumber(lnum), tonumber(col)
+    local title = collection[filename] or vim.fn.fnamemodify(filename, ":t")
+    return {
+      filename = filename,
+      lnum = lnum,
+      col = col,
+      text = text,
+      ordinal = title .. ":" .. lnum .. ":" .. col .. ":" .. text,
+      display = function(entry)
+        return displayer({
+          { entry.title, "ZkGrepEntryTitle" },
+          { entry.text, "ZkGrepEntryText" },
+        })
+      end,
+      title = title,
+      value = {
+        filename = filename,
+        lnum = lnum,
+        col = col,
+        text = text,
+        title = title,
+      },
+    }
+  end
+
+  local grep_finder = finders.new_job(function(prompt)
+    if not prompt or prompt == "" then return nil end
+    return {
+      "rg",
+      "--vimgrep",
+      "--no-heading",
+      "--smart-case",
+      prompt,
+      root,
+    }
+  end, entry_maker)
+
+  pickers.new(opts, {
+    prompt_title = "Zk Grep",
+    finder = grep_finder,
+    previewer = conf.grep_previewer(opts),
+    sorter = sorters.highlighter_only(opts),
+  }):find()
 end
 
 function M.show_tag_picker(tags, options, cb)
