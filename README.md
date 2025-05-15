@@ -551,6 +551,62 @@ require("nvim-treesitter.configs").setup({
 })
 ```
 
+
+## Troubleshooting
+
+Paste the following in a file named `init.lua`:
+
+```lua
+-- Redirect Neovim runtime paths to /tmp
+vim.env.XDG_CONFIG_HOME = "/tmp/nvim/config"
+vim.env.XDG_DATA_HOME = "/tmp/nvim/data"
+vim.env.XDG_STATE_HOME = "/tmp/nvim/state"
+vim.env.XDG_CACHE_HOME = "/tmp/nvim/cache"
+
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		lazypath,
+	})
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- Load plugins
+require("lazy").setup({
+	{
+		"zk-org/zk-nvim",
+		config = function()
+			require("zk").setup({
+				lsp = {
+					config = {
+						cmd = { "zk", "lsp", "--log", "/tmp/zk-lsp.log" },
+						name = "zk",
+						on_attach = function()
+                            print("zk lsp attached")
+						end,
+					},
+
+					-- automatically attach buffers in a zk notebook that match the given filetypes
+					auto_attach = {
+						enabled = true,
+						filetypes = { "markdown" },
+					},
+				},
+			})
+		end,
+	},
+})
+```
+
+
+
+
+
 ## nvim-lsp-installer
 
 > Not recommended, instead install the [`zk`](https://github.com/zk-org/zk) CLI
