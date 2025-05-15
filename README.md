@@ -554,7 +554,24 @@ require("nvim-treesitter.configs").setup({
 
 ## Troubleshooting
 
-Paste the following in a file named `init.lua`:
+If there are issues, you can test with a minimal config to rule out other
+players.
+
+Make a new directory, `init-zk` and make a fresh zk notebook. 
+The structure of `init-zk` should look as follows:
+
+```text
+.
+├── init.lua
+└── notebook
+    └── .zk
+        ├── config.toml
+        ├── notebook.db
+        └── templates
+            └── default.md
+```
+
+Paste the following into `init.lua`:
 
 ```lua
 -- Redirect Neovim runtime paths to /tmp
@@ -581,26 +598,18 @@ require("lazy").setup({
 	{
 		"zk-org/zk-nvim",
 		config = function()
-			require("zk").setup({
-				lsp = {
-					config = {
-						cmd = { "zk", "lsp", "--log", "/tmp/zk-lsp.log" },
-						name = "zk",
-						on_attach = function()
-                            print("zk lsp attached")
-						end,
-					},
-
-					-- automatically attach buffers in a zk notebook that match the given filetypes
-					auto_attach = {
-						enabled = true,
-						filetypes = { "markdown" },
-					},
-				},
-			})
+			require("zk").setup()
 		end,
 	},
 })
+```
+
+Then change this line in `.zk/config.toml`
+
+```toml
+[tool]
+# editor = "vim"
+editor = "nvim -u ~/path/to/init-zk/init.lua"
 ```
 
 
