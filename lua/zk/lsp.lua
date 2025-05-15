@@ -56,7 +56,12 @@ end
 
 ---Gets the LSP client managed by this plugin, might be nil
 function M.client()
-  return vim.lsp.get_client_by_id(client_id)
+  if client_id then
+    return vim.lsp.get_client_by_id(client_id)
+  else
+    print("Error: No client attached.")
+    return
+  end
 end
 
 return M

@@ -5,7 +5,9 @@ local M = {}
 ---@param notebook_path string
 ---@return string? root
 function M.notebook_root(notebook_path)
-  return require("zk.root_pattern_util").root_pattern(".zk")(notebook_path)
+  local root_pattern = require("zk.root_pattern_util").root_pattern(".zk")
+  local rp = root_pattern(notebook_path)
+  return rp
 end
 
 ---Try to resolve a notebook path by checking the following locations in that order
