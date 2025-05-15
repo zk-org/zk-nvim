@@ -551,6 +551,71 @@ require("nvim-treesitter.configs").setup({
 })
 ```
 
+
+## Troubleshooting
+
+If there are issues, you can test with a minimal config to rule out other
+players.
+
+Make a new directory, `init-zk` and make a fresh zk notebook. 
+The structure of `init-zk` should look as follows:
+
+```text
+.
+├── init.lua
+└── notebook
+    └── .zk
+        ├── config.toml
+        ├── notebook.db
+        └── templates
+            └── default.md
+```
+
+Paste the following into `init.lua`:
+
+```lua
+-- Redirect Neovim runtime paths to /tmp
+vim.env.XDG_CONFIG_HOME = "/tmp/nvim/config"
+vim.env.XDG_DATA_HOME = "/tmp/nvim/data"
+vim.env.XDG_STATE_HOME = "/tmp/nvim/state"
+vim.env.XDG_CACHE_HOME = "/tmp/nvim/cache"
+
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		lazypath,
+	})
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- Load plugins
+require("lazy").setup({
+	{
+		"zk-org/zk-nvim",
+		config = function()
+			require("zk").setup()
+		end,
+	},
+})
+```
+
+Then change this line in `.zk/config.toml`
+
+```toml
+[tool]
+# editor = "vim"
+editor = "nvim -u ~/path/to/init-zk/init.lua"
+```
+
+
+
+
+
 ## nvim-lsp-installer
 
 > Not recommended, instead install the [`zk`](https://github.com/zk-org/zk) CLI
