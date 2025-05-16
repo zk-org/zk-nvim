@@ -108,7 +108,7 @@ function M.show_note_grep_picker(opts)
 
   local displayer = entry_display.create({
     separator = " ",
-    items = { {}, {} }, -- title, text
+    items = { {}, {}, {}, {}, }, -- title, lnum, col, text
   })
 
   local entry_maker = function(line)
@@ -124,6 +124,7 @@ function M.show_note_grep_picker(opts)
       display = function(entry)
         return displayer({
           { entry.title, "TelescopeResultsIdentifier" },
+          { tostring(entry.lnum) .. ':' .. tostring(entry.col), "TelescopeResultsNumber"},
           { entry.text, "TelescopeResultsNormal" },
         })
       end,
