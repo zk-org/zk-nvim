@@ -96,7 +96,8 @@ function M.show_note_picker(notes, options, cb)
 end
 
 function M.show_note_grep_picker(opts)
-  local root = util.resolve_notebook_path(0)
+  local path = vim.api.nvim_buf_get_name(0)
+  local root = (path ~= "") and util.notebook_root(path) or util.notebook_root(vim.fn.getcwd())
   local collection = {}
 
   -- Collect title info
