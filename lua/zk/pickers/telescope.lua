@@ -124,7 +124,7 @@ function M.show_note_grep_picker(opts)
       display = function(entry)
         return displayer({
           { entry.title, "TelescopeResultsIdentifier" },
-          { tostring(entry.lnum) .. ':' .. tostring(entry.col), "TelescopeResultsNumber"},
+          { tostring(entry.lnum) .. ':' .. tostring(entry.col), "TelescopeResultsLineNr"},
           { entry.text, "TelescopeResultsNormal" },
         })
       end,
