@@ -200,6 +200,11 @@ see what they can do, and learn as you go.
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 :ZkBuffers [{options}]
 
+" Opens a grep notes picker (Currently only available with telescope)
+" params
+"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
+:ZkGrep [{options}]
+
 " Opens a notes picker for the backlinks of the current buffer
 " params
 "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
@@ -353,6 +358,9 @@ require("zk").index(options)
 ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 require("zk").pick_notes(options, picker_options, cb)
+--- Opens a notes picker (grep)
+picker_options.grep = true
+require("zk").pick_notes(options, picker_options, cb)
 ```
 
 ```lua
@@ -435,6 +443,10 @@ Used by the [high-level API](#high-level-api) to display the results of the
 ---@param options? table containing {picker}, {title}, {multi_select} keys
 ---@param cb function
 require("zk.ui").pick_notes(notes, options, cb)
+---Opens a grep note picker
+options.grep = true
+require("zk.ui").pick_notes(notes, options, cb)
+
 ```
 
 ```lua
@@ -466,6 +478,8 @@ vim.api.nvim_set_keymap("n", "<leader>zn", "<Cmd>ZkNew { title = vim.fn.input('T
 
 -- Open notes.
 vim.api.nvim_set_keymap("n", "<leader>zo", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", opts)
+-- Open notes. (grep)
+vim.api.nvim_set_keymap("n", "<leader>zg", "<Cmd>ZkGrep<CR>", opts)
 -- Open notes associated with the selected tags.
 vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
 

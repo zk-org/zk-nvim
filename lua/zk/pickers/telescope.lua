@@ -123,8 +123,8 @@ function M.show_note_grep_picker(opts)
       ordinal = title .. ":" .. lnum .. ":" .. col .. ":" .. text,
       display = function(entry)
         return displayer({
-          { entry.title, "ZkGrepEntryTitle" },
-          { entry.text, "ZkGrepEntryText" },
+          { entry.title, "TelescopeResultsIdentifier" },
+          { entry.text, "TelescopeResultsNormal" },
         })
       end,
       title = title,
