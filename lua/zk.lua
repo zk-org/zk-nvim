@@ -102,7 +102,10 @@ function M.pick_notes(options, picker_options, cb)
 
   if options.grep then
     picker_options.grep = options.grep
-    ui.pick_notes({}, picker_options, cb)
+    api.list(options.notebook_path, options, function(err, notes)
+      assert(not err, tostring(err))
+      ui.pick_notes(notes, picker_options, cb)
+    end)
   else
     api.list(options.notebook_path, options, function(err, notes)
       assert(not err, tostring(err))
@@ -140,6 +143,9 @@ function M.edit(options, picker_options)
     end
     for _, note in ipairs(notes) do
       vim.cmd("e " .. note.absPath)
+      if note.lnum and note.col then
+        vim.api.nvim_win_set_cursor(0, { note.lnum, math.max(note.col - 1, 0) })
+      end
     end
   end)
 end

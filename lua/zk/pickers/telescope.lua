@@ -95,118 +95,34 @@ function M.show_note_picker(notes, options, cb)
     :find()
 end
 
--- function M.show_note_grep_picker(opts)
---   local path = vim.api.nvim_buf_get_name(0)
---   local root = (path ~= "") and util.notebook_root(path) or util.notebook_root(vim.fn.getcwd())
---   local collection = {}
---
---   -- Collect title info
---   require("zk.api").list(root, { select = { "title", "path", "absPath" } }, function(_, notes)
---     for _, note in ipairs(notes) do
---       collection[note.absPath] = note.title or note.path
---     end
---   end)
---
---   local displayer = entry_display.create({
---     separator = " ",
---     items = { {}, {}, {}, }, -- title, lnum:col, text
---   })
---
---   local entry_maker = function(line)
---     local filename, lnum, col, text = string.match(line, "([^:]+):(%d+):(%d+):(.*)")
---     lnum, col = tonumber(lnum), tonumber(col)
---     local title = collection[filename] or vim.fn.fnamemodify(filename, ":t")
---     return {
---       filename = filename,
---       lnum = lnum,
---       col = col,
---       text = text,
---       ordinal = title .. ":" .. lnum .. ":" .. col .. ":" .. text,
---       display = function(entry)
---         return displayer({
---           { entry.title, "TelescopeResultsIdentifier" },
---           { tostring(entry.lnum) .. ':' .. tostring(entry.col), "TelescopeResultsLineNr"},
---           { entry.text, "TelescopeResultsNormal" },
---         })
---       end,
---       title = title,
---       value = {
---         filename = filename,
---         lnum = lnum,
---         col = col,
---         text = text,
---         title = title,
---       },
---     }
---   end
---
---   local function custom_highlighter_only(opts)
---     opts = opts or {}
---     local fzy = opts.fzy_mod or require "telescope.algos.fzy"
---
---     return require("telescope.sorters").Sorter:new {
---       scoring_function = function() return 1 end,
---
---       highlighter = function(_, prompt, display, entry)
---         -- entry から直接フィールド取得（entry_maker で定義しておく）
---         -- print(vim.inspect(entry))
---         local text = entry.text or ""
---         local prefix_len = #display - #text
---
---         local relative_positions = fzy.positions(prompt, text)
---         -- print(prompt, ' | ', text)
---
---         local absolute_positions = {}
---         for i, pos in ipairs(relative_positions) do
---           absolute_positions[i] = pos + prefix_len
---         end
---         -- print(vim.inspect(relative_positions))
---
---         return absolute_positions
---       end,
---     }
---   end
---
---   local grep_finder = finders.new_job(function(prompt)
---     if not prompt or prompt == "" then return nil end
---     return {
---       "rg",
---       "--vimgrep",
---       "--no-heading",
---       "--smart-case",
---       prompt,
---       root,
---     }
---   end, entry_maker)
---
---   pickers.new(opts, {
---     prompt_title = "Zk Grep",
---     finder = grep_finder,
---     previewer = conf.grep_previewer(opts),
---     -- sorter = sorters.highlighter_only(opts),
---     sorter = custom_highlighter_only(opts),
---   }):find()
--- end
+function M.make_note_grep_sorter(opts)
+   -- currently highlighter_only (no sorting)
+   opts = opts or {}
+   local fzy = opts.fzy_mod or require "telescope.algos.fzy"
 
+   return require("telescope.sorters").Sorter:new({
+     scoring_function = function() return 1 end,
 
-function M.show_note_grep_picker(opts)
-  local path = vim.api.nvim_buf_get_name(0)
-  local root = (path ~= "") and util.notebook_root(path) or util.notebook_root(vim.fn.getcwd())
-  local collection = {}
+     highlighter = function(_, prompt, display)
+       local entry_text = display:match("^.-%s%d+:%d+%s(.*)$") or display
+       local prefix_len = #display - #entry_text
+       local relative_positions = fzy.positions(prompt, entry_text)
+       local absolute_positions = {}
+       for i, pos in ipairs(relative_positions) do
+         absolute_positions[i] = pos + prefix_len
+       end
+       return absolute_positions
+     end,
+   })
+end
 
-  -- collect title info
-  require("zk.api").list(root, { select = { "title", "path", "absPath" } }, function(_, notes)
-    for _, note in ipairs(notes) do
-      collection[note.absPath] = note.title or note.path
-    end
-  end)
-
+function M.create_note_grep_entry_maker(collection)
   local displayer = entry_display.create({
     separator = " ",
-    items = { {}, {}, {} }, -- title, lnum:col, text
+    items = { {}, {}, {} },
   })
 
-  local entry_maker = function(line)
+  return function(line)
     local filename, lnum, col, text = string.match(line, "([^:]+):(%d+):(%d+):(.*)")
     lnum, col = tonumber(lnum), tonumber(col)
     local title = collection[filename] or vim.fn.fnamemodify(filename, ":t")
@@ -230,28 +146,22 @@ function M.show_note_grep_picker(opts)
         col = col,
         text = text,
         title = title,
+        absPath = filename,
       },
     }
   end
+end
 
-  local function custom_highlighter_only(opts)
-    opts = opts or {}
-    local fzy = opts.fzy_mod or require "telescope.algos.fzy"
+function M.show_note_grep_picker(notes, options, cb)
+  options = options or {}
+  local path = vim.api.nvim_buf_get_name(0)
+  local root = (path ~= "") and util.notebook_root(path) or util.notebook_root(vim.fn.getcwd())
+  local collection = {}
 
-    return require("telescope.sorters").Sorter:new {
-      scoring_function = function() return 1 end,
+  local telescope_options = vim.tbl_extend("force", { prompt_title = options.title or "Zk Grep" }, options.telescope or {})
 
-      highlighter = function(_, prompt, display)
-        local entry_text = display:match("^.-%s%d+:%d+%s(.*)$") or display
-        local prefix_len = #display - #entry_text
-        local relative_positions = fzy.positions(prompt, entry_text)
-        local absolute_positions = {}
-        for i, pos in ipairs(relative_positions) do
-          absolute_positions[i] = pos + prefix_len
-        end
-        return absolute_positions
-      end,
-    }
+  for _, note in ipairs(notes) do
+    collection[note.absPath] = note.title or note.path
   end
 
   local grep_finder = finders.new_job(function(prompt)
@@ -264,15 +174,37 @@ function M.show_note_grep_picker(opts)
       prompt,
       root,
     }
-  end, entry_maker)
+  end, M.create_note_grep_entry_maker(collection))
 
-  pickers.new(opts, {
-    prompt_title = "Zk Grep",
-    finder = grep_finder,
-    previewer = conf.grep_previewer(opts),
-    sorter = custom_highlighter_only(opts),
-  }):find()
+  pickers
+    .new(telescope_options, {
+      finder = grep_finder,
+      previewer = conf.grep_previewer(options),
+      sorter = M.make_note_grep_sorter(options),
+      attach_mappings = function(prompt_bufnr)
+        actions.select_default:replace(function()
+          if options.multi_select then
+            local selection = {}
+            action_utils.map_selections(prompt_bufnr, function(entry, _)
+              table.insert(selection, entry.value)
+            end)
+            if vim.tbl_isempty(selection) then
+              table.insert(selection, action_state.get_selected_entry().value)
+            end
+            actions.close(prompt_bufnr)
+            cb(selection)
+          else
+            local entry = action_state.get_selected_entry()
+            actions.close(prompt_bufnr)
+            cb(entry and entry.value or nil)
+          end
+        end)
+        return true
+      end,
+    })
+    :find()
 end
+
 
 function M.show_tag_picker(tags, options, cb)
   options = options or {}

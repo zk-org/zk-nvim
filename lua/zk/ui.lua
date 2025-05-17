@@ -20,7 +20,7 @@ function M.pick_notes(notes, options, cb)
       print(":ZkGrep is only usable with Telescope for now. Maybe time for a PR? 😘")
       return
     end
-    require("zk.pickers." .. options.picker).show_note_grep_picker(options, cb)
+    require("zk.pickers." .. options.picker).show_note_grep_picker(notes, options, cb)
   else
     require("zk.pickers." .. options.picker).show_note_picker(notes, options, cb)
   end
