@@ -54,45 +54,38 @@ or
 
 > [!IMPORTANT] 
 > If you have the [zk cli](https://github.com/zk-org/zk) installed,
-> then you _do not need to install `zk lsp`_ via Mason (or otherwise). This is
-> because `zk` has our lsp bundled with it, which `zk-nvim` hooks into. \
-> Additionally, `zk-nvim` will setup and start the LSP server for you, so you
-> _do not_ need to `require("lspconfig").zk.setup()`.
+> then you _do not need to install `zk lsp`_ via Mason (or otherwise). 
 
-Example `lazy.nvim` setup:
+Default `lazy.nvim` setup:
 
 ```lua
 return {
-  "zk-org/zk-nvim"
-  require("zk").setup()
+	"zk-org/zk-nvim",
+	config = function()
+		vim.lsp.enable("zk") -- for neovim 0.11.*
+		require("zk").setup({
+			-- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker",
+			-- or select" (`vim.ui.select`).
+			picker = "select",
+
+			lsp = {
+				-- `config` is passed to `vim.lsp.start(config)`
+				config = {
+					cmd = { "zk", "lsp" },
+					name = "zk",
+					-- on_attach = ...
+					-- etc, see `:h vim.lsp.start()`
+				},
+
+				-- automatically attach buffers in a zk notebook that match the given filetypes
+				auto_attach = {
+					enabled = true,
+					filetypes = { "markdown" },
+				},
+			},
+		})
+	end,
 }
-```
-
-**...which uses the default configuration:**
-
-```lua
-require("zk").setup({
-  -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker",
-  -- or select" (`vim.ui.select`). It's recommended to use "telescope",
-  -- "fzf", "fzf_lua", "minipick", or "snacks_picker".
-  picker = "select",
-
-  lsp = {
-    -- `config` is passed to `vim.lsp.start_client(config)`
-    config = {
-      cmd = { "zk", "lsp" },
-      name = "zk",
-      -- on_attach = ...
-      -- etc, see `:h vim.lsp.start_client()`
-    },
-
-    -- automatically attach buffers in a zk notebook that match the given filetypes
-    auto_attach = {
-      enabled = true,
-      filetypes = { "markdown" },
-    },
-  },
-})
 ```
 
 Note that the `setup` function will not add any key mappings for you. If you
@@ -551,14 +544,13 @@ require("nvim-treesitter.configs").setup({
 })
 ```
 
-
-## Troubleshooting
+## Troubleshooting With a Minimal Config
 
 If there are issues, you can test with a minimal config to rule out other
 players.
 
-Make a new directory, `init-zk` and make a fresh zk notebook. 
-The structure of `init-zk` should look as follows:
+Make a new directory, `init-zk` and make a fresh zk notebook. The structure of
+`init-zk` should look as follows:
 
 ```text
 .
@@ -595,12 +587,16 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Load plugins
 require("lazy").setup({
+  {
+    "neovim/nvim-lspconfig",
+  },
 	{
 		"zk-org/zk-nvim",
 		config = function()
+      vim.lsp.enable("zk") -- required as of neovim 0.11
 			require("zk").setup()
 		end,
-	},
+	}
 })
 ```
 
@@ -610,39 +606,6 @@ Then change this line in `.zk/config.toml`
 [tool]
 # editor = "vim"
 editor = "nvim -u ~/path/to/init-zk/init.lua"
-```
-
-
-
-
-
-## nvim-lsp-installer
-
-> Not recommended, instead install the [`zk`](https://github.com/zk-org/zk) CLI
-> tool and make it available in your `$PATH`.
-
-If you insist to use nvim-lsp-installer for `zk`, the following code snippet
-should guide you on how to setup the `zk` server when installed via
-nvim-lsp-installer.
-
-```lua
-require("nvim-lsp-installer").on_server_ready(function(server)
-  local opts = {
-    -- customize your options as usual
-    --
-    -- on_attach = ...
-    -- etc, see `:h vim.lsp.start_client()`
-  }
-  if server.name == "zk" then
-    require("zk").setup({
-      lsp = {
-        config = vim.tbl_extend("force", server:get_default_options(), opts),
-      },
-    })
-  else
-    server:setup(opts)
-  end
-end)
 ```
 
 ## Telescope Plugin
