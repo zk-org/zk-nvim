@@ -9,7 +9,7 @@ to see it in action.
 
 ## Requirements
 
-> [!WARN]
+> [!WARNING]
 > `zk-nvim` is currently broken with `zk-nvim` 0.4.0 and `nvim` 0.11.0.
 > It's recommended to stay on neovim 0.10.4 for now.
 > [See here](https://github.com/zk-org/zk-nvim/pull/230)
