@@ -1,4 +1,5 @@
 local config = require("zk.config")
+local util = require("zk.util")
 
 local client_id = nil
 
