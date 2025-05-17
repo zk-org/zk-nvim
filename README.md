@@ -9,6 +9,11 @@ to see it in action.
 
 ## Requirements
 
+> [!WARN]
+> `zk-nvim` is currently broken with `zk-nvim` 0.4.0 and `nvim` 0.11.0.
+> It's recommended to stay on neovim 0.10.4 for now.
+> [See here](https://github.com/zk-org/zk-nvim/pull/230)
+
 | `zk-nvim`     | `zk`            | Neovim         |
 | ------------- | --------------- | -------------- |
 | 0.4.0 - HEAD  | >=0.15.1        | >= 0.11.0      |
@@ -62,7 +67,6 @@ Default `lazy.nvim` setup:
 return {
   "zk-org/zk-nvim",
   config = function()
-    vim.lsp.enable("zk") -- for neovim 0.11.*
     require("zk").setup({
       -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker",
       -- or select" (`vim.ui.select`).
@@ -593,7 +597,6 @@ require("lazy").setup({
 	{
 		"zk-org/zk-nvim",
 		config = function()
-      vim.lsp.enable("zk") -- required as of neovim 0.11
 			require("zk").setup()
 		end,
 	}
