@@ -41,7 +41,10 @@ function M.setup(options)
   config.options = vim.tbl_deep_extend("force", config.defaults, options or {})
 
   if config.options.lsp.auto_attach.enabled then
-    setup_lsp_auto_attach()
+    -- setup_lsp_auto_attach()
+    -- FIX: This is a hot fix for #230. If this is the solution, then the
+    -- chain of custom functions from setup_lsp_auto_attach() should be removed
+    vim.lsp.enable("zk")
   end
 
   require("zk.commands.builtin")
