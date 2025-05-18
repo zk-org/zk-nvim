@@ -6,10 +6,11 @@ M.defaults = {
     config = {
       cmd = { "zk", "lsp" },
       name = "zk",
+      filetypes = { "markdown" },
+      root_markers = { ".zk" },
     },
     auto_attach = {
-      enabled = true,
-      filetypes = { "markdown" },
+      enabled = true, -- calls vim.lsp.enable()
     },
   },
 }
