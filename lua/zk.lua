@@ -6,33 +6,6 @@ local util = require("zk.util")
 
 local M = {}
 
-local function setup_lsp_auto_attach()
-  --- NOTE: modified version of code in nvim-lspconfig
-  local trigger
-  local filetypes = config.options.lsp.auto_attach.filetypes
-  if filetypes then
-    trigger = "FileType " .. table.concat(filetypes, ",")
-  else
-    trigger = "BufReadPost *"
-  end
-  M._lsp_buf_auto_add(0)
-  vim.api.nvim_command(string.format("autocmd %s lua require'zk'._lsp_buf_auto_add(0)", trigger))
-end
-
----Automatically called via an |autocmd| if lsp.auto_attach is enabled.
---
----@param bufnr number
-function M._lsp_buf_auto_add(bufnr)
-  if vim.api.nvim_buf_get_option(bufnr, "buftype") == "nofile" then
-    return
-  end
-
-  if not util.notebook_root(vim.api.nvim_buf_get_name(bufnr)) then
-    return
-  end
-
-  lsp.buf_add(bufnr)
-end
 
 ---The entry point of the plugin
 --
@@ -40,11 +13,9 @@ end
 function M.setup(options)
   config.options = vim.tbl_deep_extend("force", config.defaults, options or {})
 
+  vim.lsp.config(config.options.lsp.config.name, config.options.lsp.config)
   if config.options.lsp.auto_attach.enabled then
-    -- setup_lsp_auto_attach()
-    -- FIX: This is a hot fix for #230. If this is the solution, then the
-    -- chain of custom functions from setup_lsp_auto_attach() should be removed
-    vim.lsp.enable("zk")
+    vim.lsp.enable(config.options.lsp.config.name)
   end
 
   require("zk.commands.builtin")
