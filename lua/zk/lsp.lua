@@ -48,7 +48,6 @@ end
 
 ---Gets the LSP client managed by this plugin, might be nil
 function M.client()
-  client_id = M.external_client()
   if client_id then
     return vim.lsp.get_client_by_id(client_id)
   else
