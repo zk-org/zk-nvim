@@ -6,6 +6,20 @@ local util = require("zk.util")
 
 local M = {}
 
+---Automatically called via an |autocmd| if lsp.auto_attach is enabled.
+--
+---@param bufnr number
+function M._lsp_buf_auto_add(bufnr)
+  if vim.api.nvim_buf_get_option(bufnr, "buftype") == "nofile" then
+    return
+  end
+
+  if not util.notebook_root(vim.api.nvim_buf_get_name(bufnr)) then
+    return
+  end
+
+  lsp.buf_add(bufnr)
+end
 
 ---The entry point of the plugin
 --
@@ -16,6 +30,7 @@ function M.setup(options)
   vim.lsp.config(config.options.lsp.config.name, config.options.lsp.config)
   if config.options.lsp.auto_attach.enabled then
     vim.lsp.enable(config.options.lsp.config.name)
+    M._lsp_buf_auto_add(0)
   end
 
   require("zk.commands.builtin")

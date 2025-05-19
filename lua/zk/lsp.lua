@@ -1,4 +1,5 @@
 local config = require("zk.config")
+local util = require("zk.util")
 
 local client_id = nil
 
@@ -35,6 +36,14 @@ function M.start()
   if not client_id then
     client_id = vim.lsp.start(config.options.lsp.config)
   end
+end
+
+---Starts an LSP client if necessary, and attaches the given buffer.
+---@param bufnr number
+function M.buf_add(bufnr)
+  bufnr = bufnr or 0
+  M.start()
+  vim.lsp.buf_attach_client(bufnr, client_id)
 end
 
 ---Stops the LSP client managed by this plugin
