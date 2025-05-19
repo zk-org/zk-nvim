@@ -70,8 +70,9 @@ return {
       lsp = {
         -- `config` is passed to `vim.lsp.start(config)`
         config = {
-          cmd = { "zk", "lsp" },
           name = "zk",
+          cmd = { "zk", "lsp" },
+          filetypes = { "markdown" },
           -- on_attach = ...
           -- etc, see `:h vim.lsp.start()`
         },
@@ -79,7 +80,6 @@ return {
         -- automatically attach buffers in a zk notebook that match the given filetypes
         auto_attach = {
           enabled = true,
-          filetypes = { "markdown" },
         },
       },
     })
