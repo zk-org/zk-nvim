@@ -82,6 +82,11 @@ return {
           enabled = true,
         },
       },
+      buf = {
+        name = {
+          formatter = nil,
+        },
+      },
     })
   end,
 }
@@ -623,4 +628,114 @@ require("telescope").load_extension("zk")
 :Telescope zk notes createdAfter=3\ days\ ago
 :Telescope zk tags
 :Telescope zk tags created=today
+```
+
+## Format buffer name
+
+Buffer name is modifiable, by zk-nvim's option `buf.name.formatter` and buffer plugin's option.
+
+### Setup buffer plugin
+
+Modify buffer plugin's formatter.
+
+Via [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/)
+
+Modify `name_formatter`
+```lua
+require('bufferline').setup({
+  options = {
+    name_formatter = function(buf)
+      if vim.fn.filereadable(buf.path) == 1 then
+        if buf.name:match('%.md$') then
+          local opts = require('zk').get_options()
+          return opts.buf.name.formatter(buf.path)
+        end
+        return nil
+      end
+    end,
+  },
+})
+```
+
+### zk-nvim config
+
+Modify `buf.name.formatter` in zk-nvim's cofig.
+
+#### Sample 1 Show basename without ext
+
+`dir/filename.md` -> `filename`
+```lua
+buf = {
+  name = {
+    formatter = function(filepath)
+      return vim.fn.fnamemodify(filepath, ":t:r")
+    end,
+  },
+},
+
+```
+
+#### Sample 2 Show yaml title
+
+```markdown
+---
+title: title from yaml`
+---
+```
+-> `title from yaml`
+
+Ensure that lua-yaml is installed.
+```bash
+luarocks install lua-yaml
+```
+```lua
+buf = {
+  name = {
+    formatter = function(filepath)
+       local lines = vim.fn.readfile(filepath)
+       local util = require('zk.util')
+       local yaml = util.fetch_yaml(lines)
+       if yaml ~= nil then
+         if yaml.title ~= nil then return yaml.title end
+       end
+       return nil
+    end,
+  },
+},
+```
+
+#### Sample 3 Selected by tag
+
+Branch out depending on whether or not tag exists.
+Need lua-yaml installed above.
+
+```markdown
+---
+title: title from yaml`
+date: 2025-01-01
+tags: [daily, tag1, tag2]
+---
+```
+-> `2025-01-01 title from yaml`
+
+```lua
+buf = {
+  name = {
+    formatter = function(filepath)
+       local lines = vim.fn.readfile(filepath)
+       local util = require('zk.util')
+       local yaml = util.fetch_yaml(lines)
+       if yaml ~= nil then
+          if util.table_has_value(yaml.tags, 'note') then
+             return yaml.title
+          elseif util.table_has_value(yaml.tags, 'daily') then
+             return yaml.date .. ' ' .. yaml.title
+          else
+             return yaml.title
+          end
+       end
+       return nil
+    end,
+  },
+},
 ```
