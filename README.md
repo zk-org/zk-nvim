@@ -637,7 +637,7 @@ The buffer name can be customized, for example by using values defined in the YA
 To enable this feature, all of the following are required:
 - Configure the buffer plugin (e.g. [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/))
 - Set the `buf.name.formatter` option in zk-nvim
-- Ensure that [lua-yaml](https://github.com/exosite/lua-yaml) is installed (for using YAML frontmatter)
+- Ensure that [lyaml](https://github.com/gvvaughan/lyaml) is installed (for using YAML frontmatter)
 
 
 ### Configure The Buffer Plugin
@@ -689,9 +689,15 @@ title: title from yaml`
 ```
 Displayed buffer name: `title from yaml`
 
-Ensure that [lua-yaml](https://github.com/exosite/lua-yaml) is installed.
+Ensure that [lyaml](https://github.com/gvvaughan/lyaml) is installed.
+```vim
+" Check the Lua version used by nvim
+:lua print(_VERSION)
+" Output: lua 5.1
+```
 ```bash
-luarocks install lua-yaml
+# Install lyaml for the corresponding Lua version.
+luarocks --lua-version=5.1 install lyaml
 ```
 ```lua
 buf = {
@@ -712,7 +718,7 @@ buf = {
 #### Switch the format based on tag
 
 Switch the format depending on whether a tag exists.
-Requires [lua-yaml](https://github.com/exosite/lua-yaml), as noted above.
+Requires [lyaml](https://github.com/gvvaughan/lyaml), as noted above.
 
 YAML frontmatter:
 ```markdown
@@ -723,7 +729,7 @@ published: 2024
 tags: [book, thinking, notes]
 ---
 ```
-Displayed buffer name: `Notes That Change Your Mind (John Davis)`
+Displayed buffer name: `Notes That Change Your Mind / John Davis (2024)`
 
 ```lua
 buf = {
@@ -734,7 +740,7 @@ buf = {
       local yaml = util.fetch_yaml(lines)
       if yaml ~= nil then
         if util.table_has_value(yaml.tags, 'book') then
-          return yaml.title .. ' (' .. yaml.author .. ')'
+          return yaml.title .. ' / ' .. yaml.author .. ' (' .. yaml.published .. ')'
         else
           return yaml.title
         end
