@@ -630,17 +630,21 @@ require("telescope").load_extension("zk")
 :Telescope zk tags created=today
 ```
 
-## Format buffer name
+## Customizing Buffer Names
 
-Buffer name is modifiable, by zk-nvim's option `buf.name.formatter` and buffer plugin's option.
+The buffer name can be customized, for example by using values defined in the YAML frontmatter.
 
-### Setup buffer plugin
+To enable this feature, all of the following are required:
+- Configure the buffer plugin (e.g. [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/))
+- Set the `buf.name.formatter` option in zk-nvim
+- Ensure that [lua-yaml](https://github.com/exosite/lua-yaml) is installed (for using YAML frontmatter)
 
-Modify buffer plugin's formatter.
+
+### Configure The Buffer Plugin
 
 Via [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/)
 
-Modify `name_formatter`
+Modify `name_formatter` option:
 ```lua
 require('bufferline').setup({
   options = {
@@ -657,13 +661,13 @@ require('bufferline').setup({
 })
 ```
 
-### zk-nvim config
+### Example Configurations for zk-nvim
 
-Modify `buf.name.formatter` in zk-nvim's cofig.
+#### Show basename without extention
 
-#### Sample 1 Show basename without ext
+Filepath: `dir/filename.md`
+Displayed buffer name: `filename`
 
-`dir/filename.md` -> `filename`
 ```lua
 buf = {
   name = {
@@ -675,16 +679,17 @@ buf = {
 
 ```
 
-#### Sample 2 Show yaml title
+#### Show title from YAML frontmatter
 
+YAML frontmatter:
 ```markdown
 ---
 title: title from yaml`
 ---
 ```
--> `title from yaml`
+Displayed buffer name: `title from yaml`
 
-Ensure that lua-yaml is installed.
+Ensure that [lua-yaml](https://github.com/exosite/lua-yaml) is installed.
 ```bash
 luarocks install lua-yaml
 ```
@@ -692,49 +697,49 @@ luarocks install lua-yaml
 buf = {
   name = {
     formatter = function(filepath)
-       local lines = vim.fn.readfile(filepath)
-       local util = require('zk.util')
-       local yaml = util.fetch_yaml(lines)
-       if yaml ~= nil then
-         if yaml.title ~= nil then return yaml.title end
-       end
-       return nil
+      local lines = vim.fn.readfile(filepath)
+      local util = require('zk.util')
+      local yaml = util.fetch_yaml(lines)
+      if yaml ~= nil then
+        return yaml.title
+      end
+      return nil
     end,
   },
 },
 ```
 
-#### Sample 3 Selected by tag
+#### Switch the format based on tag
 
-Branch out depending on whether or not tag exists.
-Need lua-yaml installed above.
+Switch the format depending on whether a tag exists.
+Requires [lua-yaml](https://github.com/exosite/lua-yaml), as noted above.
 
+YAML frontmatter:
 ```markdown
 ---
-title: title from yaml`
-date: 2025-01-01
-tags: [daily, tag1, tag2]
+title: Notes That Change Your Mind
+author: John Davis
+published: 2024
+tags: [book, thinking, notes]
 ---
 ```
--> `2025-01-01 title from yaml`
+Displayed buffer name: `Notes That Change Your Mind (John Davis)`
 
 ```lua
 buf = {
   name = {
     formatter = function(filepath)
-       local lines = vim.fn.readfile(filepath)
-       local util = require('zk.util')
-       local yaml = util.fetch_yaml(lines)
-       if yaml ~= nil then
-          if util.table_has_value(yaml.tags, 'note') then
-             return yaml.title
-          elseif util.table_has_value(yaml.tags, 'daily') then
-             return yaml.date .. ' ' .. yaml.title
-          else
-             return yaml.title
-          end
-       end
-       return nil
+      local lines = vim.fn.readfile(filepath)
+      local util = require('zk.util')
+      local yaml = util.fetch_yaml(lines)
+      if yaml ~= nil then
+        if util.table_has_value(yaml.tags, 'book') then
+          return yaml.title .. ' (' .. yaml.author .. ')'
+        else
+          return yaml.title
+        end
+      end
+      return nil
     end,
   },
 },
