@@ -154,4 +154,36 @@ function M.get_buffer_paths()
   return paths
 end
 
+---Fetch yaml matter from lines
+--
+---@return table|nil yaml as table
+---@return string|nil err error message
+function M.fetch_yaml(lines)
+   local lyaml = require('lyaml')
+
+   local text = table.concat(lines, '\n')
+   local yaml_start, _ = text:find('^%-%-%-\n(.-)\n%-%-%-', 1)
+   if not yaml_start then return nil, 'No YAML front matter found' end
+
+   local yaml_content = text:match('^%-%-%-\n(.-)\n%-%-%-')
+   if not yaml_content then return nil, 'Failed to extract YAML content' end
+
+   local success, yaml = pcall(lyaml.load, yaml_content)
+   if not success then return nil, 'Failed to parse YAML: ' .. tostring(yaml) end
+
+   return yaml
+end
+
+--- Check if the value is contained in the table
+--
+---@param table table to be searched from
+---@param value string|number search value
+---@return boolean
+function M.table_has_value(table, value)
+   for _, v in ipairs(table) do
+      if v == value then return true end
+   end
+   return false
+end
+
 return M

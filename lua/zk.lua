@@ -21,6 +21,13 @@ function M.setup(options)
   require("zk.commands.builtin")
 end
 
+---Get options
+--
+---@return table Options that merged with user options
+function M.get_options()
+  return config.options
+end
+
 ---Cd into the notebook root
 --
 ---@param options? table
