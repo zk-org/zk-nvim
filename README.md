@@ -759,3 +759,65 @@ require('bufferline').setup({
   },
 })
 ```
+
+
+## Integration with neo-tree
+
+Steps:
+1. Install [lyaml](https://github.com/gvvaughan/lyaml) (See [#install-lyaml](#ensure-that-lyaml-is-installed))
+2. Configure [neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim/))
+
+
+### Configure neo-tree
+
+See `:help neo-tree-renderers` for details.
+
+```lua
+local function custom_name_component(config, node, state)
+  local highlights = require('neo-tree.ui.highlights')
+  local highlight = config.highlight or highlights.FILE_NAME
+
+  if node.type == 'directory' then highlight = highlights.DIRECTORY_NAME end
+  if node:get_depth() == 1 then
+    highlight = highlights.ROOT_NAME
+  else
+    if config.use_git_status_colors == nil or config.use_git_status_colors then
+      local git_status = state.components.git_status({}, node, state)
+      if git_status and git_status.highlight then highlight = git_status.highlight end
+    end
+  end
+
+  if node.type == 'file' then
+    local util = require('zk.util')
+    print(util.notebook_root(node.path))
+    if util.notebook_root(node.path) ~= nil then
+      local lines = vim.fn.readfile(node.path)
+      local yaml = util.fetch_yaml(lines)
+      local title
+      -- print(vim.inspect(node))
+      if yaml ~= nil then
+        if util.table_has_value(yaml.tags, 'book') then
+          title = (yaml.title or '[No title]') .. ' / ' .. (yaml.author or '[No author]') .. ' (' .. (yaml.published or '?') .. ')'
+          return { text = title, highlight = highlight }
+        else
+          title = yaml.title or node.name
+          return { text = title, highlight = highlight }
+        end
+      end
+    end
+  end
+  return { text = node.name, highlight = highlight }
+end
+
+require('neo-tree').setup({
+  filesystem = {
+    components = {
+      name = custom_name_component,
+  },
+  buffers = { -- If you need
+    components = {
+      name = custom_name_component,
+    }
+  }
+})
+```
