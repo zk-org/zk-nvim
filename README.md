@@ -635,12 +635,10 @@ require("telescope").load_extension("zk")
 The buffer names are customizable with the YAML frontmatter.
 
 Steps:
-1. Ensure that [lyaml](https://github.com/gvvaughan/lyaml) is installed
+1. Install [lyaml](https://github.com/gvvaughan/lyaml)
 2. Configure [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/))
-3. Set `buf.name.formatter` option in zk-nvim
 
-
-### Ensure that lyaml is installed
+### Install lyaml
 
 Check the Lua version used by nvim:
 ```vim
@@ -654,28 +652,7 @@ luarocks --lua-version=5.1 install lyaml
 
 ### Configure bufferline
 
-Modify `name_formatter` option:
-```lua
-require('bufferline').setup({
-  options = {
-    name_formatter = function(buf)
-      if vim.fn.filereadable(buf.path) == 1 then
-        local zk_config = require('zk.config')
-        local zk_util = require('zk.util')
-        if zk_util.notebook_root(buf.path) ~= nil then
-          if buf.name:match('%.md$') then
-            local opts = zk_config.options
-            return opts.buf.name.formatter(buf.path)
-          end
-        end
-        return nil
-      end
-    end,
-  },
-})
-```
-
-### Set buf.name.formatter option in zk-nvim
+Modify `name_formatter` option.
 
 Examples:
 
@@ -685,14 +662,22 @@ Filepath: `dir/filename.md`
 Displayed buffer name: `filename`
 
 ```lua
-buf = {
-  name = {
-    formatter = function(filepath)
-      return vim.fn.fnamemodify(filepath, ":t:r")
+require('bufferline').setup({
+  options = {
+    name_formatter = function(buf)
+      if vim.fn.filereadable(buf.path) == 1 then
+        local zk_util = require('zk.util')
+        if zk_util.notebook_root(buf.path) ~= nil then
+          if buf.name:match('%.md$') then
+            local basename = vim.fn.fnamemodify(filepath, ":t:r")
+            return basename
+          end
+        end
+        return nil
+      end
     end,
   },
-},
-
+})
 ```
 
 #### Show title from YAML frontmatter
@@ -708,19 +693,27 @@ title: title from yaml
 Displayed buffer name: `title from yaml`
 
 ```lua
-buf = {
-  name = {
-    formatter = function(filepath)
-      local lines = vim.fn.readfile(filepath)
-      local util = require('zk.util')
-      local yaml = util.fetch_yaml(lines)
-      if yaml ~= nil then
-        return yaml.title
+require('bufferline').setup({
+  options = {
+    name_formatter = function(buf)
+      if vim.fn.filereadable(buf.path) == 1 then
+        local zk_util = require('zk.util')
+        if zk_util.notebook_root(buf.path) ~= nil then
+          if buf.name:match('%.md$') then
+            local lines = vim.fn.readfile(filepath)
+            local yaml = zk_util.fetch_yaml(lines)
+            local basename = vim.fn.fnamemodify(filepath, ":t:r")
+            if yaml ~= nil then
+              return yaml.title or basename
+            end
+            return nil
+          end
+        end
+        return nil
       end
-      return nil
     end,
   },
-},
+})
 ```
 
 #### Switch the format based on tag
@@ -740,21 +733,29 @@ tags: [book, thinking, notes]
 Displayed buffer name: `Notes That Change Your Mind / John Davis (2024)`
 
 ```lua
-buf = {
-  name = {
-    formatter = function(filepath)
-      local lines = vim.fn.readfile(filepath)
-      local util = require('zk.util')
-      local yaml = util.fetch_yaml(lines)
-      if yaml ~= nil then
-        if util.table_has_value(yaml.tags, 'book') then
-          return ( yaml.title or '[No Title]' ) .. ' / ' .. ( yaml.author or '[No Author]' ) .. ' (' .. ( yaml.published or '?' ) .. ')'
-        else
-          return yaml.title
+require('bufferline').setup({
+  options = {
+    name_formatter = function(buf)
+      if vim.fn.filereadable(buf.path) == 1 then
+        local zk_util = require('zk.util')
+        if zk_util.notebook_root(buf.path) ~= nil then
+          if buf.name:match('%.md$') then
+            local lines = vim.fn.readfile(filepath)
+            local yaml = zk_util.fetch_yaml(lines)
+            local basename = vim.fn.fnamemodify(filepath, ":t:r")
+            if yaml ~= nil then
+              if zk_util.table_has_value(yaml.tags, 'book') then
+                return ( yaml.title or '[No Title]' ) .. ' / ' .. ( yaml.author or '[No Author]' ) .. ' (' .. ( yaml.published or '?' ) .. ')'
+              else
+                return yaml.title or basename
+              end
+            end
+            return nil
+          end
         end
+        return nil
       end
-      return nil
     end,
   },
-},
+})
 ```

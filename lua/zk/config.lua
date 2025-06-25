@@ -13,11 +13,6 @@ M.defaults = {
       enabled = true, -- calls vim.lsp.enable()
     },
   },
-  buf = {
-    name = {
-      formatter = nil,
-    },
-  },
 }
 
 M.options = M.defaults -- not necessary, but better code completion
