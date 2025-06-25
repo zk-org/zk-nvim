@@ -630,19 +630,29 @@ require("telescope").load_extension("zk")
 :Telescope zk tags created=today
 ```
 
-## Customizing Buffer Names
+## Integration with bufferline
 
-The buffer name can be customized, for example by using values defined in the YAML frontmatter.
+The buffer names are customizable with the YAML frontmatter.
 
-To enable this feature, all of the following are required:
-- Configure the buffer plugin (e.g. [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/))
-- Set the `buf.name.formatter` option in zk-nvim
-- Ensure that [lyaml](https://github.com/gvvaughan/lyaml) is installed (for using YAML frontmatter)
+Steps:
+1. Ensure that [lyaml](https://github.com/gvvaughan/lyaml) is installed
+2. Configure [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/))
+3. Set `buf.name.formatter` option in zk-nvim
 
 
-### Configure The Buffer Plugin
+### Ensure that lyaml is installed
 
-Via [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/)
+Check the Lua version used by nvim:
+```vim
+:lua print(_VERSION)
+" Output: lua 5.1
+```
+Install lyaml for the corresponding Lua version:
+```bash
+luarocks --lua-version=5.1 install lyaml
+```
+
+### Configure bufferline
 
 Modify `name_formatter` option:
 ```lua
@@ -650,9 +660,13 @@ require('bufferline').setup({
   options = {
     name_formatter = function(buf)
       if vim.fn.filereadable(buf.path) == 1 then
-        if buf.name:match('%.md$') then
-          local opts = require('zk').get_options()
-          return opts.buf.name.formatter(buf.path)
+        local zk_config = require('zk.config')
+        local zk_util = require('zk.util')
+        if zk_util.notebook_root(buf.path) ~= nil then
+          if buf.name:match('%.md$') then
+            local opts = zk_config.options
+            return opts.buf.name.formatter(buf.path)
+          end
         end
         return nil
       end
@@ -661,7 +675,9 @@ require('bufferline').setup({
 })
 ```
 
-### Example Configurations for zk-nvim
+### Set buf.name.formatter option in zk-nvim
+
+Examples:
 
 #### Show basename without extention
 
@@ -681,24 +697,16 @@ buf = {
 
 #### Show title from YAML frontmatter
 
+Requires [lyaml](https://github.com/gvvaughan/lyaml), as noted above.
+
 YAML frontmatter:
 ```markdown
 ---
-title: title from yaml`
+title: title from yaml
 ---
 ```
 Displayed buffer name: `title from yaml`
 
-Ensure that [lyaml](https://github.com/gvvaughan/lyaml) is installed.
-```vim
-" Check the Lua version used by nvim
-:lua print(_VERSION)
-" Output: lua 5.1
-```
-```bash
-# Install lyaml for the corresponding Lua version.
-luarocks --lua-version=5.1 install lyaml
-```
 ```lua
 buf = {
   name = {
@@ -740,7 +748,7 @@ buf = {
       local yaml = util.fetch_yaml(lines)
       if yaml ~= nil then
         if util.table_has_value(yaml.tags, 'book') then
-          return yaml.title .. ' / ' .. yaml.author .. ' (' .. yaml.published .. ')'
+          return ( yaml.title or '[No Title]' ) .. ' / ' .. ( yaml.author or '[No Author]' ) .. ' (' .. ( yaml.published or '?' ) .. ')'
         else
           return yaml.title
         end
