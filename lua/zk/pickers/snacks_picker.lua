@@ -1,13 +1,11 @@
 local M = {}
-
 local H = {}
 
-local snacks = require('snacks')
+local Snacks = require('snacks')
 local snacks_picker = require("snacks.picker")
-local zk_util = require('zk.util')
+local snacks_format = require('snacks.picker.format')
+local util = require('zk.util')
 local uv = vim.uv or vim.loop
-local F = require("snacks.picker.format")
-
 
 M.note_picker_list_api_selection = { "title", "path", "absPath" }
 
@@ -19,81 +17,44 @@ M.show_note_picker = function(notes, opts, cb)
   H.item_picker(notes, opts, cb)
 end
 
--- local snacks = require("snacks")
--- snacks.picker.format["my_format"] = function(item, picker)
---   --@type snacks.picker.Highlight[]
---   local ret = {}
---   local F = require('snacks.picker.format')
---   -- snacks.picker.highlight.format(item, item.line, ret)
---   -- table.insert(ret, { " " })
---   if item.label then
---     ret[#ret + 1] = { item.label, "SnacksPickerLabel" }
---     ret[#ret + 1] = { " ", virtual = true }
---   end
---
---   if item.parent then
---     vim.list_extend(ret, F.tree(item, picker))
---   end
---
---   if item.status then
---     vim.list_extend(ret, F.file_git_status(item, picker))
---   end
---
---   if item.severity then
---     vim.list_extend(ret, F.severity(item, picker))
---   end
---
---   vim.list_extend(ret, F.filename(item, picker))
---
---   if item.comment then
---     table.insert(ret, { item.comment, "SnacksPickerComment" })
---     table.insert(ret, { " " })
---   end
---
---   if item.line then
---     snacks.picker.highlight.format(item, item.line, ret)
---     table.insert(ret, { " " })
---   end
---   print('\nmy_format: \n' .. vim.inspect(ret))
---   return item
--- end
+M.show_grep_picker = function(opts, cb)
+  local path = vim.api.nvim_buf_get_name(0)
+  local root = (path ~= "") and util.notebook_root(path) or util.notebook_root(vim.fn.getcwd()) or vim.fn.getenv("ZK_NOTEBOOK_DIR")
+  if root == nil then
+     Snacks.notify.error('zk root not found.')
+     return
+  end
+  local picker_opts = vim.tbl_deep_extend("force", {
+    format = "zk",
+    cwd = root,
+    sort = { fields = { "score:desc", "idx" } },
+  }, opts.snacks_picker or {})
+  Snacks.picker.grep(picker_opts, cb)
+end
 
--- function M.file(item, picker)
---   local F = require('snacks.picker.format')
---   ---@type snacks.picker.Highlight[]
---   local ret = {}
+M.show_tag_picker = function(tags, opts, cb)
+  opts.snacks_picker = opts.snacks_picker or {}
+  opts.snacks_picker =
+    vim.tbl_deep_extend("keep", { preview = "preview", layout = { preview = false } }, opts.snacks_picker)
+  local width = H.max_note_count(tags)
+  tags = vim.tbl_map(function(tag)
+    local padded_count = H.pad(tag.note_count, width)
+    return {
+      text = string.format(" %s  %s", padded_count, tag.name),
+      value = tag,
+      preview = { text = string.format("%s notes for #%s tag", tag.note_count, tag.name) },
+    }
+  end, tags)
+  H.item_picker(tags, opts, cb)
+end
 
--- TODO: 一番左にアイコンを表示
--- TODO: line:col も表示
--- TODO: file名は非表示
-
--- TODO: REMOVE after rebase from `buf_name_from_yaml` branch
--- local function read_file(path)
---   local fd = uv.fs_open(path, "r", 438)
---   if not fd then return {} end
---   local stat = uv.fs_fstat(fd)
---   local content = uv.fs_read(fd, stat.size, 0)
---   uv.fs_close(fd)
---   if not content then return {} end
---   return vim.split(content, "\n", { plain = true })
--- end
---
--- local function fetch_yaml(lines)
---   local lyaml = require("lyaml")
---   local text = table.concat(lines, "\n")
---   local yaml_content = text:match("^%-%-%-%s*\n(.-)\n%-%-%-")
---   if not yaml_content then return nil, "No YAML found" end
---   local ok, res = pcall(lyaml.load, yaml_content)
---   if not ok then return nil, "YAML parse error" end
---   return res
--- end
-
-
+-- Create a new function that extends builtin `F.filename` with YAML frontmatter title.
+-- https://github.com/folke/snacks.nvim/blob/main/lua/snacks/picker/format.lua
 ---@param item snacks.picker.Item
-function F.zk_filename(item, picker)
-  local path = vim.fs.joinpath(item.cwd, item.file)
-  local lines = zk_util.read_file(path)
-  local yaml = zk_util.fetch_yaml(lines)
+function snacks_format.zk_filename(item, picker)
+  local fullpath = vim.fs.joinpath(item.cwd, item.file)
+  local lines = util.read_file(fullpath)
+  local yaml = util.fetch_yaml(lines)
   ---@type snacks.picker.Highlight[]
   local ret = {}
   if not item.file then
@@ -140,19 +101,9 @@ function F.zk_filename(item, picker)
   end
   local dir_hl = "SnacksPickerDir"
 
-
-  if yaml then
-    if yaml.title then
+  if yaml and yaml.title then
       ret[#ret+1] = { tostring(yaml.title), base_hl }
-      -- ret[#ret+1] = { " " }
-    end
-    -- TODO: Tag を追加したいときはこれ
-    -- if yaml.tags then
-    --   ret[#ret+1] = { "(" .. table.concat(yaml.tags, ", ") .. ")", "Comment" }
-    --   ret[#ret+1] = { "  " }
-    -- end
   else
-    -- ret[#ret+1] = { item.file, "Comment" }
     if picker.opts.formatters.file.filename_only then
       path = vim.fn.fnamemodify(item.file, ":t")
       ret[#ret + 1] = { path, base_hl, field = "file" }
@@ -196,175 +147,16 @@ function F.zk_filename(item, picker)
   return ret
 end
 
--- zk_filename を使う前。削除していい
--- require("snacks").picker.format["zk"] = function(item, picker)
---   local ret = {}
---   if not item.file then return ret end
---   local path = vim.fs.joinpath(item.cwd, item.file)
---   local lines = zk_util.read_file(path)
---   local yaml = zk_util.fetch_yaml(lines)
---   if not yaml then
---     ret[#ret+1] = { item.file, "Comment" }
---   else
---     if yaml.title then
---       ret[#ret+1] = { tostring(yaml.title), "Title" }
---       ret[#ret+1] = { "  " }
---     end
---     -- TODO: Tag を追加したいときはこれ
---     -- if yaml.tags then
---     --   ret[#ret+1] = { "(" .. table.concat(yaml.tags, ", ") .. ")", "Comment" }
---     --   ret[#ret+1] = { "  " }
---     -- end
---   end
---   vim.list_extend(ret, F.zk_filename(item, picker)) -- 通常のファイル表示も追加 TODO: ここで、どっかで追加したカスタムの linecol ? 関数を呼び出すこと
---   if item.line then
---     require('snacks').picker.highlight.format(item, item.line, ret)
---     table.insert(ret, { " " })
---   end
---   return ret
--- end
-
-snacks.picker.format["zk"] = function(item, picker)
+-- Add 'zk' format
+Snacks.picker.format["zk"] = function(item, picker)
   local ret = {}
   if not item.file then return ret end
-  -- local path = vim.fs.joinpath(item.cwd, item.file)
-  -- local lines = zk_util.read_file(path)
-  -- local yaml = zk_util.fetch_yaml(lines)
-  -- if not yaml then
-  --   ret[#ret+1] = { item.file, "Comment" }
-  -- else
-  --   if yaml.title then
-  --     ret[#ret+1] = { tostring(yaml.title), "Title" }
-  --     ret[#ret+1] = { "  " }
-  --   end
-  --   -- TODO: Tag を追加したいときはこれ
-  --   -- if yaml.tags then
-  --   --   ret[#ret+1] = { "(" .. table.concat(yaml.tags, ", ") .. ")", "Comment" }
-  --   --   ret[#ret+1] = { "  " }
-  --   -- end
-  -- end
-  vim.list_extend(ret, F.zk_filename(item, picker))
+  vim.list_extend(ret, snacks_format.zk_filename(item, picker))
   if item.line then
-    snacks.picker.highlight.format(item, item.line, ret) -- line でも text でも一緒
-    -- require('snacks').picker.highlight.format(item, item.text, ret)
+    Snacks.picker.highlight.format(item, item.line, ret)
     table.insert(ret, { " " })
   end
   return ret
-end
-
-M.show_note_grep_picker = function(notes, opts, cb)
-  local cur_path = vim.api.nvim_buf_get_name(0)
-  local notebook_root = zk_util.notebook_root(cur_path)
-  local grep_opts = vim.tbl_deep_extend("force", {
-    format = "zk", -- 'file'
-    cwd = notebook_root,
-    sort = { fields = { "score:desc", "idx" } },
-    confirm = function(picker, item)
-      picker:close()
-      if not opts.multi_select then
-        cb(item)
-      else
-        cb(picker:selected({ fallback = true }))
-      end
-    end,
-    -- TODO: できるかな？
-    transform = function(item)
-      local file, line, col, text = item.text:match("^(.+):(%d+):(%d+):(.*)$")
-      if not file then
-        if not item.text:match("WARNING") then
-          Snacks.notify.error("invalid grep output:\n" .. item.text)
-        end
-        return false
-      else
-        local path = vim.fs.joinpath(item.cwd,item.file)
-        local lines = zk_util.read_file(path)
-        local yaml = zk_util.fetch_yaml(lines)
-        -- item.text = (yaml and yaml.title or file) .. ':' .. line .. ':' .. col .. ' ' .. text
-        item.text = text
-        item.file = file
-        item.pos = { tonumber(line), tonumber(col) - 1 }
-        item.title = yaml and yaml.title or ''
-      end
-    end,
-    matcher = {
-      on_match = function(matcher, item)
-        -- -- if matcher.pattern == "" then return end -- 空文字ならスキップ
-        -- -- local positions = matcher:positions(item)
-        -- local positions = matcher:positions({
-        --   text = item.text,
-        --   title = item.title,
-        --   idx = item.idx,
-        --   score = item.score,
-        -- })
-        -- print(vim.inspect(matcher))
-        -- print(vim.inspect(positions))
-        -- print(vim.inspect(item))
-        -- if positions.title and not positions.text then
-        --   item.score = 0 -- YAML title のみマッチは除外
-        -- end
-        -- if matcher:empty() then return end -- 検索語が空なら処理しない
-
-        -- local positions = matcher:positions({
-        --   text = item.text,
-        --   title = item.title,
-        --   idx = item.idx,
-        --   score = item.score,
-        -- })
-        -- local mods = matcher.Mods
-
-        --
-        -- if positions.title and not positions.text then
-        --   item.score = 0 -- YAML title のみマッチは除外
-        -- end
-
-        -- print(matcher.positions.text)
-
-        -- print('matcher:\n' .. vim.inspect(matcher))
-        -- print('positions:\n' .. vim.inspect(positions))
-        -- print('Mods:\n' .. vim.inspect(mods))
-        -- print('item:\n' .. vim.inspect(item))
-        -- print('matcher:\n' .. vim.inspect(matcher))
-      end
-    },
-    -- matcher = nil
-  }, opts.snacks_picker or {})
-  snacks.picker.grep(grep_opts, cb)
-end
-
--- -- Without YAML title version
--- M.show_note_grep_picker = function(notes, opts, cb)
---   local cur_path = vim.api.nvim_buf_get_name(0)
---   local notebook_root = zk_util.notebook_root(cur_path)
---   local grep_opts = vim.tbl_deep_extend("force", {
---     format = "file",
---     cwd = notebook_root,
---     sort = { fields = { "score:desc", "idx" } },
---     confirm = function(picker, item)
---       picker:close()
---       if not opts.multi_select then
---         cb(item)
---       else
---         cb(picker:selected({ fallback = true }))
---       end
---     end,
---   }, opts.snacks_picker or {})
---   snacks.picker.grep(grep_opts, cb)
--- end
-
-M.show_tag_picker = function(tags, opts, cb)
-  opts.snacks_picker = opts.snacks_picker or {}
-  opts.snacks_picker =
-    vim.tbl_deep_extend("keep", { preview = "preview", layout = { preview = false } }, opts.snacks_picker)
-  local width = H.max_note_count(tags)
-  tags = vim.tbl_map(function(tag)
-    local padded_count = H.pad(tag.note_count, width)
-    return {
-      text = string.format(" %s  %s", padded_count, tag.name),
-      value = tag,
-      preview = { text = string.format("%s notes for #%s tag", tag.note_count, tag.name) },
-    }
-  end, tags)
-  H.item_picker(tags, opts, cb)
 end
 
 H.item_picker = function(items, opts, cb)
