@@ -159,31 +159,50 @@ end
 ---@return table|nil yaml as table
 ---@return string|nil err error message
 function M.fetch_yaml(lines)
-   local lyaml = require('lyaml')
+  local lyaml = require("lyaml")
 
-   local text = table.concat(lines, '\n')
-   local yaml_start, _ = text:find('^%-%-%-\n(.-)\n%-%-%-', 1)
-   if not yaml_start then return nil, 'No YAML front matter found' end
+  local text = table.concat(lines, "\n")
+  local yaml_start, _ = text:find("^%-%-%-\n(.-)\n%-%-%-", 1)
+  if not yaml_start then
+    return nil, "No YAML front matter found"
+  end
 
-   local yaml_content = text:match('^%-%-%-\n(.-)\n%-%-%-')
-   if not yaml_content then return nil, 'Failed to extract YAML content' end
+  local yaml_content = text:match("^%-%-%-\n(.-)\n%-%-%-")
+  if not yaml_content then
+    return nil, "Failed to extract YAML content"
+  end
 
-   local success, yaml = pcall(lyaml.load, yaml_content)
-   if not success then return nil, 'Failed to parse YAML: ' .. tostring(yaml) end
+  local success, yaml = pcall(lyaml.load, yaml_content)
+  if not success then
+    return nil, "Failed to parse YAML: " .. tostring(yaml)
+  end
 
-   return yaml
+  return yaml
 end
 
---- Check if the value is contained in the table
+---Check if all the values are contained in the table
+---** supports only flat (one level) table **
 --
----@param table table to be searched from
----@param value string|number search value
+---@param tbl table to be searched from
+---@param values any|any[] search values
 ---@return boolean
-function M.table_has_value(table, value)
-   for _, v in ipairs(table) do
-      if v == value then return true end
-   end
-   return false
+function M.table_contains(tbl, values)
+  if type(values) ~= "table" then
+    values = { values }
+  end
+  for _, value in ipairs(values) do
+    local found = false
+    for _, target in ipairs(tbl) do
+      if target == value then
+        found = true
+        break
+      end
+    end
+    if not found then
+      return false
+    end
+  end
+  return true
 end
 
 return M

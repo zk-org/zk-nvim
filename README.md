@@ -744,7 +744,7 @@ require('bufferline').setup({
             local yaml = zk_util.fetch_yaml(lines)
             local basename = vim.fn.fnamemodify(filepath, ":t:r")
             if yaml ~= nil then
-              if zk_util.table_has_value(yaml.tags, 'book') then
+              if zk_util.table_contains(yaml.tags, 'book') then
                 return ( yaml.title or '[No Title]' ) .. ' / ' .. ( yaml.author or '[No Author]' ) .. ' (' .. ( yaml.published or '?' ) .. ')'
               else
                 return yaml.title or basename
@@ -794,7 +794,7 @@ local function custom_name_component(config, node, state)
       local yaml = util.fetch_yaml(lines)
       local title
       if yaml ~= nil then
-        if util.table_has_value(yaml.tags, 'book') then
+        if util.table_contains(yaml.tags, 'book') then
           title = (yaml.title or '[No title]') .. ' / ' .. (yaml.author or '[No author]') .. ' (' .. (yaml.published or '?') .. ')'
           return { text = title, highlight = highlight }
         else
