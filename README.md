@@ -699,7 +699,7 @@ require('bufferline').setup({
       if vim.fn.filereadable(buf.path) == 1 then
         local zk_util = require('zk.util')
         if zk_util.notebook_root(buf.path) ~= nil then
-          if buf.name:match('%.md$') then
+          if buf.name:match('%.md$') and not buf.path:match('%.zk') then
             local lines = vim.fn.readfile(filepath)
             local yaml = zk_util.fetch_yaml(lines)
             local basename = vim.fn.fnamemodify(filepath, ":t:r")
@@ -739,7 +739,7 @@ require('bufferline').setup({
       if vim.fn.filereadable(buf.path) == 1 then
         local zk_util = require('zk.util')
         if zk_util.notebook_root(buf.path) ~= nil then
-          if buf.name:match('%.md$') then
+          if buf.name:match('%.md$') and not buf.path:match('%.zk') then
             local lines = vim.fn.readfile(filepath)
             local yaml = zk_util.fetch_yaml(lines)
             local basename = vim.fn.fnamemodify(filepath, ":t:r")
@@ -789,12 +789,10 @@ local function custom_name_component(config, node, state)
 
   if node.type == 'file' then
     local util = require('zk.util')
-    print(util.notebook_root(node.path))
-    if util.notebook_root(node.path) ~= nil then
+    if util.notebook_root(node.path) ~= nil and not node.path:match('%.zk') then
       local lines = vim.fn.readfile(node.path)
       local yaml = util.fetch_yaml(lines)
       local title
-      -- print(vim.inspect(node))
       if yaml ~= nil then
         if util.table_has_value(yaml.tags, 'book') then
           title = (yaml.title or '[No title]') .. ' / ' .. (yaml.author or '[No author]') .. ' (' .. (yaml.published or '?') .. ')'
