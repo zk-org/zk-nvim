@@ -1,10 +1,10 @@
 local M = {}
 local H = {}
 
-local Snacks = require('snacks')
+local Snacks = require("snacks")
 local snacks_picker = require("snacks.picker")
-local snacks_format = require('snacks.picker.format')
-local util = require('zk.util')
+local snacks_format = require("snacks.picker.format")
+local util = require("zk.util")
 local uv = vim.uv or vim.loop
 
 M.note_picker_list_api_selection = { "title", "path", "absPath" }
@@ -19,10 +19,12 @@ end
 
 M.show_grep_picker = function(opts, cb)
   local path = vim.api.nvim_buf_get_name(0)
-  local root = (path ~= "") and util.notebook_root(path) or util.notebook_root(vim.fn.getcwd()) or vim.fn.getenv("ZK_NOTEBOOK_DIR")
+  local root = (path ~= "") and util.notebook_root(path)
+    or util.notebook_root(vim.fn.getcwd())
+    or vim.fn.getenv("ZK_NOTEBOOK_DIR")
   if root == nil then
-     Snacks.notify.error('zk root not found.')
-     return
+    Snacks.notify.error("zk root not found.")
+    return
   end
   local picker_opts = vim.tbl_deep_extend("force", {
     format = "zk",
@@ -53,15 +55,16 @@ end
 ---@param item snacks.picker.Item
 function snacks_format.zk_filename(item, picker)
   local fullpath = vim.fs.joinpath(item.cwd, item.file)
-  local lines = util.read_file(fullpath)
-  local yaml = util.fetch_yaml(lines)
+  local yaml = util.load_yaml(fullpath)
   ---@type snacks.picker.Highlight[]
   local ret = {}
   if not item.file then
     return ret
   end
+  -- print(vim.inspect(item))
   local path = Snacks.picker.util.path(item) or item.file
-  path = Snacks.picker.util.truncpath(path, picker.opts.formatters.file.truncate or 40, { cwd = picker:cwd() })
+  path =
+    Snacks.picker.util.truncpath(path, picker.opts.formatters.file.truncate or 40, { cwd = picker:cwd() })
   local name, cat = path, "file"
   if item.buf and vim.api.nvim_buf_is_loaded(item.buf) then
     name = vim.bo[item.buf].filetype
@@ -102,7 +105,7 @@ function snacks_format.zk_filename(item, picker)
   local dir_hl = "SnacksPickerDir"
 
   if yaml and yaml.title then
-      ret[#ret+1] = { tostring(yaml.title), base_hl }
+    ret[#ret + 1] = { tostring(yaml.title), base_hl }
   else
     if picker.opts.formatters.file.filename_only then
       path = vim.fn.fnamemodify(item.file, ":t")
@@ -150,7 +153,9 @@ end
 -- Add 'zk' format
 Snacks.picker.format["zk"] = function(item, picker)
   local ret = {}
-  if not item.file then return ret end
+  if not item.file then
+    return ret
+  end
   vim.list_extend(ret, snacks_format.zk_filename(item, picker))
   if item.line then
     Snacks.picker.highlight.format(item, item.line, ret)

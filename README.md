@@ -714,8 +714,7 @@ require('bufferline').setup({
         local zk_util = require('zk.util')
         if zk_util.notebook_root(buf.path) ~= nil then
           if buf.name:match('%.md$') and not buf.path:match('%.zk') then
-            local lines = vim.fn.readfile(filepath)
-            local yaml = zk_util.fetch_yaml(lines)
+            local yaml = zk_util.load_yaml(filepath)
             local basename = vim.fn.fnamemodify(filepath, ":t:r")
             if yaml ~= nil then
               return yaml.title or basename
