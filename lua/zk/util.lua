@@ -5,7 +5,9 @@ local M = {}
 ---@param notebook_path string
 ---@return string? root
 function M.notebook_root(notebook_path)
-  return require("zk.root_pattern_util").root_pattern(".zk")(notebook_path)
+  local root_pattern = require("zk.root_pattern_util").root_pattern(".zk")
+  local rp = root_pattern(notebook_path)
+  return rp
 end
 
 ---Try to resolve a notebook path by checking the following locations in that order
@@ -151,3 +153,66 @@ function M.get_buffer_paths()
 
   return paths
 end
+
+---Parse yaml frontmatter from lines
+--
+---@return table|nil yaml as table
+---@return string|nil err error message
+function M.parse_yaml(lines)
+  local lyaml = require("lyaml")
+
+  local text = table.concat(lines, "\n")
+  local yaml_start, _ = text:find("^%-%-%-\n(.-)\n%-%-%-", 1)
+  if not yaml_start then
+    return nil, "No YAML front matter found"
+  end
+
+  local yaml_content = text:match("^%-%-%-\n(.-)\n%-%-%-")
+  if not yaml_content then
+    return nil, "Failed to extract YAML content"
+  end
+
+  local success, yaml = pcall(lyaml.load, yaml_content)
+  if not success then
+    return nil, "Failed to parse YAML: " .. tostring(yaml)
+  end
+
+  return yaml
+end
+
+---Load yaml frontmatter from path
+--
+---@return table|nil yaml as table
+---@return string|nil err error message
+function M.load_yaml(path)
+  local lines = vim.fn.readfile(path)
+  local yaml, err = M.parse_yaml(lines)
+  return yaml, err
+end
+
+---Check if all the values are contained in the table
+---** supports only flat (one level) table **
+--
+---@param tbl table to be searched from
+---@param values any|any[] search values
+---@return boolean
+function M.table_contains(tbl, values)
+  if type(values) ~= "table" then
+    values = { values }
+  end
+  for _, value in ipairs(values) do
+    local found = false
+    for _, target in ipairs(tbl) do
+      if target == value then
+        found = true
+        break
+      end
+    end
+    if not found then
+      return false
+    end
+  end
+  return true
+end
+
+return M
