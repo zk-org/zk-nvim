@@ -154,11 +154,11 @@ function M.get_buffer_paths()
   return paths
 end
 
----Fetch yaml matter from lines
+---Parse yaml frontmatter from lines
 --
 ---@return table|nil yaml as table
 ---@return string|nil err error message
-function M.fetch_yaml(lines)
+function M.parse_yaml(lines)
   local lyaml = require("lyaml")
 
   local text = table.concat(lines, "\n")
@@ -178,6 +178,16 @@ function M.fetch_yaml(lines)
   end
 
   return yaml
+end
+
+---Load yaml frontmatter from path
+--
+---@return table|nil yaml as table
+---@return string|nil err error message
+function M.load_yaml(path)
+  local lines = vim.fn.readfile(path)
+  local yaml, err = M.parse_yaml(lines)
+  return yaml, err
 end
 
 ---Check if all the values are contained in the table

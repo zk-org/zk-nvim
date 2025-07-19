@@ -740,8 +740,7 @@ require('bufferline').setup({
         local zk_util = require('zk.util')
         if zk_util.notebook_root(buf.path) ~= nil then
           if buf.name:match('%.md$') and not buf.path:match('%.zk') then
-            local lines = vim.fn.readfile(filepath)
-            local yaml = zk_util.fetch_yaml(lines)
+            local yaml = zk_util.load_yaml(filepath)
             local basename = vim.fn.fnamemodify(filepath, ":t:r")
             if yaml ~= nil then
               if zk_util.table_contains(yaml.tags, 'book') then
@@ -770,52 +769,91 @@ Steps:
 
 ### Configure neo-tree
 
-See `:help neo-tree-renderers` for details.
+reffers:
+- `:h neo-tree-custom-components` or [Github neo-tree-custom-components](https://github.com/nvim-neo-tree/neo-tree.nvim/blob/b85cc7611ff8fb443b0a1591c53669ead195a826/doc/neo-tree.txt#L1811)
+- `:h neo-tree-renderers`
+
+Display name:
+* zk files -> `yaml.title`
+* zk files with `book` tag -> `yaml.title / yaml.author (yaml.published) filename`
+
+Sorting:
+* Ascending by `dir/yaml.title` or `path`
 
 ```lua
-local function custom_name_component(config, node, state)
-  local highlights = require('neo-tree.ui.highlights')
-  local highlight = config.highlight or highlights.FILE_NAME
-
-  if node.type == 'directory' then highlight = highlights.DIRECTORY_NAME end
-  if node:get_depth() == 1 then
-    highlight = highlights.ROOT_NAME
-  else
-    if config.use_git_status_colors == nil or config.use_git_status_colors then
-      local git_status = state.components.git_status({}, node, state)
-      if git_status and git_status.highlight then highlight = git_status.highlight end
-    end
-  end
-
-  if node.type == 'file' then
-    local util = require('zk.util')
-    if util.notebook_root(node.path) ~= nil and not node.path:match('%.zk') then
-      local lines = vim.fn.readfile(node.path)
-      local yaml = util.fetch_yaml(lines)
-      local title
-      if yaml ~= nil then
-        if util.table_contains(yaml.tags, 'book') then
-          title = (yaml.title or '[No title]') .. ' / ' .. (yaml.author or '[No author]') .. ' (' .. (yaml.published or '?') .. ')'
-          return { text = title, highlight = highlight }
-        else
-          title = yaml.title or node.name
-          return { text = title, highlight = highlight }
-        end
-      end
-    end
-  end
-  return { text = node.name, highlight = highlight }
-end
-
 require('neo-tree').setup({
   filesystem = {
     components = {
-      name = custom_name_component,
+      name = function(config, node, state)
+        -- from built-in 'name' function
+        local highlights = require('neo-tree.ui.highlights')
+        local highlight = config.highlight or highlights.FILE_NAME
+      
+        if node.type == 'directory' then highlight = highlights.DIRECTORY_NAME end
+        if node:get_depth() == 1 then
+          highlight = highlights.ROOT_NAME
+        else
+          if config.use_git_status_colors == nil or config.use_git_status_colors then
+            local git_status = state.components.git_status({}, node, state)
+            if git_status and git_status.highlight then highlight = git_status.highlight end
+          end
+        end
+        -- customized here
+        if node.type == 'file' then
+          local zk_util = require('zk.util')
+          if zk_util.notebook_root(node.path) ~= nil and not node.path:match('%.zk') then
+            local yaml = zk_util.load_yaml(node.path)
+            if yaml ~= nil then
+              if yaml.title then
+                if zk_util.table_contains(yaml.tags, 'book') then -- if has 'book' tag
+                  local book_title = (yaml.title or '[No title]') .. ' / ' .. (yaml.author or '[No author]')
+                  local published = yaml.published or '?'
+                  -- title '/' author + published + filename
+                  return { { text = book_title, highlight = highlight }, { text = published, highlight = 'Comment'},  { text = node.name, highlight = 'NeoTreeDimText' } }
+                else
+                  -- title + filename
+                  return { { text = yaml.title, highlight = highlight }, { text = node.name, highlight = 'NeoTreeDimText' } }
+                end
+              end
+            end
+          end
+        end
+        return { text = node.name, highlight = highlight }
+      end
+    },
   },
-  buffers = { -- If you need
-    components = {
-      name = custom_name_component,
-    }
-  }
+  sort_function = function(a, b)
+    -- neo-tree keeps additional fields in a, b nodes (e.g. a.yaml, b.compare_text)
+    local zk_util = require('zk.util')
+
+    local function add_yaml(node)
+      if node.ext == 'md' and not node.yaml and not node.path:match('%.zk') then
+        local yaml = zk_util.load_yaml(node.path)
+        if yaml and type(yaml) == 'table' and next(yaml) then node['yaml'] = yaml end
+      end
+    end
+
+    local function add_compare_text(node)
+      if node.compare_text == nil then
+        if node.yaml and node.yaml.title then
+          local dir_name = vim.fs.dirname(node.path)
+          node.compare_text = vim.fs.joinpath(dir_name, node.yaml.title)
+        end
+      end
+    end
+
+    if a.type == b.type then
+      add_yaml(a)
+      add_yaml(b)
+      add_compare_text(a)
+      add_compare_text(b)
+      return (a.compare_text or a.path) < (b.compare_text or b.path)
+    else
+      return a.type < b.type
+    end
+  end
 })
+
 ```
+
+
