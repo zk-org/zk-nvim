@@ -794,10 +794,14 @@ Sorting:
 * Ascending by `dir/yaml.title` or `path`
 
 ```lua
+local zk_util = require('zk.util')
+local zk_root_cache -- To avoid overhead
+
 require('neo-tree').setup({
   filesystem = {
     components = {
       name = function(config, node, state)
+
         -- from built-in 'name' function
         local highlights = require('neo-tree.ui.highlights')
         local highlight = config.highlight or highlights.FILE_NAME
@@ -811,10 +815,26 @@ require('neo-tree').setup({
             if git_status and git_status.highlight then highlight = git_status.highlight end
           end
         end
-        -- customized here
+
+        -- customized from here
+        local function contains_dir(path, dir_name)
+          for dir in vim.fs.parents(path) do
+            if vim.fs.basename(dir) == dir_name then return true end
+          end
+          return false
+        end
+
         if node.type == 'file' then
-          local zk_util = require('zk.util')
-          if zk_util.notebook_root(node.path) ~= nil and not node.path:match('%.zk') then
+          local zk_root
+
+          if zk_root_cache == nil or not string.match(node.path, zk_root_cache) then
+            zk_root = zk_util.notebook_root(node.path)
+            zk_root_cache = zk_root
+          else
+            zk_root = zk_root_cache -- reuse cache
+          end
+
+          if (zk_root ~= nil) and not contains_dir(node.path, '.zk') then
             local yaml = zk_util.load_yaml(node.path)
             if yaml ~= nil then
               if yaml.title then
