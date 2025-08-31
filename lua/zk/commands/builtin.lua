@@ -68,8 +68,7 @@ commands.add("ZkBuffers", function(options)
 end)
 
 commands.add("ZkGrep", function(options)
-  options = options or {}
-  options.grep = true
+  options = vim.tbl_extend("force", { grep = true }, options or {})
   zk.edit(options, { title = "Zk Grep" })
 end)
 

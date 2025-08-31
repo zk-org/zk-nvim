@@ -72,7 +72,6 @@ function M.show_note_picker(notes, options, cb)
       sorter = conf.file_sorter(options),
       previewer = M.make_note_previewer(),
       attach_mappings = function(prompt_bufnr)
-        -- TODO: add an action here to grep the currently displayed notes with ZkGrep.
         actions.select_default:replace(function()
           if options.multi_select then
             local selection = {}

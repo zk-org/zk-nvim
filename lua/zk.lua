@@ -6,7 +6,6 @@ local util = require("zk.util")
 
 local M = {}
 
-
 ---The entry point of the plugin
 --
 ---@param options? table user configuration options
@@ -72,21 +71,23 @@ end
 ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 function M.pick_notes(options, picker_options, cb)
-  options = vim.tbl_extend("force", { select = ui.get_pick_notes_list_api_selection(picker_options) }, options or {})
+  options = vim.tbl_extend("force", {
+    select = ui.get_pick_notes_list_api_selection(picker_options or {}),
+  }, options or {})
+  api.list(options.notebook_path, options, function(err, notes)
+    assert(not err, tostring(err))
+    ui.pick_notes(notes, picker_options, cb)
+  end)
+end
 
-  if options.grep then
-    picker_options.grep = options.grep
-    api.list(options.notebook_path, options, function(err, notes)
-      assert(not err, tostring(err))
-      ui.pick_notes(notes, picker_options, cb)
-    end)
-  else
-    api.list(options.notebook_path, options, function(err, notes)
-      assert(not err, tostring(err))
-      ui.pick_notes(notes, picker_options, cb)
-    end)
-  end
-
+---Opens a grep picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see zk.ui.grep_notes
+function M.grep_notes(options, picker_options, cb)
+  ui.grep_notes(options, picker_options, cb)
 end
 
 ---Opens a tags picker, and calls the callback with the selection
@@ -111,7 +112,7 @@ end
 ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 function M.edit(options, picker_options)
-  M.pick_notes(options, picker_options, function(notes)
+  function cb(notes)
     if picker_options and picker_options.multi_select == false then
       notes = { notes }
     end
@@ -121,7 +122,13 @@ function M.edit(options, picker_options)
         vim.api.nvim_win_set_cursor(0, { note.lnum, math.max(note.col - 1, 0) })
       end
     end
-  end)
+  end
+
+  if options and options.grep and options.grep == true then
+    M.grep_notes(options, picker_options, cb)
+  else
+    M.pick_notes(options, picker_options, cb)
+  end
 end
 
 return M

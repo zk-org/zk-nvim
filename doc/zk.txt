@@ -164,6 +164,11 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     :ZkNotes [{options}]
+
+    " Opens a notes grep picker
+    " params
+    "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
+    :ZkGrep [{options}]
 <
     " Opens a notes picker for active buffers (showing notebook files only).
     " params

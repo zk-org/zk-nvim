@@ -18,19 +18,13 @@ M.show_note_picker = function(notes, opts, cb)
 end
 
 M.show_grep_picker = function(opts, cb)
-  local path = vim.api.nvim_buf_get_name(0)
-  local root = (path ~= "") and util.notebook_root(path)
-    or util.notebook_root(vim.fn.getcwd())
-    or vim.fn.getenv("ZK_NOTEBOOK_DIR")
-  if root == nil then
-    Snacks.notify.error("zk root not found.")
-    return
-  end
   local picker_opts = vim.tbl_deep_extend("force", {
     format = "zk",
-    cwd = root,
+    cwd = opts.notebook_path,
+    title = opts.title or "Zk Grep",
     sort = { fields = { "score:desc", "idx" } },
   }, opts.snacks_picker or {})
+
   Snacks.picker.grep(picker_opts, cb)
 end
 
@@ -61,7 +55,6 @@ function snacks_format.zk_filename(item, picker)
   if not item.file then
     return ret
   end
-  -- print(vim.inspect(item))
   local path = Snacks.picker.util.path(item) or item.file
   path =
     Snacks.picker.util.truncpath(path, picker.opts.formatters.file.truncate or 40, { cwd = picker:cwd() })

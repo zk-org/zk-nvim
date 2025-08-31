@@ -12,18 +12,31 @@ function M.pick_notes(notes, options, cb)
     "force",
     { title = "Zk Notes", picker = config.options.picker, multi_select = true },
     config.options.picker_options or {},
-    options or {}
+    options or {},
+    options.notebook_path and { notebook_path = options.notebook_path } or {}
   )
+  require("zk.pickers." .. options.picker).show_note_picker(notes, options, cb)
+end
 
-  if options.grep ~= nil then
-    if options.picker ~= "telescope" and options.picker ~= 'snacks_picker' then
-      print(":ZkGrep is only usable with telescope and snacks_picker.")
-      return
-    end
-    require("zk.pickers." .. options.picker).show_grep_picker(options, cb)
-  else
-    require("zk.pickers." .. options.picker).show_note_picker(notes, options, cb)
+---Opens a grep picker
+--
+---@param options? table containing {notebook_path}, {picker}, {multi_select} keys
+---@param picker_options? table
+---@param cb function
+function M.grep_notes(options, picker_options, cb)
+  options = vim.tbl_extend(
+    "force",
+    { title = "Zk Grep", picker = config.options.picker, multi_select = true },
+    config.options.picker_options or {},
+    options or {},
+    picker_options or {},
+    options.notebook_path and { notebook_path = options.notebook_path } or {}
+  )
+  if options.picker ~= "telescope" and options.picker ~= "snacks_picker" then
+    print(":ZkGrep is only usable with telescope and snacks_picker.")
+    return
   end
+  require("zk.pickers." .. options.picker).show_grep_picker(options, cb)
 end
 
 ---Opens a tags picker
