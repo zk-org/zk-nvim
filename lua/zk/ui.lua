@@ -18,7 +18,7 @@ function M.pick_notes(notes, options, cb)
   require("zk.pickers." .. options.picker).show_note_picker(notes, options, cb)
 end
 
----Opens a grep picker
+---Opens a notes grep picker
 --
 ---@param options? table containing {notebook_path}, {picker}, {multi_select} keys
 ---@param picker_options? table
