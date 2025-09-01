@@ -668,33 +668,40 @@ require("telescope").load_extension("zk")
 :Telescope zk tags created=today
 ```
 
-## Integration with bufferline
+# Integrations
 
-The buffer names are customizable with the YAML frontmatter.
 
-Steps:
-1. Install [lyaml](https://github.com/gvvaughan/lyaml)
-2. Configure [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/))
+How to integrate with nvim plugins, like bufferline, neo-tree.
 
-### Install lyaml
 
-Check the Lua version used by nvim:
+## Install lyaml
+
+Below integrations require [lyaml](https://github.com/gvvaughan/lyaml) installed.
+
+1. Check the Lua version used by nvim:
 ```vim
 :lua print(_VERSION)
 " Output: lua 5.1
 ```
-Install lyaml for the corresponding Lua version:
+2. Install lyaml for the corresponding Lua version:
 ```bash
 luarocks --lua-version=5.1 install lyaml
 ```
 
+
+## Integrating with bufferline
+
+The buffer names can be replaced with the YAML frontmatter.
+
+Ensure that lyaml is installed. (See [Install lyaml](#install-lyaml))
+
+
 ### Configure bufferline
 
-Modify `name_formatter` option.
+Modify `name_formatter` option in bufferline.
 
-Examples:
 
-#### Show basename without extention
+#### Example 1. Show basename
 
 Filepath: `dir/filename.md`
 Displayed buffer name: `filename`
@@ -718,7 +725,7 @@ require('bufferline').setup({
 })
 ```
 
-#### Show title from YAML frontmatter
+#### Example 2. Show title from YAML
 
 Requires [lyaml](https://github.com/gvvaughan/lyaml), as noted above.
 
@@ -753,7 +760,7 @@ require('bufferline').setup({
 })
 ```
 
-#### Switch the format based on tag
+#### Example 3. Switch based on tag
 
 Switch the format depending on whether a tag exists.
 Requires [lyaml](https://github.com/gvvaughan/lyaml), as noted above.
@@ -797,22 +804,22 @@ require('bufferline').setup({
 ```
 
 
-## Integration with neo-tree
+## Integrating with neo-tree
 
-Steps:
-1. Install [lyaml](https://github.com/gvvaughan/lyaml) (See [#install-lyaml](#ensure-that-lyaml-is-installed))
-2. Configure [neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim/))
+The file list titles can be replaced with yaml frontmatter.
+
+Ensure that lyaml is installed. (See [Install lyaml](#install-lyaml))
 
 
-### Configure neo-tree
+### Example 1. Show list with yaml frontmatter
 
 reffers:
-- `:h neo-tree-custom-components` or [Github neo-tree-custom-components](https://github.com/nvim-neo-tree/neo-tree.nvim/blob/b85cc7611ff8fb443b0a1591c53669ead195a826/doc/neo-tree.txt#L1811)
+- `:h neo-tree-custom-components` or [Github neo-tree-custom-components](https://github.com/nvim-neo-tree/neo-tree.nvim/tree/main/doc/neo-tree.txt#L1811)
 - `:h neo-tree-renderers`
 
 Display name:
-* zk files -> `yaml.title`
 * zk files with `book` tag -> `yaml.title / yaml.author (yaml.published) filename`
+* other zk files -> `yaml.title`
 
 Sorting:
 * Ascending by `dir/yaml.title` or `path`
@@ -910,7 +917,5 @@ require('neo-tree').setup({
     end
   end
 })
-
 ```
-
 
