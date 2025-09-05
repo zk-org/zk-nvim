@@ -8,6 +8,7 @@ function M.notebook_root(notebook_path)
   local root_pattern = require("zk.root_pattern_util").root_pattern(".zk")
   local rp = root_pattern(notebook_path)
   return rp
+  -- return require("zk.root_pattern_util").root_pattern(".zk")(notebook_path)
 end
 
 ---Try to resolve a notebook path by checking the following locations in that order

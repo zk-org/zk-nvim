@@ -7,10 +7,10 @@ M.defaults = {
       cmd = { "zk", "lsp" },
       name = "zk",
       filetypes = { "markdown" },
-      root_markers = { ".zk" },
+      root_dir = vim.fs.root(0, { ".zk" }),
     },
     auto_attach = {
-      enabled = true, -- calls vim.lsp.enable()
+      enabled = true,
     },
   },
 }
