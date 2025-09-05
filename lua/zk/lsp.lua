@@ -26,14 +26,27 @@ function M.external_client()
   end
 end
 
----Starts an LSP client if necessary
 function M.start()
   if not client_id then
     client_id = M.external_client()
   end
 
   if not client_id then
-    client_id = vim.lsp.start(config.options.lsp.config)
+    local id = vim.lsp.start(config.options.lsp.config)
+    if id then
+      client_id = id
+    end
+  end
+end
+
+---Starts an LSP client if necessary, and attaches the given buffer.
+---@param bufnr number
+function M.buf_add(bufnr)
+  bufnr = bufnr or 0
+  M.start()
+
+  if client_id then
+    vim.lsp.buf_attach_client(bufnr, client_id)
   end
 end
 

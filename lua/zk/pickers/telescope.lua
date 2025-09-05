@@ -61,7 +61,11 @@ end
 
 function M.show_note_picker(notes, options, cb)
   options = options or {}
-  local telescope_options = vim.tbl_extend("force", { prompt_title = options.title }, options.telescope or {})
+  local telescope_options = vim.tbl_extend(
+    "force",
+    { prompt_title = options.title },
+    options.telescope or { prompt_title = "CTRL-E: create a note with the query as title" }
+  )
 
   pickers
     .new(telescope_options, {
@@ -71,7 +75,7 @@ function M.show_note_picker(notes, options, cb)
       }),
       sorter = conf.file_sorter(options),
       previewer = M.make_note_previewer(),
-      attach_mappings = function(prompt_bufnr)
+      attach_mappings = function(prompt_bufnr, mapping)
         actions.select_default:replace(function()
           if options.multi_select then
             local selection = {}
@@ -86,6 +90,24 @@ function M.show_note_picker(notes, options, cb)
           else
             actions.close(prompt_bufnr)
             cb(action_state.get_selected_entry().value)
+          end
+        end)
+        mapping("i", "<C-e>", function()
+          local current_picker = action_state.get_current_picker(prompt_bufnr)
+          local prompt = current_picker:_get_prompt()
+          actions.close(prompt_bufnr)
+          vim.schedule(function()
+            require("zk").new({ title = prompt })
+          end)
+        end)
+        mapping("i", "<CR>", function()
+          local entry = action_state.get_selected_entry()
+          if entry == nil then
+            actions.close(prompt_bufnr)
+          else
+            vim.schedule(function()
+              actions.select_default(prompt_bufnr)
+            end)
           end
         end)
         return true
