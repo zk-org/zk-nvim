@@ -8,8 +8,8 @@ local M = {}
 
 -- Some path utilities
 
-local function tbl_flatten(t)
-  return vim.iter(t):flatten():totable()
+local function tbl_flatten(...)
+  return vim.iter({ ... }):flatten():totable()
 end
 
 M.path = (function()
