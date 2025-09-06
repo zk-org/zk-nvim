@@ -82,11 +82,6 @@ return {
           enabled = true,
         },
       },
-      buf = {
-        name = {
-          formatter = nil,
-        },
-      },
     })
   end,
 }
