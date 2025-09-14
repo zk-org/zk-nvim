@@ -16,6 +16,22 @@ to see it in action.
 | 0.1.1         | 0.13.0 - 0.14.1 | 0.9.5          |
 | 0.1.0         | 0.13.0 - 0.14.1 | 0.8.0 - 0.9.5  |
 
+## Dependencies
+
+### lyaml
+
+If you use `:ZkGrep`, [lyaml](https://github.com/gvvaughan/lyaml) is required.
+
+1. Check the Lua version used by nvim:
+```vim
+:lua print(_VERSION)
+" lua 5.1
+```
+2. Install lyaml for the corresponding Lua version:
+```bash
+luarocks --lua-version=5.1 install lyaml
+```
+
 ## Installation
 
 Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
@@ -49,6 +65,8 @@ To get the best experience, it's recommended to also install either
 [mini.pick](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pick.md),
 or
 [snacks.picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
+
+## Dependencies
 
 ## Setup
 
@@ -674,255 +692,3 @@ require("telescope").load_extension("zk")
 :Telescope zk tags
 :Telescope zk tags created=today
 ```
-
-# Integrations
-
-
-How to integrate with nvim plugins, like bufferline, neo-tree.
-
-
-## Install lyaml
-
-Below integrations require [lyaml](https://github.com/gvvaughan/lyaml) installed.
-
-1. Check the Lua version used by nvim:
-```vim
-:lua print(_VERSION)
-" Output: lua 5.1
-```
-2. Install lyaml for the corresponding Lua version:
-```bash
-luarocks --lua-version=5.1 install lyaml
-```
-
-
-## Integrating with bufferline
-
-The buffer names can be replaced with the YAML frontmatter.
-
-Ensure that lyaml is installed. (See [Install lyaml](#install-lyaml))
-
-
-### Configure bufferline
-
-Modify `name_formatter` option in bufferline.
-
-
-#### Example 1. Show basename
-
-Filepath: `dir/filename.md`
-Displayed buffer name: `filename`
-
-```lua
-require('bufferline').setup({
-  options = {
-    name_formatter = function(buf)
-      if vim.fn.filereadable(buf.path) == 1 then
-        local zk_util = require('zk.util')
-        if zk_util.notebook_root(buf.path) ~= nil then
-          if buf.name:match('%.md$') then
-            local basename = vim.fn.fnamemodify(filepath, ":t:r")
-            return basename
-          end
-        end
-        return nil
-      end
-    end,
-  },
-})
-```
-
-#### Example 2. Show title from YAML
-
-Requires [lyaml](https://github.com/gvvaughan/lyaml), as noted above.
-
-YAML frontmatter:
-```markdown
----
-title: title from yaml
----
-```
-Displayed buffer name: `title from yaml`
-
-```lua
-require('bufferline').setup({
-  options = {
-    name_formatter = function(buf)
-      if vim.fn.filereadable(buf.path) == 1 then
-        local zk_util = require('zk.util')
-        if zk_util.notebook_root(buf.path) ~= nil then
-          if buf.name:match('%.md$') and not buf.path:match('%.zk') then
-            local yaml = zk_util.load_yaml(filepath)
-            local basename = vim.fn.fnamemodify(filepath, ":t:r")
-            if yaml ~= nil then
-              return yaml.title or basename
-            end
-            return nil
-          end
-        end
-        return nil
-      end
-    end,
-  },
-})
-```
-
-#### Example 3. Switch based on tag
-
-Switch the format depending on whether a tag exists.
-Requires [lyaml](https://github.com/gvvaughan/lyaml), as noted above.
-
-YAML frontmatter:
-```markdown
----
-title: Notes That Change Your Mind
-author: John Davis
-published: 2024
-tags: [book, thinking, notes]
----
-```
-Displayed buffer name: `Notes That Change Your Mind / John Davis (2024)`
-
-```lua
-require('bufferline').setup({
-  options = {
-    name_formatter = function(buf)
-      if vim.fn.filereadable(buf.path) == 1 then
-        local zk_util = require('zk.util')
-        if zk_util.notebook_root(buf.path) ~= nil then
-          if buf.name:match('%.md$') and not buf.path:match('%.zk') then
-            local yaml = zk_util.load_yaml(filepath)
-            local basename = vim.fn.fnamemodify(filepath, ":t:r")
-            if yaml ~= nil then
-              if zk_util.table_contains(yaml.tags, 'book') then
-                return ( yaml.title or '[No Title]' ) .. ' / ' .. ( yaml.author or '[No Author]' ) .. ' (' .. ( yaml.published or '?' ) .. ')'
-              else
-                return yaml.title or basename
-              end
-            end
-            return nil
-          end
-        end
-        return nil
-      end
-    end,
-  },
-})
-```
-
-
-## Integrating with neo-tree
-
-The file list titles can be replaced with yaml frontmatter.
-
-Ensure that lyaml is installed. (See [Install lyaml](#install-lyaml))
-
-
-### Example 1. Show list with yaml frontmatter
-
-reffers:
-- `:h neo-tree-custom-components` or [Github neo-tree-custom-components](https://github.com/nvim-neo-tree/neo-tree.nvim/tree/main/doc/neo-tree.txt#L1811)
-- `:h neo-tree-renderers`
-
-Display name:
-* zk files with `book` tag -> `yaml.title / yaml.author (yaml.published) filename`
-* other zk files -> `yaml.title`
-
-Sorting:
-* Ascending by `dir/yaml.title` or `path`
-
-```lua
-local zk_util = require('zk.util')
-local zk_root_cache -- To avoid overhead
-
-require('neo-tree').setup({
-  filesystem = {
-    components = {
-      name = function(config, node, state)
-
-        -- from built-in 'name' function
-        local highlights = require('neo-tree.ui.highlights')
-        local highlight = config.highlight or highlights.FILE_NAME
-      
-        if node.type == 'directory' then highlight = highlights.DIRECTORY_NAME end
-        if node:get_depth() == 1 then
-          highlight = highlights.ROOT_NAME
-        else
-          if config.use_git_status_colors == nil or config.use_git_status_colors then
-            local git_status = state.components.git_status({}, node, state)
-            if git_status and git_status.highlight then highlight = git_status.highlight end
-          end
-        end
-
-        -- customized from here
-        local function contains_dir(path, dir_name)
-          for dir in vim.fs.parents(path) do
-            if vim.fs.basename(dir) == dir_name then return true end
-          end
-          return false
-        end
-
-        if node.type == 'file' then
-          local zk_root
-
-          if zk_root_cache == nil or not string.match(node.path, zk_root_cache) then
-            zk_root = zk_util.notebook_root(node.path)
-            zk_root_cache = zk_root
-          else
-            zk_root = zk_root_cache -- reuse cache
-          end
-
-          if (zk_root ~= nil) and not contains_dir(node.path, '.zk') then
-            local yaml = zk_util.load_yaml(node.path)
-            if yaml ~= nil then
-              if yaml.title then
-                if zk_util.table_contains(yaml.tags, 'book') then -- if has 'book' tag
-                  local book_title = (yaml.title or '[No title]') .. ' / ' .. (yaml.author or '[No author]')
-                  local published = yaml.published or '?'
-                  -- title '/' author + published + filename
-                  return { { text = book_title, highlight = highlight }, { text = published, highlight = 'Comment'},  { text = node.name, highlight = 'NeoTreeDimText' } }
-                else
-                  -- title + filename
-                  return { { text = yaml.title, highlight = highlight }, { text = node.name, highlight = 'NeoTreeDimText' } }
-                end
-              end
-            end
-          end
-        end
-        return { text = node.name, highlight = highlight }
-      end
-    },
-  },
-  sort_function = function(a, b)
-    -- neo-tree keeps additional fields in a, b nodes (e.g. a.yaml, b.compare_text)
-    local zk_util = require('zk.util')
-
-    local function add_yaml(node)
-      if node.ext == 'md' and not node.yaml and not node.path:match('%.zk') then
-        local yaml = zk_util.load_yaml(node.path)
-        if yaml and type(yaml) == 'table' and next(yaml) then node['yaml'] = yaml end
-      end
-    end
-
-    local function add_compare_text(node)
-      if node.compare_text == nil then
-        if node.yaml and node.yaml.title then
-          local dir_name = vim.fs.dirname(node.path)
-          node.compare_text = vim.fs.joinpath(dir_name, node.yaml.title)
-        end
-      end
-    end
-
-    if a.type == b.type then
-      add_yaml(a)
-      add_yaml(b)
-      add_compare_text(a)
-      add_compare_text(b)
-      return (a.compare_text or a.path) < (b.compare_text or b.path)
-    else
-      return a.type < b.type
-    end
-  end
-})
-```
-
