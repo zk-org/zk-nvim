@@ -33,7 +33,7 @@ function M.refresh_title(buf, callback)
         vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
 
         if type(callback) == "function" then
-          vim.schedule(callback) -- TODO: vim.scheduled ???
+          vim.schedule(callback)
         end
         return true
       end
@@ -53,7 +53,7 @@ function M.update_zk_list(callback)
       print("zk_list update error.")
     end
     if type(callback) == "function" then
-      vim.schedule(callback) -- TODO: vim.scheduled ???
+      vim.schedule(callback)
     end
   end)
 end
