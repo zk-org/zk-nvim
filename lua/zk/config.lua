@@ -19,7 +19,7 @@ M.defaults = {
       pattern = { "*.md" },
       select = { "id", "absPath", "title", "filenameStem" },
       custom_title = function(note)
-        return note.title or note.filenameStem or note.id
+        return note.title or note.filenameStem or note.id or nil
       end,
     },
   },
