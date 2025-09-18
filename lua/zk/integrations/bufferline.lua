@@ -28,9 +28,7 @@ function M.name_formatter(buf)
     else
       vim.schedule(function()
         M.get_zk_info(buf, function()
-          if M.refresh_title(buf) then
-            require("bufferline.ui").refresh()
-          end
+          M.refresh_title(buf)
         end)
       end)
     end
@@ -39,22 +37,11 @@ function M.name_formatter(buf)
 end
 
 -- Refresh Buffer Title
-function M.refresh_title(buf, callback)
+function M.refresh_title(buf, note)
   -- Parse title
-  if vim.g.zk_list then
-    for _, note in ipairs(vim.g.zk_list) do
-      if note.absPath == buf.path then
-        local title = config.custom_title(note)
-        vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
-
-        if type(callback) == "function" then
-          vim.schedule(callback)
-        end
-        return true
-      end
-    end
-  end
-  return false
+  local title = config.custom_title(note)
+  vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
+  require("bufferline.ui").refresh()
 end
 
 -- Get zk info (Async)
@@ -69,7 +56,7 @@ function M.get_zk_info(buf, callback)
       local title = config.custom_title(notes[1])
       vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
       if type(callback) == "function" then
-        vim.schedule(callback)
+        callback(buf, notes[1])
       end
       return true
     else
@@ -98,11 +85,9 @@ if config.enabled == true then
       -- Clear existing zk_title
       vim.b[bufnr].zk_title = nil
 
-      -- Update zk_list -> update zk_title -> refresh
-      M.get_zk_info(buf, function()
-        M.refresh_title(buf, function()
-          require("bufferline.ui").refresh()
-        end)
+      -- Get zk info (Async) -> Update vim.b.zk_title -> Refresh bufferline
+      M.get_zk_info(buf, function(note)
+        M.refresh_title(buf, note)
       end)
     end,
   })
