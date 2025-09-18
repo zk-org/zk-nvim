@@ -27,7 +27,7 @@ function M.name_formatter(buf)
       return zk_title
     else
       vim.schedule(function()
-        M.update_zk_list(function()
+        M.get_zk_info(buf, function()
           if M.refresh_title(buf) then
             require("bufferline.ui").refresh()
           end
@@ -44,7 +44,7 @@ function M.refresh_title(buf, callback)
   if vim.g.zk_list then
     for _, note in ipairs(vim.g.zk_list) do
       if note.absPath == buf.path then
-        local title = config.custom_title(note) -- note.metadata and note.metadata.author or note.title or note.filenameStem or note.id
+        local title = config.custom_title(note)
         vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
 
         if type(callback) == "function" then
@@ -57,19 +57,27 @@ function M.refresh_title(buf, callback)
   return false
 end
 
--- Async update zk_list
-function M.update_zk_list(callback)
+-- Get zk info (Async)
+function M.get_zk_info(buf, callback)
   require("zk.api").list(nil, {
     select = config.select,
+    hrefs = { buf.path },
+    limit = 1,
   }, function(err, notes)
-    if not err and notes then
-      vim.g.zk_list = notes
+    if not err and notes and (#notes == 1) then
+      -- vim.g.zk_list = notes
+      local title = config.custom_title(notes[1])
+      vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
+      if type(callback) == "function" then
+        vim.schedule(callback)
+      end
+      return true
     else
-      print("zk_list update error.")
+      print(string.format("error in get_zk_info: found %s note", #notes))
     end
-    if type(callback) == "function" then
-      vim.schedule(callback)
-    end
+    -- if type(callback) == "function" then
+    --   vim.schedule(callback)
+    -- end
   end)
 end
 
@@ -91,7 +99,7 @@ if config.enabled == true then
       vim.b[bufnr].zk_title = nil
 
       -- Update zk_list -> update zk_title -> refresh
-      M.update_zk_list(function()
+      M.get_zk_info(buf, function()
         M.refresh_title(buf, function()
           require("bufferline.ui").refresh()
         end)
