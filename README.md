@@ -81,6 +81,17 @@ return {
           enabled = true,
         },
       },
+      integrations = {
+        bufferline = {
+          enabled = true,
+          pattern = { "*.md" },
+          select = { "id", "title", "filenameStem" },
+          ---@param note table
+          custom_title = function(note)
+            return note.title or note.filenameStem or note.id or nil
+          end,
+        },
+      },
     })
   end,
 }

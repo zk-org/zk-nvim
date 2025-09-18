@@ -155,29 +155,4 @@ function M.get_buffer_paths()
   return paths
 end
 
----Check if all the values are contained in the table
----** supports only flat (one level) table **
---
----@param tbl table to be searched from
----@param values any|any[] search values
----@return boolean
-function M.table_contains(tbl, values)
-  if type(values) ~= "table" then
-    values = { values }
-  end
-  for _, value in ipairs(values) do
-    local found = false
-    for _, target in ipairs(tbl) do
-      if target == value then
-        found = true
-        break
-      end
-    end
-    if not found then
-      return false
-    end
-  end
-  return true
-end
-
 return M
