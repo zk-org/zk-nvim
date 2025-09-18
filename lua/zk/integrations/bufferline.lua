@@ -13,12 +13,7 @@ end
 -- Add mandatory fields
 config.select = vim.tbl_extend("force", { "id", "absPath", "title", "filenameStem" }, config.select)
 
--- local zk_state = {
---   loading = false,
---   last_update = 0,
---   update_interval = 1000,
--- }
-
+---@param buf table
 function M.name_formatter(buf)
   -- TODO: Add checking & keeping, if notebook dir or not
   if config.enabled == true then
@@ -37,14 +32,20 @@ function M.name_formatter(buf)
 end
 
 -- Refresh Buffer Title
+---@param buf table
+---@param note table?
 function M.refresh_title(buf, note)
-  -- Parse title
-  local title = config.custom_title(note)
-  vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
-  require("bufferline.ui").refresh()
+  if note then
+    -- Parse title
+    local title = config.custom_title(note)
+    vim.api.nvim_buf_set_var(buf.bufnr, "zk_title", title)
+    require("bufferline.ui").refresh()
+  end
 end
 
 -- Get zk info (Async)
+---@param buf table
+---@param callback function?
 function M.get_zk_info(buf, callback)
   require("zk.api").list(nil, {
     select = config.select,
