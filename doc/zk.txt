@@ -16,6 +16,9 @@ CONTENTS                                                             *zk-content
     1.8. API..............................................................|zk-api|
     1.9. Pickers......................................................|zk-pickers|
     1.10. Example Mappings...................................|zk-example_mappings|
+    1.11. Integrations...........................................|zk-integrations|
+        1.11.1 Bufferline..........................................|zk-bufferline|
+        1.11.2 Bufferline Sample Config..............|zk-bufferline_sample_config|
 2. Miscellaneous................................................|zk-miscellaneous|
     2.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
     2.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
@@ -444,6 +447,81 @@ Then, create a new file under `~/.config/nvim/ftplugin/markdown.lua` to setup th
     end
 <
 
+--------------------------------------------------------------------------------
+INTEGRATIONS                                                     *zk-integrations*
+
+
+
+BUFFERLINE                                                         *zk-bufferline*
+
+Show YAML frontmatter `title` or `#` heading as buffer name.
+
+Defaut:
+>lua
+    require("zk").setup({
+      integrations = {
+        bufferline = {
+          enabled = true,
+    
+          -- The file patterns to hook
+          pattern = { "*.md" },
+    
+          -- The fields to fetch
+          -- Available fields are: filename, filenameStem, path, absPath, title, lead, body, snippets, rawContent, wordCount, tags, metadata, created, modified, checksum
+          -- `metadata` has all the YAML frontmatter, including user defined fields.
+          -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
+          select = { "id", "title", "filenameStem" },
+    
+          -- buffer name formatter
+          formatter = function(note)
+            return note.title or note.filenameStem or note.id or nil
+          end,
+        },
+      },
+      ...
+    })
+<
+
+BUFFERLINE SAMPLE CONFIG                             *zk-bufferline_sample_config*
+
+A sample for:
+- Displaying the buffer name from user-defined YAML frontmatter.
+- checking if a specific tag is contained.
+
+YAML frontmatter:
+>markdown
+    ---
+    title      : Awesome Note Taking
+    author     : John Davis
+    published  : 2025
+    tags       : [book]
+    ---
+<
+
+Config:
+>lua
+    require("zk").setup({
+      integrations = {
+        bufferline = {
+          ...
+          select = { "id", "title", "filenameStem", "metadata" }, -- Add metadata
+          formatter = function(note)
+            if vim.tbl_contains(note.tags, "book") then
+              local published = metadata and metadata.published or '?'
+              local author = metadata and metadata.author or '?'
+              local title = metadata.title or '?'
+              return string.format("%s / %s (%s)", title, author, published)
+            else
+              return note.title or note.filenameStem or note.id or nil
+          end,
+        },
+      },
+      ...
+    })
+<
+After the sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
+
+
 ================================================================================
 MISCELLANEOUS                                                   *zk-miscellaneous*
 
@@ -517,6 +595,7 @@ It's possible (but unnecessary) to also load the notes and tags pickers as a tel
     :Telescope zk tags
     :Telescope zk tags created=today
 <
+
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:fdm=marker:cole=2:

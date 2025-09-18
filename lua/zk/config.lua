@@ -18,7 +18,7 @@ M.defaults = {
       enabled = true,
       pattern = { "*.md" },
       select = { "id", "title", "filenameStem" },
-      custom_title = function(note)
+      formatter = function(note)
         return note.title or note.filenameStem or note.id or nil
       end,
     },

@@ -32,7 +32,7 @@ end
 ---@param buf table
 ---@param note table?
 function M.refresh_title(buf, note)
-  local title = config.custom_title(note)
+  local title = config.formatter(note)
   if vim.b[buf.bufnr].zk_title ~= title then
     vim.b[buf.bufnr].zk_title = title
     require("bufferline.ui").refresh()

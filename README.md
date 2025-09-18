@@ -86,8 +86,7 @@ return {
           enabled = true,
           pattern = { "*.md" },
           select = { "id", "title", "filenameStem" },
-          ---@param note table
-          custom_title = function(note)
+          formatter = function(note)
             return note.title or note.filenameStem or note.id or nil
           end,
         },
@@ -506,6 +505,78 @@ if require("zk.util").notebook_root(vim.fn.expand('%:p')) ~= nil then
 end
 ```
 
+## Integrations
+
+### bufferline
+
+Show YAML frontmatter `title` or `#` heading as buffer name.
+
+Default:
+```lua
+require("zk").setup({
+  integrations = {
+    bufferline = {
+      enabled = true,
+
+      -- The file patterns to hook
+      pattern = { "*.md" },
+
+      -- The fields to fetch
+      -- Available fields are: filename, filenameStem, path, absPath, title, lead, body, snippets, rawContent, wordCount, tags, metadata, created, modified, checksum
+      -- `metadata` has all the YAML frontmatter, including user defined fields.
+      -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
+      select = { "id", "title", "filenameStem" },
+
+      -- buffer name formatter
+      formatter = function(note)
+        return note.title or note.filenameStem or note.id or nil
+      end,
+    },
+  },
+  ...
+})
+```
+
+### bufferline Sample Config
+
+A sample for:
+- Displaying the buffer name from user-defined YAML frontmatter.
+- checking if a specific tag is contained.
+
+YAML frontmatter:
+```markdown
+---
+title      : Awesome Note Taking
+author     : John Davis
+published  : 2025
+tags       : [book]
+---
+```
+Config:
+```lua
+require("zk").setup({
+  integrations = {
+    bufferline = {
+      ...
+      select = { "id", "title", "filenameStem", "metadata" }, -- Add metadata
+      formatter = function(note)
+        if vim.tbl_contains(note.tags, "book") then
+          local published = metadata and metadata.published or '?'
+          local author = metadata and metadata.author or '?'
+          local title = metadata.title or '?'
+          return string.format("%s / %s (%s)", title, author, published)
+        else
+          return note.title or note.filenameStem or note.id or nil
+      end,
+    },
+  },
+  ...
+})
+```
+After the sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
+
+
+
 # Miscellaneous
 
 ## Syntax Highlighting Tips
@@ -633,3 +704,4 @@ require("telescope").load_extension("zk")
 :Telescope zk tags
 :Telescope zk tags created=today
 ```
+
