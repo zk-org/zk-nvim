@@ -16,13 +16,13 @@ CONTENTS                                                             *zk-content
     1.8. API..............................................................|zk-api|
     1.9. Pickers......................................................|zk-pickers|
     1.10. Example Mappings...................................|zk-example_mappings|
-    1.11. Integrations...........................................|zk-integrations|
-        1.11.1 Bufferline..........................................|zk-bufferline|
-        1.11.2 Bufferline Sample Config..............|zk-bufferline_sample_config|
-2. Miscellaneous................................................|zk-miscellaneous|
-    2.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
-    2.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
-    2.3. Telescope Plugin....................................|zk-telescope_plugin|
+2. Integrations..................................................|zk-integrations|
+    2.1 Bufferline.................................................|zk-bufferline|
+    2.2 Bufferline Sample Config.....................|zk-bufferline_sample_config|
+3. Miscellaneous................................................|zk-miscellaneous|
+    3.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
+    3.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
+    3.3. Telescope Plugin....................................|zk-telescope_plugin|
 
 ================================================================================
 ZK-NVIM                                                               *zk-zk-nvim*

@@ -505,9 +505,9 @@ if require("zk.util").notebook_root(vim.fn.expand('%:p')) ~= nil then
 end
 ```
 
-## Integrations
+# Integrations
 
-### bufferline
+## bufferline
 
 Show YAML frontmatter `title` or `#` heading as buffer name.
 
@@ -537,7 +537,7 @@ require("zk").setup({
 })
 ```
 
-### bufferline Sample Config
+## bufferline Sample Config
 
 A sample for:
 - Displaying the buffer name from user-defined YAML frontmatter.
