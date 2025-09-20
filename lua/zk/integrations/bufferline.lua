@@ -3,6 +3,7 @@ local config = require("zk.config").options.integrations.bufferline
 
 local M = {}
 
+-- Check if bufferline is installed
 if config.enabled == true then
   local status, _ = pcall(require, "bufferline")
   if not status then
@@ -11,6 +12,7 @@ if config.enabled == true then
   end
 end
 
+---Format buffer name (called via 'name_formatter' config of bufferline)
 ---@param buf table
 function M.zk_name_formatter(buf)
   local notebook_root = util.notebook_root(buf.path)
@@ -28,7 +30,7 @@ function M.zk_name_formatter(buf)
   end
 end
 
--- Refresh Buffer Title
+---Refresh buffer title
 ---@param buf table
 ---@param note table?
 function M.refresh_title(buf, note)
@@ -39,7 +41,7 @@ function M.refresh_title(buf, note)
   end
 end
 
--- Get zk info (Async)
+---Get zk info (Async)
 ---@param buf table
 ---@param callback function?
 function M.get_zk_info(buf, callback)
@@ -58,19 +60,24 @@ function M.get_zk_info(buf, callback)
   end)
 end
 
--- Add autocmd
-if config.enabled == true then
-  vim.api.nvim_create_autocmd("BufWritePost", {
-    pattern = config.pattern,
-    callback = function(args)
-      local bufnr = args.buf
-      local path = args.file
-      local buf = { bufnr = bufnr, path = path }
-      M.get_zk_info(buf, function(note)
-        M.refresh_title(buf, note)
-      end)
-    end,
-  })
+---Define autocmd
+function M.define_autocmd()
+  if config.enabled == true then
+    local augroup = vim.api.nvim_create_augroup("ZkBufferline", { clear = true })
+    -- Refresh buffer name
+    vim.api.nvim_create_autocmd("BufWritePost", {
+      pattern = config.pattern,
+      group = augroup,
+      callback = function(args)
+        local buf = { bufnr = args.buf, path = args.file }
+        M.get_zk_info(buf, function(note)
+          M.refresh_title(buf, note)
+        end)
+      end,
+    })
+  end
 end
+
+M.define_autocmd()
 
 return M
