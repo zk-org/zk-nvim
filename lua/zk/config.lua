@@ -13,6 +13,16 @@ M.defaults = {
       enabled = true,
     },
   },
+  integrations = {
+    bufferline = {
+      enabled = true,
+      pattern = { "*.md" },
+      select = { "id", "title", "filenameStem" },
+      formatter = function(note)
+        return note.title or note.filenameStem or note.id or nil
+      end,
+    },
+  },
 }
 
 M.options = M.defaults -- not necessary, but better code completion
