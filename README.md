@@ -16,22 +16,6 @@ to see it in action.
 | 0.1.1         | 0.13.0 - 0.14.1 | 0.9.5          |
 | 0.1.0         | 0.13.0 - 0.14.1 | 0.8.0 - 0.9.5  |
 
-## Dependencies
-
-### lyaml
-
-If you use `:ZkGrep`, [lyaml](https://github.com/gvvaughan/lyaml) is required.
-
-1. Check the Lua version used by nvim:
-```vim
-:lua print(_VERSION)
-" lua 5.1
-```
-2. Install lyaml for the corresponding Lua version:
-```bash
-luarocks --lua-version=5.1 install lyaml
-```
-
 ## Installation
 
 Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
@@ -65,8 +49,6 @@ To get the best experience, it's recommended to also install either
 [mini.pick](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pick.md),
 or
 [snacks.picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
-
-## Dependencies
 
 ## Setup
 
