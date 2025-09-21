@@ -112,7 +112,6 @@ function snacks_format.zk_filename(item, picker)
   end
   local dir_hl = "SnacksPickerDir"
 
-  print("path: " .. path)
   local note = notes_cache[path]
   if note and note.title then
     ret[#ret + 1] = { tostring(note.title), base_hl }

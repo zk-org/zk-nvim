@@ -152,7 +152,6 @@ function M.create_grep_entry_maker(collection)
     local filename, lnum, col, text = string.match(line, "^(.-):(%d+):(%d+):(.*)$")
     lnum, col = tonumber(lnum), tonumber(col)
     local title = collection[filename] or vim.fn.fnamemodify(filename, ":t")
-    print(filename)
     return {
       filename = filename,
       lnum = lnum,
