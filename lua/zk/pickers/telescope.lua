@@ -8,10 +8,13 @@ local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
 local sorters = require("telescope.sorters")
 local util = require("zk.util")
+local api = require("zk.api")
+local notes_cache = {}
 
 local M = {}
 
-M.note_picker_list_api_selection = { "title", "absPath", "path" }
+-- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
+M.zk_api_select = { "title", "absPath", "path" } -- TODO: Can be modify now / Should be included in args's opts?
 
 function M.create_note_entry_maker(_)
   return function(note)
@@ -149,6 +152,7 @@ function M.create_grep_entry_maker(collection)
     local filename, lnum, col, text = string.match(line, "^(.-):(%d+):(%d+):(.*)$")
     lnum, col = tonumber(lnum), tonumber(col)
     local title = collection[filename] or vim.fn.fnamemodify(filename, ":t")
+    print(filename)
     return {
       filename = filename,
       lnum = lnum,
@@ -162,7 +166,8 @@ function M.create_grep_entry_maker(collection)
           { entry.text, "TelescopeResultsNormal" },
         })
       end,
-      title = title,
+      -- title = title,
+      title = notes_cache[filename] and notes_cache[filename].title or title,
       value = {
         filename = filename,
         lnum = lnum,
@@ -176,6 +181,13 @@ function M.create_grep_entry_maker(collection)
 end
 
 function M.show_grep_picker(options, cb)
+  local function index_notes_by_path(notes)
+    local tbl = {}
+    for _, note in ipairs(notes) do
+      tbl[note.absPath] = note
+    end
+    return tbl
+  end
   options = options or {}
   local path = vim.api.nvim_buf_get_name(0)
   local root = (path ~= "") and util.notebook_root(path)
@@ -204,33 +216,39 @@ function M.show_grep_picker(options, cb)
     }
   end, M.create_grep_entry_maker(collection))
 
-  pickers
-    .new(telescope_options, {
-      finder = grep_finder,
-      previewer = conf.grep_previewer(options),
-      sorter = M.make_grep_sorter(options),
-      attach_mappings = function(prompt_bufnr)
-        actions.select_default:replace(function()
-          if options.multi_select then
-            local selection = {}
-            action_utils.map_selections(prompt_bufnr, function(entry, _)
-              table.insert(selection, entry.value)
+  api.list(root, { select = M.zk_api_select }, function(err, notes)
+    if not err then
+      notes_cache = index_notes_by_path(notes)
+      -- Snacks.picker.grep(picker_opts, cb)
+      pickers
+        .new(telescope_options, {
+          finder = grep_finder,
+          previewer = conf.grep_previewer(options),
+          sorter = M.make_grep_sorter(options),
+          attach_mappings = function(prompt_bufnr)
+            actions.select_default:replace(function()
+              if options.multi_select then
+                local selection = {}
+                action_utils.map_selections(prompt_bufnr, function(entry, _)
+                  table.insert(selection, entry.value)
+                end)
+                if vim.tbl_isempty(selection) then
+                  table.insert(selection, action_state.get_selected_entry().value)
+                end
+                actions.close(prompt_bufnr)
+                cb(selection)
+              else
+                local entry = action_state.get_selected_entry()
+                actions.close(prompt_bufnr)
+                cb(entry and entry.value or nil)
+              end
             end)
-            if vim.tbl_isempty(selection) then
-              table.insert(selection, action_state.get_selected_entry().value)
-            end
-            actions.close(prompt_bufnr)
-            cb(selection)
-          else
-            local entry = action_state.get_selected_entry()
-            actions.close(prompt_bufnr)
-            cb(entry and entry.value or nil)
-          end
-        end)
-        return true
-      end,
-    })
-    :find()
+            return true
+          end,
+        })
+        :find()
+    end
+  end)
 end
 
 function M.show_tag_picker(tags, options, cb)
