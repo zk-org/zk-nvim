@@ -5,9 +5,12 @@ local Snacks = require("snacks")
 local snacks_picker = require("snacks.picker")
 local snacks_format = require("snacks.picker.format")
 local util = require("zk.util")
+local api = require("zk.api")
 local uv = vim.uv or vim.loop
+local notes_cache = {}
 
-M.note_picker_list_api_selection = { "title", "path", "absPath" }
+-- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
+M.zk_api_select = { "title", "path" } -- TODO: Can be modify now / Should be included in args's opts?
 
 M.show_note_picker = function(notes, opts, cb)
   notes = vim.tbl_map(function(note)
@@ -18,6 +21,14 @@ M.show_note_picker = function(notes, opts, cb)
 end
 
 M.show_grep_picker = function(opts, cb)
+  local function index_notes_by_path(notes)
+    local tbl = {}
+    for _, note in ipairs(notes) do
+      tbl[note.path] = note
+    end
+    return tbl
+  end
+
   local picker_opts = vim.tbl_deep_extend("force", {
     format = "zk",
     cwd = opts.notebook_path,
@@ -25,7 +36,12 @@ M.show_grep_picker = function(opts, cb)
     sort = { fields = { "score:desc", "idx" } },
   }, opts.snacks_picker or {})
 
-  Snacks.picker.grep(picker_opts, cb)
+  api.list(picker_opts.cwd, { select = M.zk_api_select }, function(err, notes)
+    if not err then
+      notes_cache = index_notes_by_path(notes)
+      Snacks.picker.grep(picker_opts, cb)
+    end
+  end)
 end
 
 M.show_tag_picker = function(tags, opts, cb)
@@ -49,7 +65,6 @@ end
 ---@param item snacks.picker.Item
 function snacks_format.zk_filename(item, picker)
   local fullpath = vim.fs.joinpath(item.cwd, item.file)
-  local yaml = util.load_yaml(fullpath)
   ---@type snacks.picker.Highlight[]
   local ret = {}
   if not item.file then
@@ -97,8 +112,10 @@ function snacks_format.zk_filename(item, picker)
   end
   local dir_hl = "SnacksPickerDir"
 
-  if yaml and yaml.title then
-    ret[#ret + 1] = { tostring(yaml.title), base_hl }
+  print("path: " .. path)
+  local note = notes_cache[path]
+  if note and note.title then
+    ret[#ret + 1] = { tostring(note.title), base_hl }
   else
     if picker.opts.formatters.file.filename_only then
       path = vim.fn.fnamemodify(item.file, ":t")
