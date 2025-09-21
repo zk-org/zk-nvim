@@ -31,6 +31,7 @@ REQUIREMENTS                                                     *zk-requirement
 
 *   Neovim >= 0.10.0
 *   `zk` >= 0.14.1
+*   `ripgrep` (for grep feature)
 
 --------------------------------------------------------------------------------
 INSTALLATION                                                     *zk-installation*
