@@ -14,7 +14,7 @@ local notes_cache = {}
 local M = {}
 
 -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
-M.zk_api_select = { "title", "absPath", "path" } -- TODO: Can be modify now / Should be included in args's opts?
+M.zk_api_select = { "title", "path", "absPath" } -- TODO: Can be modify now / Should be included in args's opts?
 
 function M.create_note_entry_maker(_)
   return function(note)

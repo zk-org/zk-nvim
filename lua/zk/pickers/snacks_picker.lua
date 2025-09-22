@@ -10,7 +10,7 @@ local uv = vim.uv or vim.loop
 local notes_cache = {}
 
 -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
-M.zk_api_select = { "title", "path" } -- TODO: Can be modify now / Should be included in args's opts?
+M.zk_api_select = { "title", "path", "absPath" } -- TODO: Can be modify now / Should be included in args's opts?
 
 M.show_note_picker = function(notes, opts, cb)
   notes = vim.tbl_map(function(note)
