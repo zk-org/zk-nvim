@@ -67,6 +67,11 @@ commands.add("ZkBuffers", function(options)
   zk.edit(options, { title = "Zk Buffers" })
 end)
 
+commands.add("ZkGrep", function(options)
+  options = vim.tbl_extend("force", { grep = true }, options or {})
+  zk.edit(options, { title = "Zk Grep" })
+end)
+
 commands.add("ZkBacklinks", function(options)
   options = vim.tbl_extend("force", { linkTo = { vim.api.nvim_buf_get_name(0) } }, options or {})
   zk.edit(options, { title = "Zk Backlinks" })
