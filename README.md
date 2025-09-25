@@ -54,9 +54,8 @@ or
 
 ## Setup
 
-> [!IMPORTANT] 
-> If you have the [zk cli](https://github.com/zk-org/zk) installed,
-> then you _do not need to install `zk lsp`_ via Mason (or otherwise). 
+> [!IMPORTANT] If you have the [zk cli](https://github.com/zk-org/zk) installed,
+> then you _do not need to install `zk lsp`_ via Mason (or otherwise).
 
 Default `lazy.nvim` setup:
 
@@ -136,8 +135,9 @@ notebook discovery. However, this is always optional, and usually not necessary.
 ## Getting Started
 
 After you have installed the plugin and added the setup code to your config, you
-are good to go. If you are not familiar with `zk`, we recommend you to also read
-the [`zk` docs](https://github.com/zk-org/zk/tree/main/docs).
+are good to go. If you are not familiar with `zk`, we recommend you to read
+through the
+[getting started guide](https://zk-org.github.io/zk/tips/getting-started.html).
 
 When using the default config, the `zk` LSP client will automatically attach
 itself to buffers inside your notebook and provide capabilities like completion,
@@ -149,88 +149,72 @@ see what they can do, and learn as you go.
 
 ## Built-in Commands
 
-```vim
-" Indexes the notebook
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zkindex
-:ZkIndex [{options}]
+### Indexing
 
-" Creates and edits a new note
-"
-" Use the `inline = true` option to insert the content of the created note at the caret position, instead of writing the note on the file system.
-"
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
-:ZkNew [{options}]
+[Options (ZkIndex)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-index)
 
-" Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
-"
-" Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
-"
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
-:'<,'>ZkNewFromTitleSelection [{options}]
+- `:ZkIndex [{options}]`  
+  Indexes the notebook.
 
-" Creates a new note and uses the last visual selection as the content while replacing the selection with a link to the new note
-"
-" Use the `inline = true` option to replace the selection with the content of the created note, instead of writing the note on the file system.
-"
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
-:'<,'>ZkNewFromContentSelection [{options}]
+### Creating Notes
 
-" cd into the notebook root
-" params
-"   (optional) additional options
-:ZkCd [{options}]
+[Options (ZkNew)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-new)
 
-" Opens a notes picker
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
-:ZkNotes [{options}]
+- `:ZkNew [{options}]`  
+  Creates and edits a new note.
 
-" Opens a notes picker for active buffers (showing notebook files only).
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
-:ZkBuffers [{options}]
+- `:'<,'>ZkNewFromTitleSelection [{options}]`  
+  Creates a new note from the visual selection (used as the **title**) and
+  replaces the selection with a link to the note.
 
-" Opens a grep notes picker (Currently only available with telescope)
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
-:ZkGrep [{options}]
+- `:'<,'>ZkNewFromContentSelection [{options}]`  
+  Creates a new note from the visual selection (used as the **content**) and
+  replaces the selection with a link to the note.
 
-" Opens a notes picker for the backlinks of the current buffer
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
-:ZkBacklinks [{options}]
+### Navigation
 
-" Opens a notes picker for the outbound links of the current buffer
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
-:ZkLinks [{options}]
+[Options (ZkList)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-list)
 
-" Inserts a link at the cursor location or around the selected text.
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
-"   One additional option is `matchSelected` (boolean) which is only applicable to inserting a link around selected text. If `true`, the note picker will search for notes similar to the selected text. Otherwise, the note picker will load all notes to filter through.
-"    e.g. :'<'>ZkInsertLinkAtSelection {matchSelected = true}
-:ZkInsertLink
-:'<,'>ZkInsertLinkAtSelection [{options}]
+- `:ZkCd [{options}]`  
+  Changes directory to the notebook root.
 
-" Opens a notes picker, filters for notes that match the text in the last visual selection
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
-:'<,'>ZkMatch [{options}]
+- `:ZkNotes [{options}]`  
+  Opens a notes picker.
 
-" Opens a notes picker, filters for notes with the selected tags
-" params
-"   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zktaglist
-:ZkTags [{options}]
-```
+- `:ZkGrep [{options}]`
+  Opens a grep notes picker
 
-The `options` parameter can be any valid _Lua_ expression that evaluates to a
-table. For a list of available options, refer to the
-[`zk` docs](https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#custom-commands).
+- `:ZkBuffers [{options}]`  
+  Opens a notes picker for active buffers (notebook files only).
+
+- `:ZkBacklinks [{options}]`  
+  Opens a notes picker showing backlinks of the current buffer.
+
+- `:ZkLinks [{options}]`  
+  Opens a notes picker showing outbound links of the current buffer.
+
+### Linking
+
+[Options (ZkList)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-list)
+
+- `:ZkInsertLink`  
+  Inserts a link at the cursor location.
+
+- `:'<,'>ZkInsertLinkAtSelection [{options}]`  
+  Inserts a link around the selected text.
+  - Special option: `matchSelected = true` → filters notes similar to the
+    selection.
+
+### Searching & Tagging
+
+[Options (ZkList)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-list)
+
+- `:'<,'>ZkMatch [{options}]`  
+  Opens a notes picker, filtering for notes matching the visual selection.
+
+- `:ZkTags [{options}]`  
+  Opens a notes picker for selected tags.
+
 In addition, `options.notebook_path` can be used to explicitly specify a
 notebook by providing a path to any file or directory within the notebook; see
 [Notebook Directory Discovery](#notebook-directory-discovery).
