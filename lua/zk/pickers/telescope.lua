@@ -7,9 +7,50 @@ local action_utils = require("telescope.actions.utils")
 local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
 
+local config = require("zk.config")
+local display_opts = config.options.picker_options.display
+
 local M = {}
 
 M.note_picker_list_api_selection = { "title", "absPath", "path" }
+
+function M.custom_note_display(e)
+  local items_layout = {}
+  local items_displayer = {}
+
+  for _, item in ipairs(display_opts.entry) do
+    local name, width, hl = unpack(item)
+
+    if width == "auto" then
+      table.insert(items_layout, { width = #(e.value[name] or "") or 0 })
+    elseif type(width) == "number" then
+      table.insert(items_layout, { width = width })
+    else
+      table.insert(items_layout, { remaining = true })
+    end
+
+    if hl then
+      table.insert(items_displayer, { e.value[name] or "", hl })
+    else
+      table.insert(items_displayer, e.value[name] or "")
+    end
+  end
+
+  local displayer = entry_display.create({
+    separator = display_opts.separator,
+    items = items_layout,
+  })
+
+  return displayer(items_displayer)
+end
+
+M.custom_note_ordinal = function(note)
+  local result = {}
+  for _, field in ipairs(display_opts.ordinal) do
+    table.insert(result, note[field])
+  end
+  return table.concat(result, " ")
+end
 
 function M.create_note_entry_maker(_)
   return function(note)
@@ -17,8 +58,8 @@ function M.create_note_entry_maker(_)
     return {
       value = note,
       path = note.absPath,
-      display = title,
-      ordinal = title,
+      display = display_opts == nil and title or M.custom_note_display,
+      ordinal = display_opts == nil and title or M.custom_note_ordinal(note),
     }
   end
 end
