@@ -565,9 +565,9 @@ require("zk").setup({
         local tags = note.tags or {}
         local metadata = note.metadata or {}
         if vim.tbl_contains(tags, "book") then
-          local published = metadata.published or '?'
-          local author = metadata.author or '[NO AUTHOR]'
           local title = metadata.title or '[NO TITLE]'
+          local author = metadata.author or '[NO AUTHOR]'
+          local published = metadata.published or '?'
           return string.format("%s / %s (%s)", title, author, published)
         end
         return note.title or note.filenameStem or note.id or nil
