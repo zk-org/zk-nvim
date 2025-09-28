@@ -1,3 +1,7 @@
+-- Buffer-local variables:
+-- * zk_loading : Prevents duplicate async calls
+-- * zk_title   : Cached formatted title
+
 local util = require("zk.util")
 local config = require("zk.config").options.integrations.bufferline
 
@@ -12,28 +16,10 @@ if config.enabled == true then
   end
 end
 
----Format buffer name (called via 'name_formatter' config of bufferline)
----@param buf table
-function M.zk_name_formatter(buf)
-  local notebook_root = util.notebook_root(buf.path)
-  if notebook_root then
-    if config.enabled == true then
-      local zk_title = vim.b[buf.bufnr].zk_title
-      if zk_title then
-        return zk_title
-      end
-      M.get_zk_info(buf, function(buf, note)
-        M.refresh_title(buf, note)
-      end)
-    end
-    return vim.fn.fnamemodify(buf.name, ":t:r")
-  end
-end
-
 ---Refresh buffer title
 ---@param buf table
 ---@param note table?
-function M.refresh_title(buf, note)
+local function refresh_title(buf, note)
   local title = config.formatter(note)
   if vim.b[buf.bufnr].zk_title ~= title then
     vim.b[buf.bufnr].zk_title = title
@@ -44,7 +30,7 @@ end
 ---Get zk info (Async)
 ---@param buf table
 ---@param callback function?
-function M.get_zk_info(buf, callback)
+local function fetch_zk_info(buf, callback)
   require("zk.api").list(nil, {
     select = config.select,
     hrefs = { buf.path },
@@ -60,8 +46,32 @@ function M.get_zk_info(buf, callback)
   end)
 end
 
+---Format buffer name (called via bufferline's 'name_formatter' config)
+---@param buf table
+function M.name_formatter(buf)
+  local notebook_root = util.notebook_root(buf.path)
+  if notebook_root then
+    if config.enabled == true then
+      -- Check and apply cached title
+      local zk_title = vim.b[buf.bufnr].zk_title
+      if zk_title then
+        return zk_title
+      end
+      -- Otherwise, cache the title
+      if not vim.b[buf.bufnr].zk_loading then
+        vim.b[buf.bufnr].zk_loading = true
+        fetch_zk_info(buf, function(buf, note)
+          vim.b[buf.bufnr].zk_loading = false
+          refresh_title(buf, note)
+        end)
+      end
+    end
+    return vim.fn.fnamemodify(buf.name, ":t:r")
+  end
+end
+
 ---Define autocmd
-function M.define_autocmd()
+local function define_autocmd()
   if config.enabled == true then
     local augroup = vim.api.nvim_create_augroup("ZkBufferline", { clear = true })
     -- Refresh buffer name
@@ -71,13 +81,13 @@ function M.define_autocmd()
       callback = function(args)
         local buf = { bufnr = args.buf, path = args.file }
         M.get_zk_info(buf, function(note)
-          M.refresh_title(buf, note)
+          refresh_title(buf, note)
         end)
       end,
     })
   end
 end
 
-M.define_autocmd()
+define_autocmd()
 
 return M

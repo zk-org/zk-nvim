@@ -522,12 +522,15 @@ require("zk").setup({
       pattern = { "*.md" },
 
       -- The fields to fetch
-      -- Available fields are: filename, filenameStem, path, absPath, title, lead, body, snippets, rawContent, wordCount, tags, metadata, created, modified, checksum
+      -- Available fields are:
+      --   filename, filenameStem, path, absPath, title, lead, body, snippets,
+      --   rawContent, wordCount, tags, metadata, created, modified, checksum
+      select = { "id", "title", "filenameStem" },
       -- `metadata` has all the YAML frontmatter, including user defined fields.
       -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
-      select = { "id", "title", "filenameStem" },
 
       -- buffer name formatter
+      -- Only the fields set by `select` option above are available.
       formatter = function(note)
         return note.title or note.filenameStem or note.id or nil
       end,
@@ -558,7 +561,7 @@ require("zk").setup({
   integrations = {
     bufferline = {
       ...
-      select = { "id", "title", "filenameStem", "metadata" }, -- Add metadata
+      select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
       formatter = function(note)
         if vim.tbl_contains(note.tags, "book") then
           local published = metadata and metadata.published or '?'
