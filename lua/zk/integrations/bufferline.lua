@@ -41,7 +41,7 @@ local function fetch_zk_info(buf, callback)
         callback(buf, notes[1])
       end
     else
-      print(string.format("error in get_zk_info: found %s note", #notes))
+      print(string.format("error in fetch_zk_info: found %s note", #notes))
     end
   end)
 end
@@ -80,7 +80,7 @@ local function define_autocmd()
       group = augroup,
       callback = function(args)
         local buf = { bufnr = args.buf, path = args.file }
-        M.get_zk_info(buf, function(note)
+        fetch_zk_info(buf, function(note)
           refresh_title(buf, note)
         end)
       end,
