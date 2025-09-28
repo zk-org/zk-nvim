@@ -522,11 +522,10 @@ require("zk").setup({
       pattern = { "*.md" },
 
       -- The fields to fetch
+      select = { "id", "title", "filenameStem" },
       -- Available fields are:
       --   filename, filenameStem, path, absPath, title, lead, body, snippets,
       --   rawContent, wordCount, tags, metadata, created, modified, checksum
-      select = { "id", "title", "filenameStem" },
-      -- `metadata` has all the YAML frontmatter, including user defined fields.
       -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
 
       -- buffer name formatter
@@ -576,7 +575,9 @@ require("zk").setup({
   ...
 })
 ```
-After the sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
+After this sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
+
+As shown in the code above, `metadata` contains all the YAML frontmatter, including user defined fields.
 
 
 
