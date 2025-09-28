@@ -64,7 +64,6 @@ end
 -- https://github.com/folke/snacks.nvim/blob/main/lua/snacks/picker/format.lua
 ---@param item snacks.picker.Item
 function snacks_format.zk_filename(item, picker)
-  local fullpath = vim.fs.joinpath(item.cwd, item.file)
   ---@type snacks.picker.Highlight[]
   local ret = {}
   if not item.file then
