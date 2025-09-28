@@ -16,6 +16,14 @@ local M = {}
 -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
 M.zk_api_select = { "title", "path", "absPath" } -- TODO: Can be modify now / Should be included in args's opts?
 
+local function index_notes_by_path(notes)
+  local tbl = {}
+  for _, note in ipairs(notes) do
+    tbl[note.absPath] = note
+  end
+  return tbl
+end
+
 function M.create_note_entry_maker(_)
   return function(note)
     local title = note.title or note.path
@@ -120,13 +128,27 @@ function M.show_note_picker(notes, options, cb)
 end
 
 function M.make_grep_sorter(opts)
-  -- currently highlighter_only (no sorting)
   opts = opts or {}
   local fzy = opts.fzy_mod or require("telescope.algos.fzy")
 
   return require("telescope.sorters").Sorter:new({
-    scoring_function = function()
-      return 1
+    scoring_function = function(_, prompt, line, display)
+      -- Order: fzf -> title (or filename) -> lnum -> col
+      local score
+      local filename, lnum, col, text = string.match(line, "^(.-):(%d+):(%d+):(.*)$")
+      lnum = tonumber(lnum) or 0
+      col = tonumber(col) or 0
+      -- fzf
+      local fzy_score = fzy.score(prompt, text or line)
+      score = -fzy_score * 1e6
+      -- title (or filename)
+      for i = 1, math.min(8, #filename) do
+        score = score + string.byte(filename, i) * math.pow(256, 8 - i)
+      end
+      -- lnum, col
+      score = score + lnum * 1e-3
+      score = score + col * 1e-6
+      return score
     end,
 
     highlighter = function(_, prompt, display)
@@ -142,7 +164,7 @@ function M.make_grep_sorter(opts)
   })
 end
 
-function M.create_grep_entry_maker(collection)
+function M.create_grep_entry_maker()
   local displayer = entry_display.create({
     separator = " ",
     items = { {}, {}, {} },
@@ -151,7 +173,8 @@ function M.create_grep_entry_maker(collection)
   return function(line)
     local filename, lnum, col, text = string.match(line, "^(.-):(%d+):(%d+):(.*)$")
     lnum, col = tonumber(lnum), tonumber(col)
-    local title = collection[filename] or vim.fn.fnamemodify(filename, ":t")
+    local note = notes_cache[filename] or nil
+    local title = note and note.title or vim.fn.fnamemodify(filename, ":t")
     return {
       filename = filename,
       lnum = lnum,
@@ -165,7 +188,6 @@ function M.create_grep_entry_maker(collection)
           { entry.text, "TelescopeResultsNormal" },
         })
       end,
-      -- title = title,
       title = notes_cache[filename] and notes_cache[filename].title or title,
       value = {
         filename = filename,
@@ -179,27 +201,25 @@ function M.create_grep_entry_maker(collection)
   end
 end
 
+-- TODO: Need refactoring with `telescope.builtin.files.live_grep`?
+-- See https://github.com/nvim-telescope/telescope.nvim/blob/b4da76be54691e854d3e0e02c36b0245f945c2c7/lua/telescope/builtin/__files.lua#L115
 function M.show_grep_picker(options, cb)
-  local function index_notes_by_path(notes)
-    local tbl = {}
-    for _, note in ipairs(notes) do
-      tbl[note.absPath] = note
-    end
-    return tbl
-  end
   options = options or {}
-  local path = vim.api.nvim_buf_get_name(0)
-  local root = (path ~= "") and util.notebook_root(path)
-    or util.notebook_root(vim.fn.getcwd())
-    or vim.fn.getenv("ZK_NOTEBOOK_DIR")
-  local collection = {}
+
+  local root
+  if options.notebook_path then
+    root = options.notebook_path
+  else
+    local path = util.resolve_notebook_path(0)
+    if not path then
+      print("This is not a zk notebook.")
+      return
+    end
+    root = util.notebook_root(path)
+  end
 
   local telescope_options =
     vim.tbl_extend("force", { prompt_title = options.title or "Zk Grep" }, options.telescope or {})
-
-  -- for _, note in ipairs(notes) do
-  --   collection[note.absPath] = note.title or note.path
-  -- end
 
   local grep_finder = finders.new_job(function(prompt)
     if not prompt or prompt == "" then
@@ -213,12 +233,11 @@ function M.show_grep_picker(options, cb)
       prompt,
       root,
     }
-  end, M.create_grep_entry_maker(collection))
+  end, M.create_grep_entry_maker())
 
   api.list(root, { select = M.zk_api_select }, function(err, notes)
     if not err then
       notes_cache = index_notes_by_path(notes)
-      -- Snacks.picker.grep(picker_opts, cb)
       pickers
         .new(telescope_options, {
           finder = grep_finder,
