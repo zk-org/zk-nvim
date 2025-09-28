@@ -562,13 +562,15 @@ require("zk").setup({
       ...
       select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
       formatter = function(note)
-        if vim.tbl_contains(note.tags, "book") then
-          local published = metadata and metadata.published or '?'
-          local author = metadata and metadata.author or '?'
-          local title = metadata.title or '?'
+        local tags = note.tags or {}
+        local metadata = note.metadata or {}
+        if vim.tbl_contains(tags, "book") then
+          local published = metadata.published or '?'
+          local author = metadata.author or '[NO AUTHOR]'
+          local title = metadata.title or '[NO TITLE]'
           return string.format("%s / %s (%s)", title, author, published)
-        else
-          return note.title or note.filenameStem or note.id or nil
+        end
+        return note.title or note.filenameStem or note.id or nil
       end,
     },
   },
