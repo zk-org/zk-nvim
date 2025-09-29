@@ -6,7 +6,6 @@ local action_state = require("telescope.actions.state")
 local action_utils = require("telescope.actions.utils")
 local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
-local sorters = require("telescope.sorters")
 local util = require("zk.util")
 local api = require("zk.api")
 local notes_cache = {}
@@ -206,16 +205,10 @@ end
 function M.show_grep_picker(options, cb)
   options = options or {}
 
-  local root
-  if options.notebook_path then
-    root = options.notebook_path
-  else
+  local root = options.notebook_path or nil
+  if not root then
     local path = util.resolve_notebook_path(0)
-    if not path then
-      print("This is not a zk notebook.")
-      return
-    end
-    root = util.notebook_root(path)
+    root = util.notebook_root(path or vim.fn.getcwd())
   end
 
   local telescope_options =

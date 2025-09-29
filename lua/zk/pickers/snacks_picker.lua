@@ -1,16 +1,24 @@
-local M = {}
-local H = {}
-
 local Snacks = require("snacks")
 local snacks_picker = require("snacks.picker")
 local snacks_format = require("snacks.picker.format")
-local util = require("zk.util")
 local api = require("zk.api")
+local util = require("zk.util")
 local uv = vim.uv or vim.loop
 local notes_cache = {}
 
+local M = {}
+local H = {}
+
 -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
 M.zk_api_select = { "title", "path", "absPath" } -- TODO: Can be modify now / Should be included in args's opts?
+
+local function index_notes_by_path(notes)
+  local tbl = {}
+  for _, note in ipairs(notes) do
+    tbl[note.path] = note
+  end
+  return tbl
+end
 
 M.show_note_picker = function(notes, opts, cb)
   notes = vim.tbl_map(function(note)
@@ -21,19 +29,17 @@ M.show_note_picker = function(notes, opts, cb)
 end
 
 M.show_grep_picker = function(opts, cb)
-  local function index_notes_by_path(notes)
-    local tbl = {}
-    for _, note in ipairs(notes) do
-      tbl[note.path] = note
-    end
-    return tbl
+  local root = opts.notebook_path or nil
+  if not root then
+    local path = util.resolve_notebook_path(0)
+    root = util.notebook_root(path or vim.fn.getcwd())
   end
 
   local picker_opts = vim.tbl_deep_extend("force", {
-    format = "zk",
-    cwd = opts.notebook_path,
+    format = "zk_grep",
+    cwd = root,
     title = opts.title or "Zk Grep",
-    sort = { fields = { "score:desc", "idx" } },
+    sort = { fields = { "score:desc", "idx" } }, -- TODO: Add custom sorting fields (e.g. "title:desc", "pos")
   }, opts.snacks_picker or {})
 
   api.list(picker_opts.cwd, { select = M.zk_api_select }, function(err, notes)
@@ -158,8 +164,8 @@ function snacks_format.zk_filename(item, picker)
   return ret
 end
 
--- Add 'zk' format
-Snacks.picker.format["zk"] = function(item, picker)
+-- Add 'zk_grep' format
+Snacks.picker.format["zk_grep"] = function(item, picker)
   local ret = {}
   if not item.file then
     return ret
