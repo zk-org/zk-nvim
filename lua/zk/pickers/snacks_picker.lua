@@ -10,7 +10,7 @@ local M = {}
 local H = {}
 
 -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
-M.zk_api_select = { "title", "path", "absPath" } -- TODO: Can be modify now / Should be included in args's opts?
+M.note_picker_list_api_selection = { "title", "path", "absPath" }
 
 local function index_notes_by_path(notes)
   local tbl = {}
@@ -42,7 +42,7 @@ M.show_grep_picker = function(opts, cb)
     sort = { fields = { "score:desc", "idx" } }, -- TODO: Add custom sorting fields (e.g. "title:desc", "pos")
   }, opts.snacks_picker or {})
 
-  api.list(picker_opts.cwd, { select = M.zk_api_select }, function(err, notes)
+  api.list(picker_opts.cwd, { select = M.note_picker_list_api_selection }, function(err, notes)
     if not err then
       notes_cache = index_notes_by_path(notes)
       Snacks.picker.grep(picker_opts, cb)

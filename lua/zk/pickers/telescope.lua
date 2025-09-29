@@ -13,7 +13,7 @@ local notes_cache = {}
 local M = {}
 
 -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
-M.zk_api_select = { "title", "path", "absPath" } -- TODO: Can be modify now / Should be included in args's opts?
+M.note_picker_list_api_selection = { "title", "path", "absPath" }
 
 local function index_notes_by_path(notes)
   local tbl = {}
@@ -228,7 +228,7 @@ function M.show_grep_picker(options, cb)
     }
   end, M.create_grep_entry_maker())
 
-  api.list(root, { select = M.zk_api_select }, function(err, notes)
+  api.list(root, { select = M.note_picker_list_api_selection }, function(err, notes)
     if not err then
       notes_cache = index_notes_by_path(notes)
       pickers

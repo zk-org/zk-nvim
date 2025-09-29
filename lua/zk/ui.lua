@@ -65,7 +65,7 @@ function M.get_pick_notes_list_api_selection(options)
     config.options.picker_options or {},
     options or {}
   )
-  return require("zk.pickers." .. options.picker).zk_api_select
+  return require("zk.pickers." .. options.picker).note_picker_list_api_selection
 end
 
 return M
