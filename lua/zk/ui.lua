@@ -43,7 +43,9 @@ function M.get_pick_notes_list_api_selection(options)
     config.options.picker_options or {},
     options or {}
   )
-  return require("zk.pickers." .. options.picker).note_picker_list_api_selection
+  local default_select = require("zk.pickers." .. options.picker).note_picker_list_api_selection
+  local extra_select = options.select
+  return vim.list_extend(default_select, extra_select)
 end
 
 return M
