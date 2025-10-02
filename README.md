@@ -579,7 +579,12 @@ require("zk").setup({
 ```
 After this sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
 
-As shown in the code above, `metadata` contains all the YAML frontmatter, including user defined fields.
+> [!NOTE]
+> As shown in the code above, `metadata` contains all the YAML frontmatter, including user defined fields.
+
+> [!NOTE]
+> `note.metadata.title` captures only YAML title, while `note.title` can capture either the YAML title or a `# heading`.
+> Therefore, including `title` in select table and using `note.title` is a safer fallback to catch the title in any positions.
 
 
 
