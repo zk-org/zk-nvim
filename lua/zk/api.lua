@@ -16,7 +16,7 @@ local function execute_command(cmd, path, options, cb)
   end
   local bufnr = 0
   lsp.start()
-  lsp.client().request("workspace/executeCommand", {
+  lsp.client():request("workspace/executeCommand", {
     command = "zk." .. cmd,
     arguments = {
       path or util.resolve_notebook_path(bufnr),
