@@ -293,6 +293,33 @@ commands.add("ZkOrphans", make_edit_fn({ orphan = true }, { title = "Zk Orphans"
 commands.add("ZkRecents", make_edit_fn({ createdAfter = "2 weeks ago" }, { title = "Zk Recents" }))
 ```
 
+## Custom Picker Output
+
+view all fields for selection: https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
+
+### Telescope picker
+
+```lua
+zk.setup({
+	picker = "telescope",
+	picker_options = {
+        -- will appended to defaults:  { "title","path", "abspath" }
+		select = { "lead" },
+		display = {
+			separator = " -- ",
+			-- entry format: { field, width, highlight }
+			entry = {
+				{ "title", "auto" },
+				{ "lead", "remaining", "Comment" },
+			},
+            -- fields to search
+			ordinal = { "title", "lead" },
+		},
+	},
+    -- ...
+})
+```
+
 ## High-level API
 
 The high-level API is inspired by the commands provided by the `zk` CLI tool;
