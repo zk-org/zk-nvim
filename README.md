@@ -81,6 +81,16 @@ return {
           enabled = true,
         },
       },
+      integrations = {
+        bufferline = {
+          enabled = true,
+          pattern = { "*.md" },
+          select = { "id", "title", "filenameStem" },
+          formatter = function(note)
+            return note.title or note.filenameStem or note.id or nil
+          end,
+        },
+      },
     })
   end,
 }
@@ -495,6 +505,91 @@ if require("zk.util").notebook_root(vim.fn.expand('%:p')) ~= nil then
 end
 ```
 
+# Integrations
+
+## bufferline
+
+Show YAML frontmatter `title` or `#` heading as buffer name.
+
+Default:
+```lua
+require("zk").setup({
+  integrations = {
+    bufferline = {
+      enabled = false,
+
+      -- The file patterns to hook
+      pattern = { "*.md" },
+
+      -- The fields to fetch
+      select = { "id", "title", "filenameStem" },
+      -- Available fields are:
+      --   filename, filenameStem, path, absPath, title, lead, body, snippets,
+      --   rawContent, wordCount, tags, metadata, created, modified, checksum
+      -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
+
+      -- buffer name formatter
+      -- Only the fields set by `select` option above are available.
+      formatter = function(note)
+        return note.title or note.filenameStem or note.id or nil
+      end,
+    },
+  },
+  ...
+})
+```
+
+## bufferline Sample Config
+
+A sample for:
+- Displaying the buffer name from user-defined YAML frontmatter.
+- checking if a specific tag is contained.
+
+YAML frontmatter:
+```markdown
+---
+title      : Awesome Note Taking
+author     : John Davis
+published  : 2025
+tags       : [book]
+---
+```
+Config:
+```lua
+require("zk").setup({
+  integrations = {
+    bufferline = {
+      ...
+      enabled = true,
+      pattern = { "*.md" },
+      select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
+      formatter = function(note)
+        local tags = note.tags or {}
+        local metadata = note.metadata or {}
+        if vim.tbl_contains(tags, "book") then
+          local title = metadata.title or '[NO TITLE]'
+          local author = metadata.author or '[NO AUTHOR]'
+          local published = metadata.published or '?'
+          return string.format("%s / %s (%s)", title, author, published)
+        end
+        return note.title or note.filenameStem or note.id or nil
+      end,
+    },
+  },
+  ...
+})
+```
+After this sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
+
+> [!NOTE]
+> As shown in the code above, `metadata` contains all the YAML frontmatter, including user defined fields.
+
+> [!NOTE]
+> `note.metadata.title` captures only YAML title, while `note.title` can capture either the YAML title or a `# heading`.
+> Therefore, including `title` in select table and using `note.title` is a safer fallback to catch the title in any positions.
+
+
+
 # Miscellaneous
 
 ## Syntax Highlighting Tips
@@ -622,3 +717,4 @@ require("telescope").load_extension("zk")
 :Telescope zk tags
 :Telescope zk tags created=today
 ```
+
