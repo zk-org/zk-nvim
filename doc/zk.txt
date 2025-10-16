@@ -461,7 +461,7 @@ Defaut:
     require("zk").setup({
       integrations = {
         bufferline = {
-          enabled = true,
+          enabled = false,
     
           -- The file patterns to hook
           pattern = { "*.md" },
@@ -503,7 +503,7 @@ Config:
     require("zk").setup({
       integrations = {
         bufferline = {
-          ...
+          enabled = true,
           select = { "id", "title", "filenameStem", "metadata" }, -- Add metadata
           formatter = function(note)
             if vim.tbl_contains(note.tags, "book") then
@@ -521,6 +521,12 @@ Config:
 <
 After the sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
 
+NOTE:
+    As shown in the code above, `metadata` contains all the YAML frontmatter, including user defined fields.
+
+NOTE:
+    `note.metadata.title` captures only YAML title, while `note.title` can capture either the YAML title or a `# heading`.
+    Therefore, including `title` in select table and using `note.title` is a safer fallback to catch the title in any positions.
 
 ================================================================================
 MISCELLANEOUS                                                   *zk-miscellaneous*

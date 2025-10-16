@@ -516,7 +516,7 @@ Default:
 require("zk").setup({
   integrations = {
     bufferline = {
-      enabled = true,
+      enabled = false,
 
       -- The file patterns to hook
       pattern = { "*.md" },
@@ -560,6 +560,8 @@ require("zk").setup({
   integrations = {
     bufferline = {
       ...
+      enabled = true,
+      pattern = { "*.md" },
       select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
       formatter = function(note)
         local tags = note.tags or {}

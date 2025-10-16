@@ -15,7 +15,7 @@ M.defaults = {
   },
   integrations = {
     bufferline = {
-      enabled = true,
+      enabled = false,
       pattern = { "*.md" },
       select = { "id", "title", "filenameStem" },
       formatter = function(note)
