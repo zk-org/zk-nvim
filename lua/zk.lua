@@ -100,6 +100,9 @@ end
 function M.pick_notes(options, picker_options, cb)
   options =
     vim.tbl_extend("force", { select = ui.get_pick_notes_list_api_selection(picker_options) }, options or {})
+  if options["notebook_path"] then
+    picker_options["notebook_path"] = options["notebook_path"]
+  end
   api.list(options.notebook_path, options, function(err, notes)
     assert(not err, tostring(err))
     ui.pick_notes(notes, picker_options, cb)
