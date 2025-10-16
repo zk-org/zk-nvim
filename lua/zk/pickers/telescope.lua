@@ -93,13 +93,13 @@ function M.show_note_picker(notes, options, cb)
         mapping("i", "<C-e>", function()
           local current_picker = action_state.get_current_picker(prompt_bufnr)
           local prompt = current_picker:_get_prompt()
-          local newOptions = { title = prompt }
+          local new_options = { title = prompt }
           if options["notebook_path"] then
-            newOptions["notebook_path"] = options["notebook_path"]
+            new_options["notebook_path"] = options["notebook_path"]
           end
           actions.close(prompt_bufnr)
           vim.schedule(function()
-            require("zk").new(newOptions)
+            require("zk").new(new_options)
           end)
         end)
         mapping("i", "<CR>", function()
