@@ -69,11 +69,8 @@ function M.show_note_picker(notes, options, cb)
       end,
       ["ctrl-e"] = function()
         local query = require("fzf-lua").config.__resume_data.last_query
-        local new_options = { title = query }
-        if options["notebook_path"] then
-          new_options["notebook_path"] = options["notebook_path"]
-        end
-        require("zk").new(new_options)
+        options["title"] = query
+        require("zk").new(options)
       end,
     },
   }, options.fzf_lua or {})
