@@ -127,6 +127,7 @@ commands.add("ZkTags", function(options)
     tags = vim.tbl_map(function(v)
       return v.name
     end, tags)
-    zk.edit({ tags = tags }, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
+    options = vim.tbl_extend("keep", { tags = tags }, options or {})
+    zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
   end)
 end)
