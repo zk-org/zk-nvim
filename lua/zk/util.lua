@@ -155,4 +155,41 @@ function M.get_buffer_paths()
   return paths
 end
 
+---Load and decode 'config.toml'
+---@param cwd? string Notebook root directory (optional)
+---@return table? config Decoded TOML config if successful
+function M.get_zk_config(cwd)
+  local ltoml = require("toml")
+  cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
+  if not cwd then
+    return
+  end
+  toml_path = vim.fs.joinpath(cwd, ".zk/config.toml")
+  local result, config = pcall(ltoml.decodeFromFile, toml_path)
+  if not result then
+    vim.notify("Error: Cannot get 'config.toml'.", vim.log.levels.ERROR, { title = "zk-nvim" })
+    return
+  end
+  return config
+end
+
+---Get templates list
+---@param cwd string?
+---@param filename_modifiers string? Same like vim.fs.fnamemodify() e.g. ":t"
+---@return table? templates_list Formated tamplates list
+function M.get_templates(cwd, filename_modifiers)
+  cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
+  if not cwd then
+    return
+  end
+  local template_dir = vim.fs.joinpath(cwd, ".zk/templates")
+  local templates = vim.fn.globpath(template_dir, "*.md", false, true)
+  local list = {}
+  for _, path in ipairs(templates) do
+    local name = vim.fn.fnamemodify(path, filename_modifiers or ":t")
+    table.insert(list, name)
+  end
+  return list
+end
+
 return M
