@@ -158,7 +158,7 @@ end
 ---Load and decode 'config.toml'
 ---@param cwd? string Notebook root directory (optional)
 ---@return table? config Decoded TOML config if successful
-function M.get_zk_config(cwd)
+function M.get_config_toml(cwd)
   local ltoml = require("toml")
   cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
   if not cwd then
@@ -175,21 +175,105 @@ end
 
 ---Get templates list
 ---@param cwd string?
----@param filename_modifiers string? Same like vim.fs.fnamemodify() e.g. ":t"
----@return table? templates_list Formated tamplates list
-function M.get_templates(cwd, filename_modifiers)
+---@return table<string, {name:string, path:string, content:string}>? temlates
+function M.get_templates(cwd)
   cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
   if not cwd then
     return
   end
   local template_dir = vim.fs.joinpath(cwd, ".zk/templates")
-  local templates = vim.fn.globpath(template_dir, "*.md", false, true)
-  local list = {}
-  for _, path in ipairs(templates) do
-    local name = vim.fn.fnamemodify(path, filename_modifiers or ":t")
-    table.insert(list, name)
+  local paths = vim.fn.globpath(template_dir, "*.md", false, true)
+  local templates = {}
+  for _, path in ipairs(paths) do
+    local template = {
+      path = path,
+      name = vim.fn.fnamemodify(path, ":t"),
+      stem = vim.fn.fnamemodify(path, ":t:r"),
+      content = table.concat(vim.fn.readfile(path), "\n"),
+    }
+    templates[path] = template
   end
-  return list
+  return templates
+end
+
+---Get directories list
+---@param cwd string?
+---@return table? directories
+function M.get_dirs(cwd)
+  cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
+  if not cwd then
+    return
+  end
+  local DEPTH = 10
+  local dirs = {}
+  for name, type in vim.fs.dir(cwd, { depth = DEPTH }) do
+    if type == "directory" then
+      local segments = vim.split(name, "[/\\]")
+      local hidden = false
+      for _, segment in ipairs(segments) do
+        if segment:sub(1, 1) == "." then
+          hidden = true
+        end
+      end
+      if not hidden then
+        table.insert(dirs, name)
+      end
+    end
+  end
+  return dirs
+end
+
+function M.select(cwd)
+  -- DEBUG: ここから
+  -- config.toml 取得
+  -- groups 取得
+  --
+  -- groups 設定アリ
+  --   ⭐️ group 選択
+  --   group 中の paths (template) 取得
+  --   全ディレクトリを取得 (ルート込み)
+  --   ⭐️ paths から選択 (paths が無ければ全ディレクトリから選択)
+  --   template は1つしか指定ないので自動的に選択 無ければ default.md を選択、それも無ければ空っぽで。
+  --   -> 上記設定で callback 実行
+  --
+  -- groups 設定ナシ
+  --   templates を取得
+  --   ⭐️template 選択
+  --   paths も無いはずなので 全ディレクトリを取得
+  --   ⭐️ディレクトリ選択
+  --   -> 上記設定で callback を実行
+  --
+  -- callback の引数には {group, dir, template} を与える
+  --   group string?
+  --   dir string?
+  --   templates table?
+  --   ん、group もテーブルで toml 情報を渡すか？ group = { note = ... } になるけど使いにくくないか？
+  --
+  -- ベースとなる関数
+  --   zk.select() を追加しておき、それをコール。
+  --   api には入れられない。zk cli の機能ではないから。
+  --   とすると、
+  --     1. zk.lua に直接記述
+  --     2. util.lua に記述 (こちらだね)
+
+  -- group サンプル
+  -- note = {
+  --   extra = {
+  --     categories = "",
+  --     created = "",
+  --     modified = "",
+  --     status = "draft",
+  --     tags = ""
+  --   },
+  --   ["id-case"] = "lower",
+  --   ["id-charset"] = "alphanum",
+  --   ["id-length"] = 6,
+  --   note = {
+  --     filename = "{{id}}",
+  --     template = "note.md"
+  --   },
+  --   paths = { "notes" }
+  -- }
 end
 
 return M
