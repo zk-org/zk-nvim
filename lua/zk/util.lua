@@ -198,24 +198,35 @@ end
 
 ---Get directories list
 ---@param cwd string?
+---@param depth number?
+---@param ignores table?
 ---@return table? directories
-function M.get_dirs(cwd)
+function M.get_dirs(cwd, depth, ignores)
   cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
   if not cwd then
     return
   end
-  local DEPTH = 10
+  depth = depth or 10
+  ignores = ignores or {}
   local dirs = {}
-  for name, type in vim.fs.dir(cwd, { depth = DEPTH }) do
+  for name, type in vim.fs.dir(cwd, { depth = depth }) do
     if type == "directory" then
       local segments = vim.split(name, "[/\\]")
       local hidden = false
+      local ignored = false
       for _, segment in ipairs(segments) do
         if segment:sub(1, 1) == "." then
           hidden = true
+          break
+        end
+        for _, part in ipairs(ignores) do
+          if segment == part then
+            ignored = true
+            break
+          end
         end
       end
-      if not hidden then
+      if not hidden and not ignored then
         table.insert(dirs, name)
       end
     end
@@ -224,6 +235,16 @@ function M.get_dirs(cwd)
 end
 
 function M.select(cwd)
+  local config = M.get_config_toml(cwd)
+  local groups = config.groups
+  if groups then
+    -- groups exists
+    print()
+  else
+    -- groups does not exist
+    print()
+  end
+
   -- DEBUG: ここから
   -- config.toml 取得
   -- groups 取得
@@ -231,15 +252,14 @@ function M.select(cwd)
   -- groups 設定アリ
   --   ⭐️ group 選択
   --   group 中の paths (template) 取得
-  --   全ディレクトリを取得 (ルート込み)
-  --   ⭐️ paths から選択 (paths が無ければ全ディレクトリから選択)
+  --   ⭐️ paths から選択 (paths が無ければ全ディレクトリを収集して選択)
   --   template は1つしか指定ないので自動的に選択 無ければ default.md を選択、それも無ければ空っぽで。
   --   -> 上記設定で callback 実行
   --
   -- groups 設定ナシ
   --   templates を取得
   --   ⭐️template 選択
-  --   paths も無いはずなので 全ディレクトリを取得
+  --   paths も無いはずなので 全ディレクトリを収集
   --   ⭐️ディレクトリ選択
   --   -> 上記設定で callback を実行
   --
