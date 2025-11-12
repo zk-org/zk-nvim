@@ -18,7 +18,7 @@ commands.add("ZkNew", function(options)
 end)
 
 commands.add("ZkNewSelect", function(options)
-  -- commands.add("ZkSelect", function(options)
+  -- commands.add("ZkSelect", function(options) -- DEBUG:
   options = options or {}
 end)
 

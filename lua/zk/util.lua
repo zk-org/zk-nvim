@@ -234,66 +234,96 @@ function M.get_dirs(cwd, depth, ignores)
   return dirs
 end
 
-function M.select(cwd)
-  local config = M.get_config_toml(cwd)
-  local groups = config.groups
-  if groups then
-    -- groups exists
-    print()
-  else
-    -- groups does not exist
-    print()
+---@class zk.select.util.result
+---@field group string?
+---@field dir string?
+---@field template string?
+
+---Interactive selection for group, paths, templates, and directories.
+---@param cwd string?
+---@param cb fun(ret: zk.select.util.result?, config: table?)
+function M.select(cwd, cb)
+  local function sorter(a, b)
+    return a < b
   end
-
-  -- DEBUG: ここから
-  -- config.toml 取得
-  -- groups 取得
-  --
-  -- groups 設定アリ
-  --   ⭐️ group 選択
-  --   group 中の paths (template) 取得
-  --   ⭐️ paths から選択 (paths が無ければ全ディレクトリを収集して選択)
-  --   template は1つしか指定ないので自動的に選択 無ければ default.md を選択、それも無ければ空っぽで。
-  --   -> 上記設定で callback 実行
-  --
-  -- groups 設定ナシ
-  --   templates を取得
-  --   ⭐️template 選択
-  --   paths も無いはずなので 全ディレクトリを収集
-  --   ⭐️ディレクトリ選択
-  --   -> 上記設定で callback を実行
-  --
-  -- callback の引数には {group, dir, template} を与える
-  --   group string?
-  --   dir string?
-  --   templates table?
-  --   ん、group もテーブルで toml 情報を渡すか？ group = { note = ... } になるけど使いにくくないか？
-  --
-  -- ベースとなる関数
-  --   zk.select() を追加しておき、それをコール。
-  --   api には入れられない。zk cli の機能ではないから。
-  --   とすると、
-  --     1. zk.lua に直接記述
-  --     2. util.lua に記述 (こちらだね)
-
-  -- group サンプル
-  -- note = {
-  --   extra = {
-  --     categories = "",
-  --     created = "",
-  --     modified = "",
-  --     status = "draft",
-  --     tags = ""
-  --   },
-  --   ["id-case"] = "lower",
-  --   ["id-charset"] = "alphanum",
-  --   ["id-length"] = 6,
-  --   note = {
-  --     filename = "{{id}}",
-  --     template = "note.md"
-  --   },
-  --   paths = { "notes" }
-  -- }
+  cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
+  if not cwd then
+    return
+  end
+  local ret = {} ---@type zk.select.util.result
+  local config = M.get_config_toml(cwd) or {}
+  local groups = config.group -- group, not groups in toml
+  if groups then -- groups exists
+    local group_names = vim.tbl_keys(groups)
+    table.sort(group_names, sorter)
+    vim.ui.select(group_names, { prompt = "Select a group" }, function(group_name)
+      if not group_name then
+        return
+      end
+      ret.group = group_name
+      local paths = groups[group_name] and groups[group_name].paths
+      if paths then -- paths exists
+        table.sort(paths, sorter)
+        if #paths > 1 then
+          vim.ui.select(paths, { prompt = "Select a path" }, function(path)
+            if not path then
+              return
+            end
+            ret.dir = path
+            ret.template = groups[group_name].note and groups[group_name].note.template
+            cb(ret, config)
+          end)
+        elseif #paths == 1 then -- Apply automatically if only one path
+          ret.dir = paths[1]
+          ret.template = groups[group_name].note and groups[group_name].note.template
+          cb(ret, config)
+        end
+      else -- paths does not exist
+        local dirs = M.get_dirs(cwd) or {}
+        table.insert(dirs, "")
+        table.sort(dirs, sorter)
+        vim.ui.select(dirs, { prompt = "Select a directory" }, function(dir)
+          if not dir then
+            return
+          end
+          ret.dir = dir
+          ret.template = groups[group_name].note and groups[group_name].note.template
+          if not ret.template then
+            local msg =
+              string.format("`note.template` is not set for `%s` group.\nSee `.zk/config.toml`", group_name)
+            vim.notify(msg, vim.log.levels.ERROR, { title = "zk-nvim" })
+            return
+          end
+          cb(ret, config)
+        end)
+      end
+    end)
+  else -- groups does not exist
+    ret.group = nil
+    local templates = M.get_templates(cwd)
+    if not templates or vim.tbl_count(templates) == 0 then
+      local msg = "Cannot find any templates in `.zk/templates`"
+      vim.notify(msg, vim.log.levels.ERROR, { title = "zk-nvim" })
+      return
+    end
+    local template_names = vim.tbl_keys(templates)
+    vim.ui.select(template_names, { prompt = "Select a template" }, function(template_name)
+      if not template_name then
+        return
+      end
+      ret.template = template_name
+      local dirs = M.get_dirs(cwd) or {}
+      table.insert(dirs, "")
+      table.sort(dirs, sorter)
+      vim.ui.select(dirs, { prompt = "Select a directory" }, function(dir)
+        if not dir then
+          return
+        end
+        ret.dir = dir
+        cb(ret, config)
+      end)
+    end)
+  end
 end
 
 return M
