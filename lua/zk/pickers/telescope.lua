@@ -19,6 +19,7 @@ function M.create_note_entry_maker(_)
       path = note.absPath,
       display = title,
       ordinal = title,
+      text = title,
     }
   end
 end
