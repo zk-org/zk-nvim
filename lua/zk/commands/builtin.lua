@@ -17,9 +17,9 @@ commands.add("ZkNew", function(options)
   zk.new(options)
 end)
 
-commands.add("ZkNewSelect", function(options)
+commands.add("ZkNewWithPrompt", function(options)
   options = options or {}
-  util.select(nil, function(ret, _)
+  util.prompt_for_new(nil, function(ret, _)
     options = vim.tbl_deep_extend("force", options, ret)
     zk.new(options)
   end)

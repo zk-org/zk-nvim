@@ -239,10 +239,10 @@ end
 ---@field dir string?
 ---@field template string?
 
----Interactive selection for group, paths, templates, and directories.
+---Prompt for group, paths, templates, and directories for new note.
 ---@param cwd string?
 ---@param cb fun(ret: zk.select.util.result?, config: table?)
-function M.select(cwd, cb)
+function M.prompt_for_new(cwd, cb)
   local function sorter(a, b)
     return a < b
   end
