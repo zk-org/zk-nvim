@@ -18,8 +18,11 @@ commands.add("ZkNew", function(options)
 end)
 
 commands.add("ZkNewSelect", function(options)
-  -- commands.add("ZkSelect", function(options) -- DEBUG:
   options = options or {}
+  util.select(nil, function(ret, _)
+    options = vim.tbl_deep_extend("force", options, ret)
+    zk.new(options)
+  end)
 end)
 
 commands.add("ZkNewFromTitleSelection", function(options)
