@@ -234,15 +234,15 @@ function M.get_dirs(cwd, depth, ignores)
   return dirs
 end
 
----@class zk.select.util.result
+---@class zk.util.prompt_new.result
 ---@field group string?
 ---@field dir string?
 ---@field template string?
 
 ---Prompt for group, paths, templates, and directories for new note.
 ---@param cwd string?
----@param cb fun(ret: zk.select.util.result?, config: table?)
-function M.prompt_for_new(cwd, cb)
+---@param cb fun(ret: zk.util.prompt_new.result?, config: table?)
+function M.prompt_new(cwd, cb)
   local function sorter(a, b)
     return a < b
   end
@@ -250,7 +250,7 @@ function M.prompt_for_new(cwd, cb)
   if not cwd then
     return
   end
-  local ret = {} ---@type zk.select.util.result
+  local ret = {} ---@type zk.util.prompt_new.result
   local config = M.get_config_toml(cwd) or {}
   local groups = config.group -- group, not groups in toml
   if groups then -- groups exists
