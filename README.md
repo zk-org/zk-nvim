@@ -161,6 +161,9 @@ see what they can do, and learn as you go.
 - `:ZkNew [{options}]`  
   Creates and edits a new note.
 
+- `:'<,'>ZkNewWithPrompt [{options}]`  
+  Creates and edits a new note with prompt for choosing group, path and template.
+
 - `:'<,'>ZkNewFromTitleSelection [{options}]`  
   Creates a new note from the visual selection (used as the **title**) and
   replaces the selection with a link to the note.
@@ -168,6 +171,7 @@ see what they can do, and learn as you go.
 - `:'<,'>ZkNewFromContentSelection [{options}]`  
   Creates a new note from the visual selection (used as the **content**) and
   replaces the selection with a link to the note.
+
 
 ### Navigation
 
