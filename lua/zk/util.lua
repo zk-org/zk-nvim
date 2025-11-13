@@ -284,10 +284,19 @@ function M.prompt_new(cwd, cb)
           ret.dir = dir
           ret.template = groups[group_name].note and groups[group_name].note.template
           if not ret.template then
-            local msg =
-              string.format("`note.template` is not set for `%s` group.\nSee `.zk/config.toml`", group_name)
-            vim.notify(msg, vim.log.levels.ERROR, { title = "zk-nvim" })
-            return
+            local templates = M.get_templates(cwd)
+            if not templates or vim.tbl_count(templates) == 0 then
+              local msg = "Cannot find any templates in `.zk/templates`"
+              vim.notify(msg, vim.log.levels.ERROR, { title = "zk-nvim" })
+              return
+            end
+            local template_names = vim.tbl_keys(templates)
+            vim.ui.select(template_names, { prompt = "Select a template" }, function(template_name)
+              if not template_name then
+                return
+              end
+              ret.template = template_name
+            end)
           end
           cb(ret, config)
         end)
