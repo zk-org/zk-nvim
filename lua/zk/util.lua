@@ -238,72 +238,68 @@ end
 ---@param cwd string?
 ---@param cb fun(ret: table?, config: table?)
 function M.prompt_new(cwd, cb)
-  local function sorter(a, b)
-    return a < b
-  end
+  local ret = {}
   cwd = cwd or require("zk.util").notebook_root(vim.fn.getcwd())
   if not cwd then
     return
   end
-  local ret = {}
   local config = M.get_config_toml(cwd) or {}
-  local groups = config.group -- group, not groups in toml
-  if groups then -- groups exists
-    local group_names = vim.tbl_keys(groups)
+  local groups = config.group -- Note that it is named `group` instead of `groups` in config.toml
+
+  ---@param a string
+  ---@param b string
+  ---@return boolean
+  local function sorter(a, b)
+    return a < b
+  end
+
+  ---@param callback function
+  function select_group(group_names, callback)
     table.sort(group_names, sorter)
     vim.ui.select(group_names, { prompt = "Select a group" }, function(group_name)
       if not group_name then
         return
       end
       ret.group = group_name
-      local paths = groups[group_name] and groups[group_name].paths
-      if paths then -- paths exists
-        table.sort(paths, sorter)
-        if #paths > 1 then
-          vim.ui.select(paths, { prompt = "Select a path" }, function(path)
-            if not path then
-              return
-            end
-            ret.dir = path
-            ret.template = groups[group_name].note and groups[group_name].note.template
-            cb(ret, config)
-          end)
-        elseif #paths == 1 then -- Apply automatically if only one path
-          ret.dir = paths[1]
-          ret.template = groups[group_name].note and groups[group_name].note.template
-          cb(ret, config)
-        end
-      else -- paths does not exist
-        local dirs = M.get_dirs(cwd) or {}
-        table.insert(dirs, "")
-        table.sort(dirs, sorter)
-        vim.ui.select(dirs, { prompt = "Select a directory" }, function(dir)
-          if not dir then
-            return
-          end
-          ret.dir = dir
-          ret.template = groups[group_name].note and groups[group_name].note.template
-          if not ret.template then
-            local templates = M.get_templates(cwd)
-            if not templates or vim.tbl_count(templates) == 0 then
-              local msg = "Cannot find any templates in `.zk/templates`"
-              vim.notify(msg, vim.log.levels.ERROR, { title = "zk-nvim" })
-              return
-            end
-            local template_names = vim.tbl_keys(templates)
-            vim.ui.select(template_names, { prompt = "Select a template" }, function(template_name)
-              if not template_name then
-                return
-              end
-              ret.template = template_name
-            end)
-          end
-          cb(ret, config)
-        end)
-      end
+      callback()
     end)
-  else -- groups does not exist
-    ret.group = nil
+  end
+
+  ---@param callback function
+  function select_directory_fs(callback)
+    local dirs = M.get_dirs(cwd) or {}
+    table.insert(dirs, "")
+    table.sort(dirs, sorter)
+    vim.ui.select(dirs, { prompt = "Select a directory" }, function(dir)
+      if not dir then
+        return
+      end
+      ret.dir = dir
+      callback()
+    end)
+  end
+
+  ---@param callback function
+  function select_paths(paths, callback)
+    table.sort(paths, sorter)
+    if #paths > 1 then
+      vim.ui.select(paths, { prompt = "Select a path" }, function(path)
+        if not path then
+          return
+        end
+        ret.dir = path
+        ret.template = groups[ret.group].note and groups[ret.group].note.template
+        callback()
+      end)
+    elseif #paths == 1 then -- Apply automatically if only one path
+      ret.dir = paths[1]
+      ret.template = groups[ret.group].note and groups[ret.group].note.template
+      callback()
+    end
+  end
+
+  ---@param callback function
+  function select_template_fs(callback)
     local templates = M.get_templates(cwd)
     if not templates or vim.tbl_count(templates) == 0 then
       local msg = "Cannot find any templates in `.zk/templates`"
@@ -316,14 +312,43 @@ function M.prompt_new(cwd, cb)
         return
       end
       ret.template = template_name
-      local dirs = M.get_dirs(cwd) or {}
-      table.insert(dirs, "")
-      table.sort(dirs, sorter)
-      vim.ui.select(dirs, { prompt = "Select a directory" }, function(dir)
-        if not dir then
-          return
-        end
-        ret.dir = dir
+      callback()
+    end)
+  end
+
+  if groups then -- groups exists
+    local group_names = vim.tbl_keys(groups)
+    select_group(group_names, function()
+      local paths = groups[ret.group] and groups[ret.group].paths
+      if paths then -- paths exists
+        select_paths(paths, function()
+          local template_name = groups[ret.group].note and groups[ret.group].note.template
+          if template_name then
+            ret.template = template_name
+            cb(ret, config)
+          else
+            select_template_fs(function()
+              cb(ret, config)
+            end)
+          end
+        end)
+      else -- paths does not exist
+        select_directory_fs(function()
+          local template_name = groups[ret.group].note and groups[ret.group].note.template
+          if template_name then
+            ret.template = template_name
+            cb(ret, config)
+          else
+            select_template_fs(function()
+              cb(ret, config)
+            end)
+          end
+        end)
+      end
+    end)
+  else -- groups does not exist
+    select_directory_fs(function()
+      select_template_fs(function()
         cb(ret, config)
       end)
     end)
