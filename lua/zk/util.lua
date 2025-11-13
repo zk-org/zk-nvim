@@ -253,20 +253,20 @@ function M.prompt_new(cwd, cb)
     return a < b
   end
 
-  ---@param callback function
-  function select_group(group_names, callback)
+  ---@param on_select function
+  function select_group(group_names, on_select)
     table.sort(group_names, sorter)
     vim.ui.select(group_names, { prompt = "Select a group" }, function(group_name)
       if not group_name then
         return
       end
       ret.group = group_name
-      callback()
+      on_select()
     end)
   end
 
-  ---@param callback function
-  function select_directory_fs(callback)
+  ---@param on_select function
+  function select_directory_fs(on_select)
     local dirs = M.get_dirs(cwd) or {}
     table.insert(dirs, "")
     table.sort(dirs, sorter)
@@ -275,12 +275,12 @@ function M.prompt_new(cwd, cb)
         return
       end
       ret.dir = dir
-      callback()
+      on_select()
     end)
   end
 
-  ---@param callback function
-  function select_paths(paths, callback)
+  ---@param on_select function
+  function select_paths(paths, on_select)
     table.sort(paths, sorter)
     if #paths > 1 then
       vim.ui.select(paths, { prompt = "Select a path" }, function(path)
@@ -289,17 +289,17 @@ function M.prompt_new(cwd, cb)
         end
         ret.dir = path
         ret.template = groups[ret.group].note and groups[ret.group].note.template
-        callback()
+        on_select()
       end)
     elseif #paths == 1 then -- Apply automatically if only one path
       ret.dir = paths[1]
       ret.template = groups[ret.group].note and groups[ret.group].note.template
-      callback()
+      on_select()
     end
   end
 
-  ---@param callback function
-  function select_template_fs(callback)
+  ---@param on_select function
+  function select_template_fs(on_select)
     local templates = M.get_templates(cwd)
     if not templates or vim.tbl_count(templates) == 0 then
       local msg = "Cannot find any templates in `.zk/templates`"
@@ -317,7 +317,7 @@ function M.prompt_new(cwd, cb)
         return
       end
       ret.template = template_name
-      callback()
+      on_select()
     end)
   end
 
