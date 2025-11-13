@@ -306,7 +306,12 @@ function M.prompt_new(cwd, cb)
       vim.notify(msg, vim.log.levels.ERROR, { title = "zk-nvim" })
       return
     end
-    local template_names = vim.tbl_keys(templates)
+
+    local template_names = {}
+    for _, template in pairs(templates) do
+      table.insert(template_names, template.name)
+    end
+    table.sort(template_names, sorter)
     vim.ui.select(template_names, { prompt = "Select a template" }, function(template_name)
       if not template_name then
         return
