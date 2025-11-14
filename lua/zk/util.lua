@@ -253,6 +253,7 @@ function M.prompt_new(cwd, cb)
     return a < b
   end
 
+  ---@param group_names string[]
   ---@param on_select function
   function select_group(group_names, on_select)
     table.sort(group_names, sorter)
@@ -279,6 +280,7 @@ function M.prompt_new(cwd, cb)
     end)
   end
 
+  ---@param paths string[]
   ---@param on_select function
   function select_paths(paths, on_select)
     table.sort(paths, sorter)
