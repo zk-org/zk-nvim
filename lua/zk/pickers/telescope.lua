@@ -153,8 +153,8 @@ function M.make_grep_sorter(opts)
     end,
 
     highlighter = function(_, prompt, display)
-      local entry_text = display:match("^.-%s%d+:%d+%s(.*)$") or display
-      local prefix_len = #display - #entry_text
+      local entry_text = display:match("^.-:%d+:%d+%s(.*)$") or display -- Should match the pattern returned by displayer()
+      local prefix_len = #display - #entry_text -- start position of entry.text
       local relative_positions = fzy.positions(prompt, entry_text)
       local absolute_positions = {}
       for i, pos in ipairs(relative_positions) do
@@ -165,31 +165,39 @@ function M.make_grep_sorter(opts)
   })
 end
 
-function M.create_grep_entry_maker()
+---@param root string
+function M.create_grep_entry_maker(root)
   local displayer = entry_display.create({
-    separator = " ",
-    items = { {}, {}, {} },
+    separator = "",
+    items = { {}, {}, {}, {} },
   })
 
   return function(line)
     local filename, lnum, col, text = string.match(line, "^(.-):(%d+):(%d+):(.*)$")
     lnum, col = tonumber(lnum), tonumber(col)
+    local relpath = filename:sub(#root + 2)
+    local dir = vim.fn.fnamemodify(relpath, ":h")
+    dir = dir == "." and "" or vim.fs.joinpath(dir, "")
+    local base = vim.fn.fnamemodify(relpath, ":t")
     local note = notes_cache[filename] or nil
-    local title = note and note.title or vim.fn.fnamemodify(filename, ":t")
+    local title = note and note.title or base
+
     return {
       filename = filename,
       lnum = lnum,
       col = col,
       text = text,
-      ordinal = title .. ":" .. lnum .. ":" .. col .. ":" .. text,
+      ordinal = dir .. title .. ":" .. lnum .. ":" .. col .. ":" .. text,
       display = function(entry)
         return displayer({
-          { entry.title, "TelescopeResultsIdentifier" },
-          { tostring(entry.lnum) .. ":" .. tostring(entry.col), "TelescopeResultsLineNr" },
+          { entry.dir, "TelescopeResultsLineNr" }, -- TODO: Is there a better hl?
+          { entry.title, "TelescopeResultsTitle" },
+          { ":" .. tostring(entry.lnum) .. ":" .. tostring(entry.col) .. " ", "TelescopeResultsLineNr" },
           { entry.text, "TelescopeResultsNormal" },
         })
       end,
-      title = notes_cache[filename] and notes_cache[filename].title or title,
+      title = title,
+      dir = dir,
       value = {
         filename = filename,
         lnum = lnum,
@@ -210,7 +218,7 @@ function M.show_grep_picker(options, cb)
   local root = options.notebook_path or nil
   if not root then
     local path = util.resolve_notebook_path(0)
-    root = util.notebook_root(path or vim.fn.getcwd())
+    root = util.notebook_root(path or vim.fn.getcwd()) or vim.fn.getcwd()
   end
 
   local telescope_options =
@@ -228,7 +236,7 @@ function M.show_grep_picker(options, cb)
       prompt,
       root,
     }
-  end, M.create_grep_entry_maker())
+  end, M.create_grep_entry_maker(root))
 
   api.list(root, { select = M.note_picker_list_api_selection }, function(err, notes)
     if not err then
