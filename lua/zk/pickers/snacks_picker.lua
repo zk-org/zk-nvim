@@ -78,18 +78,19 @@ function snacks_format.zk_filename(item, picker)
   local path = Snacks.picker.util.path(item) or item.file
   path =
     Snacks.picker.util.truncpath(path, picker.opts.formatters.file.min_width or 40, { cwd = picker:cwd() })
-  local name, cat = path, "file"
-  if item.buf and vim.api.nvim_buf_is_loaded(item.buf) then
-    name = vim.bo[item.buf].filetype
-    cat = "filetype"
-  elseif item.dir then
-    cat = "directory"
-  end
 
   if picker.opts.icons.files.enabled ~= false then
+    local name, cat = path, (item.dir and "directory" or "file")
+    if item.buf and vim.api.nvim_buf_is_loaded(item.buf) and vim.bo[item.buf].buftype ~= "" then
+      name = vim.bo[item.buf].filetype
+      cat = "filetype"
+    end
     local icon, hl = Snacks.util.icon(name, cat, {
       fallback = picker.opts.icons.files,
     })
+    if item.buftype == "terminal" then
+      icon, hl = " ", "Special"
+    end
     if item.dir and item.open then
       icon = picker.opts.icons.files.dir_open
     end
@@ -123,21 +124,34 @@ function snacks_format.zk_filename(item, picker)
   else
     if picker.opts.formatters.file.filename_only then
       path = vim.fn.fnamemodify(item.file, ":t")
+      path = path == "" and item.file or path
       ret[#ret + 1] = { path, base_hl, field = "file" }
     else
-      local dir, base = path:match("^(.*)/(.+)$")
-      if base and dir then
-        if picker.opts.formatters.file.filename_first then
-          ret[#ret + 1] = { base, base_hl, field = "file" }
-          ret[#ret + 1] = { " " }
-          ret[#ret + 1] = { dir, dir_hl, field = "file" }
-        else
-          ret[#ret + 1] = { dir .. "/", dir_hl, field = "file" }
-          ret[#ret + 1] = { base, base_hl, field = "file" }
-        end
-      else
-        ret[#ret + 1] = { path, base_hl, field = "file" }
-      end
+      ret[#ret + 1] = {
+        "",
+        resolve = function(max_width)
+          local truncpath = Snacks.picker.util.truncpath(
+            path,
+            math.max(max_width, picker.opts.formatters.file.min_width or 20),
+            { cwd = picker:cwd(), kind = picker.opts.formatters.file.truncate }
+          )
+          local dir, base = truncpath:match("^(.*)/(.+)$")
+          local resolved = {} ---@type snacks.picker.Highlight[]
+          if base and dir then
+            if picker.opts.formatters.file.filename_first then
+              resolved[#resolved + 1] = { base, base_hl, field = "file" }
+              resolved[#resolved + 1] = { " " }
+              resolved[#resolved + 1] = { dir, dir_hl, field = "file" }
+            else
+              resolved[#resolved + 1] = { dir .. "/", dir_hl, field = "file" }
+              resolved[#resolved + 1] = { base, base_hl, field = "file" }
+            end
+          else
+            resolved[#resolved + 1] = { truncpath, base_hl, field = "file" }
+          end
+          return resolved
+        end,
+      }
     end
   end
 
