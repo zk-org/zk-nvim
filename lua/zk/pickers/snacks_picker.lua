@@ -119,40 +119,37 @@ function snacks_format.zk_filename(item, picker)
   local dir_hl = "SnacksPickerDir"
 
   local note = notes_cache[path]
-  if note and note.title then
-    ret[#ret + 1] = { tostring(note.title), base_hl }
+  if picker.opts.formatters.file.filename_only then
+    path = vim.fn.fnamemodify(item.file, ":t")
+    path = path == "" and item.file or path
+    ret[#ret + 1] = { note and note.title or path, base_hl, field = "file" }
   else
-    if picker.opts.formatters.file.filename_only then
-      path = vim.fn.fnamemodify(item.file, ":t")
-      path = path == "" and item.file or path
-      ret[#ret + 1] = { path, base_hl, field = "file" }
-    else
-      ret[#ret + 1] = {
-        "",
-        resolve = function(max_width)
-          local truncpath = Snacks.picker.util.truncpath(
-            path,
-            math.max(max_width, picker.opts.formatters.file.min_width or 20),
-            { cwd = picker:cwd(), kind = picker.opts.formatters.file.truncate }
-          )
-          local dir, base = truncpath:match("^(.*)/(.+)$")
-          local resolved = {} ---@type snacks.picker.Highlight[]
-          if base and dir then
-            if picker.opts.formatters.file.filename_first then
-              resolved[#resolved + 1] = { base, base_hl, field = "file" }
-              resolved[#resolved + 1] = { " " }
-              resolved[#resolved + 1] = { dir, dir_hl, field = "file" }
-            else
-              resolved[#resolved + 1] = { dir .. "/", dir_hl, field = "file" }
-              resolved[#resolved + 1] = { base, base_hl, field = "file" }
-            end
+    ret[#ret + 1] = {
+      "",
+      resolve = function(max_width)
+        local truncpath = Snacks.picker.util.truncpath(
+          path,
+          math.max(max_width, picker.opts.formatters.file.min_width or 20),
+          { cwd = picker:cwd(), kind = picker.opts.formatters.file.truncate }
+        )
+        local dir, base = truncpath:match("^(.*)/(.+)$")
+        base = note and note.title or base
+        local resolved = {} ---@type snacks.picker.Highlight[]
+        if base and dir then
+          if picker.opts.formatters.file.filename_first then
+            resolved[#resolved + 1] = { base, base_hl, field = "file" }
+            resolved[#resolved + 1] = { " " }
+            resolved[#resolved + 1] = { dir, dir_hl, field = "file" }
           else
-            resolved[#resolved + 1] = { truncpath, base_hl, field = "file" }
+            resolved[#resolved + 1] = { dir .. "/", dir_hl, field = "file" }
+            resolved[#resolved + 1] = { base, base_hl, field = "file" }
           end
-          return resolved
-        end,
-      }
-    end
+        else
+          resolved[#resolved + 1] = { truncpath, base_hl, field = "file" }
+        end
+        return resolved
+      end,
+    }
   end
 
   if item.pos and item.pos[1] > 0 then
