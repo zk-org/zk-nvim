@@ -77,7 +77,7 @@ function snacks_format.zk_filename(item, picker)
   end
   local path = Snacks.picker.util.path(item) or item.file
   path =
-    Snacks.picker.util.truncpath(path, picker.opts.formatters.file.truncate or 40, { cwd = picker:cwd() })
+    Snacks.picker.util.truncpath(path, picker.opts.formatters.file.min_width or 40, { cwd = picker:cwd() })
   local name, cat = path, "file"
   if item.buf and vim.api.nvim_buf_is_loaded(item.buf) then
     name = vim.bo[item.buf].filetype
