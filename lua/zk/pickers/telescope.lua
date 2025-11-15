@@ -31,6 +31,7 @@ function M.create_note_entry_maker(_)
       path = note.absPath,
       display = title,
       ordinal = title,
+      text = title,
     }
   end
 end
@@ -105,9 +106,10 @@ function M.show_note_picker(notes, options, cb)
         mapping("i", "<C-e>", function()
           local current_picker = action_state.get_current_picker(prompt_bufnr)
           local prompt = current_picker:_get_prompt()
+          options["title"] = prompt
           actions.close(prompt_bufnr)
           vim.schedule(function()
-            require("zk").new({ title = prompt })
+            require("zk").new(options)
           end)
         end)
         mapping("i", "<CR>", function()
