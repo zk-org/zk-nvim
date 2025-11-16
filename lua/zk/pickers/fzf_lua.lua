@@ -97,6 +97,7 @@ function M.show_tag_picker(tags, options, cb)
       ["--nth"] = 2,
       ["--exact"] = "",
       ["--tabstop"] = 4,
+      ["--multi"] = options.multi_select,
     },
     actions = {
       ["default"] = function(selected, _)
