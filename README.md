@@ -16,7 +16,7 @@ to see it in action.
 | 0.1.1         | 0.13.0 - 0.14.1 | 0.9.5          |
 | 0.1.0         | 0.13.0 - 0.14.1 | 0.8.0 - 0.9.5  |
 
-* `ripgrep` (for grep feature)
+* `ripgrep` >= 14.1.0 (for grep feature)
 
 ## Installation
 
