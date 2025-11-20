@@ -183,6 +183,10 @@ Snacks.picker.format["zk_grep"] = function(item, picker)
   end
   vim.list_extend(ret, snacks_format.zk_filename(item, picker))
   if item.line then
+    if item.positions then
+      local offset = Snacks.picker.highlight.offset(ret)
+      Snacks.picker.highlight.matches(ret, item.positions, offset)
+    end
     Snacks.picker.highlight.format(item, item.line, ret)
     table.insert(ret, { " " })
   end
