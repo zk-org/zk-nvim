@@ -60,6 +60,9 @@ Default `lazy.nvim` setup:
 ```lua
 return {
   "zk-org/zk-nvim",
+  dependencies = {
+    'akinsho/bufferline.nvim', -- Optional: If you use bufferline integration
+  },
   config = function()
     require("zk").setup({
       -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker",
@@ -84,8 +87,8 @@ return {
       integrations = {
         bufferline = {
           enabled = true,
-          pattern = { "*.md" },
           select = { "id", "title", "filenameStem" },
+          override = true,
           formatter = function(note)
             return note.title or note.filenameStem or note.id or nil
           end,
@@ -514,12 +517,10 @@ Show YAML frontmatter `title` or `#` heading as buffer name.
 Default:
 ```lua
 require("zk").setup({
+  ...
   integrations = {
     bufferline = {
       enabled = false,
-
-      -- The file patterns to hook
-      pattern = { "*.md" },
 
       -- The fields to fetch
       select = { "id", "title", "filenameStem" },
@@ -528,11 +529,21 @@ require("zk").setup({
       --   rawContent, wordCount, tags, metadata, created, modified, checksum
       -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
 
-      -- buffer name formatter
-      -- Only the fields set by `select` option above are available.
+      -- How to apply the formatter
+      override = true,
+      -- true  : Completely replace bufferline's `name_formatter` using the
+      --         formatter function defined below.
+      -- false : Do not replace it automatically. You must configure bufferline's
+      --         `name_formatter` yourself, which allows more flexibility.
+      --         (e.g. combining zk's formatter logic with your own custom rules.)
+
+      ---buffer name formatter
+      ---@param note table
+      ---@return string?
       formatter = function(note)
         return note.title or note.filenameStem or note.id or nil
       end,
+      -- Only the fields set by `select` option above are available.
     },
   },
   ...
@@ -541,9 +552,10 @@ require("zk").setup({
 
 ## bufferline Sample Config
 
-A sample for:
-- Displaying the buffer name from user-defined YAML frontmatter.
-- checking if a specific tag is contained.
+### Branching logics by tag
+
+- Displaying the title (user-defined YAML frontmatter) as buffer name 
+- Branching if a specific tag is contained.
 
 YAML frontmatter:
 ```markdown
@@ -557,12 +569,12 @@ tags       : [book]
 Config:
 ```lua
 require("zk").setup({
+  ...
   integrations = {
     bufferline = {
-      ...
       enabled = true,
-      pattern = { "*.md" },
       select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
+      override = true,
       formatter = function(note)
         local tags = note.tags or {}
         local metadata = note.metadata or {}
@@ -588,6 +600,49 @@ After this sample setup, the buffer name is: `Awesome Note Taking / John Davis (
 > `note.metadata.title` captures only YAML title, while `note.title` can capture either the YAML title or a `# heading`.
 > Therefore, including `title` in select table and using `note.title` is a safer fallback to catch the title in any positions.
 
+
+### Flexible config conbined with bufferline
+
+- Displaying the title (headings or YAML frontmatter) as buffer name 
+- Extra modifications for other filetypes
+
+```lua
+require("zk").setup({
+  ...
+  integrations = {
+    bufferline = {
+      enabled = true,
+      select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
+      override = false, -- Not override
+      formatter = function(note)
+        return note.title or note.filenameStem or note.id or nil
+      end,
+    },
+  },
+  ...
+})
+```
+```lua
+require("bufferline").setup({
+  options = {
+    ---@param buf table
+    ---@return string?
+    name_formatter = function(buf)
+      local ext = vim.fn.fnamemodify(buf.name, ":e")
+      if ext == "md" then
+        return require("zk.integrations.bufferline").name_formatter(buf) -- Call zk-nvim's `name_formatter` (Above `formatter` is internally used in refresh())
+      elseif ext == "org" then
+        return buf.name -- Add extra modifications here
+      elseif ext == "norg" then
+        return buf.name -- Add extra modifications here
+      end
+    end,
+  },
+})
+```
+
+> [!Note]
+> `buf` table contains `name`, `path` and `bufnr` fields.
 
 
 # Miscellaneous

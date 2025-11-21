@@ -45,6 +45,8 @@ function M.setup(options)
   end
 
   require("zk.commands.builtin")
+
+  require("zk.integrations.bufferline").override_name_formatter()
 end
 
 ---Cd into the notebook root

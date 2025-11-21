@@ -49,24 +49,37 @@ end
 ---Format buffer name (called via bufferline's 'name_formatter' config)
 ---@param buf table
 function M.name_formatter(buf)
-  local notebook_root = util.notebook_root(buf.path)
-  if notebook_root then
-    if config.enabled == true then
-      -- Check and apply cached title
-      local zk_title = vim.b[buf.bufnr].zk_title
-      if zk_title then
-        return zk_title
+  if vim.fn.fnamemodify(buf.path, ":e") == "md" then
+    local notebook_root = util.notebook_root(buf.path)
+    if notebook_root then
+      if config.enabled == true then
+        -- Check and apply cached title
+        local zk_title = vim.b[buf.bufnr].zk_title
+        if zk_title then
+          return zk_title
+        end
+        -- Otherwise, cache the title
+        if not vim.b[buf.bufnr].zk_loading then
+          vim.b[buf.bufnr].zk_loading = true
+          fetch_zk_info(buf, function(_buf, note)
+            vim.b[_buf.bufnr].zk_loading = false
+            refresh_title(_buf, note)
+          end)
+        end
       end
-      -- Otherwise, cache the title
-      if not vim.b[buf.bufnr].zk_loading then
-        vim.b[buf.bufnr].zk_loading = true
-        fetch_zk_info(buf, function(buf, note)
-          vim.b[buf.bufnr].zk_loading = false
-          refresh_title(buf, note)
-        end)
-      end
+      return vim.fn.fnamemodify(buf.name, ":t:r")
     end
-    return vim.fn.fnamemodify(buf.name, ":t:r")
+  end
+end
+
+---Override name_formatter in bufferline
+function M.override_name_formatter()
+  if config.enabled and config.override then
+    local bufferline_config = require("bufferline.config").get()
+    bufferline_config.options.name_formatter = function(buf)
+      return require("zk.integrations.bufferline").name_formatter(buf)
+    end
+    require("bufferline").setup(bufferline_config)
   end
 end
 

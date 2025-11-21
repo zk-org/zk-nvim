@@ -16,8 +16,8 @@ M.defaults = {
   integrations = {
     bufferline = {
       enabled = false,
-      pattern = { "*.md" },
       select = { "id", "title", "filenameStem" },
+      override = true,
       formatter = function(note)
         return note.title or note.filenameStem or note.id or nil
       end,
