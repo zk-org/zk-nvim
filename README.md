@@ -81,6 +81,29 @@ return {
           enabled = true,
         },
       },
+      update = {
+        enabled = false, -- true: enable auto content updating
+        triggers = {
+          on_save = {
+            enabled = false, -- true: enable auto content updating for this trigger
+            rules = {
+              ["modified - %Y-%m-%d %H:%M:%S"] = {
+                pattern = "^(modified *: *)(%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d)$", -- line matching pattern
+                ---@param captures table
+                ---@param line string
+                ---@return string
+                format = function(captures, line) -- formatter for captured items
+                  captures[2] = os.date("%Y-%m-%d %H:%M:%S")
+                  return table.concat(captures)
+                end,
+                in_yaml = true, -- true: only matches in YAML frontmatter / false: only matches in content
+                dirs = {}, -- valid directories (default: allows all dirctories)
+                notebook_paths = {}, -- valie notebook_paths (default: allows all notebook_paths)
+              },
+            },
+          },
+        },
+      },
     })
   end,
 }
@@ -237,6 +260,15 @@ require("zk.commands").get("ZkNew")({ dir = "daily" })
 require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
 require("zk.commands").get("ZkNewFromTitleSelection")()
 ```
+
+### Updating
+
+Toggle automatic content updating.
+
+- `:ZkUpdateToggle [{category_name}]`
+  When `category_name` is given, toggles `opts.update[category_name].enabled`.
+  Otherwise, toggles `opts.update.enabled`.
+
 
 ## Custom Commands
 
@@ -451,6 +483,9 @@ vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", opts)
 -- Search for the notes matching the current visual selection.
 vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
+
+-- Toggle auto update content
+vim.api.nvim_set_keymap("n", "<leader>zu", ":ZkUpdateToggle<CR>", opts)
 ```
 
 You can add additional key mappings for Markdown buffers located in a `zk`

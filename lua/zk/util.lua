@@ -155,4 +155,84 @@ function M.get_buffer_paths()
   return paths
 end
 
+---Auto update lines
+---@param trigger_name string
+function M.update(trigger_name)
+  local opts = require("zk.config").options
+  local trigger = opts.update.triggers[trigger_name]
+  if not opts.update.enabled or not trigger.enabled then
+    return
+  end
+
+  local YAML_DELIMITER = "^%-%-%-"
+  local path = vim.api.nvim_buf_get_name(0)
+  local root = M.notebook_root(vim.api.nvim_buf_get_name(0))
+  local all_rules = trigger.rules
+
+  ---@param notebook_paths string[]
+  ---@return boolean is_allowed_notebook_path
+  local function is_notebook_allowed(notebook_paths)
+    if not notebook_paths or #notebook_paths == 0 then
+      return true
+    end
+    for _, notebook_path in ipairs(notebook_paths) do
+      if notebook_path == root then
+        return true
+      end
+    end
+    return false
+  end
+
+  ---@param dirs string[]
+  ---@return boolean is_allowed_directory
+  local function is_dir_allowed(dirs)
+    if not dirs or #dirs == 0 then
+      return true
+    end
+    for _, dir in ipairs(dirs) do
+      if path:find(vim.fs.joinpath(root, dir), 1, true) then
+        return true
+      end
+    end
+    return false
+  end
+
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local rules = {}
+
+  -- Keep only the valid rules for the notebook_paths and dirs
+  for _, rule in pairs(all_rules) do
+    if is_notebook_allowed(rule.notebook_paths) then
+      if is_dir_allowed(rule.dirs) then
+        table.insert(rules, rule)
+      end
+    end
+  end
+
+  local in_yaml = false
+  for i, line in ipairs(lines) do
+    if line:match(YAML_DELIMITER) then
+      in_yaml = not in_yaml
+    end
+    for _, rule in ipairs(rules) do
+      if rule.in_yaml == in_yaml then
+        captures = { line:match(rule.pattern) }
+        if #captures > 0 then
+          lines[i] = rule.format(captures, line)
+        end
+      end
+    end
+  end
+
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+end
+
+-- DEBUG: put this to some where else / Should add `event = "BufWritePre"` field and apply autocmd automatically ?
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.md",
+  callback = function()
+    M.update("on_save")
+  end,
+})
+
 return M

@@ -193,6 +193,14 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zktaglist
     :ZkTags [{options}]
 <
+>
+    " Toggle automatic content updating
+    " When [trigger_name] is given, toggles opts.update[trigger_name].enabled.
+    " Otherwise, toggles opts.update.enabled.
+    " params
+    "   (optional) trigger_name
+    :ZkUpdateToggle [{trigger_name}]
+<
 
 The `options` parameter can be any valid Lua expression that evaluates to a table.
 For a list of available options, refer to the `zk` docs (https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#custom-commands).
@@ -406,6 +414,8 @@ Add these global mappings in your main Neovim config:
     vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", opts)
     -- Search for the notes matching the current visual selection.
     vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
+    -- Toggle auto update content
+    vim.api.nvim_set_keymap("n", "<leader>zu", ":ZkUpdateToggle<CR>", opts)
 <
 
 You can add additional key mappings for Markdown buffers located in a `zk` notebook, using `ftplugin`. First, make sure it is enabled in your Neovim config:

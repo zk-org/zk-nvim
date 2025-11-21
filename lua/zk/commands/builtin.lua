@@ -131,3 +131,24 @@ commands.add("ZkTags", function(options)
     zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
   end)
 end)
+
+---@param trigger_name string?
+commands.add("ZkUpdateToggle", function(trigger_name)
+  local opts = require("zk.config").options
+  if not trigger_name then
+    opts.update.enabled = not opts.update.enabled
+    local enabled = opts.update.enabled
+    local msg = string.format("Update: %s", enabled and "Enabled" or "Disabled")
+    vim.notify(msg, vim.log.levels.INFO, { title = "zk-nvim" })
+  else
+    local trigger = opts.update.triggers[trigger_name]
+    if not trigger then
+      local msg = string.format("'%s' is not a valid trigger name in 'opts.update.triggers'", trigger_name)
+      vim.notify(msg, vim.log.levels.ERROR, { title = "zk-nvim" })
+      return
+    end
+    trigger.enabled = not trigger.enabled
+    local msg = string.format("Update %s: %s", trigger_name, trigger.enabled and "Enabled" or "Disabled")
+    vim.notify(msg, vim.log.levels.INFO, { title = "zk-nvim" })
+  end
+end)
