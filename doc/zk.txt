@@ -17,10 +17,13 @@ CONTENTS                                                             *zk-content
     1.9. Pickers......................................................|zk-pickers|
     1.10. Example Mappings...................................|zk-example_mappings|
     1.11. Update Options.......................................|zk-update_options|
-2. Miscellaneous................................................|zk-miscellaneous|
-    2.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
-    2.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
-    2.3. Telescope Plugin....................................|zk-telescope_plugin|
+2. Integrations..................................................|zk-integrations|
+    2.1 Bufferline.................................................|zk-bufferline|
+    2.2 Bufferline Sample Config.....................|zk-bufferline_sample_config|
+3. Miscellaneous................................................|zk-miscellaneous|
+    3.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
+    3.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
+    3.3. Telescope Plugin....................................|zk-telescope_plugin|
 
 ================================================================================
 ZK-NVIM                                                               *zk-zk-nvim*
@@ -32,6 +35,8 @@ REQUIREMENTS                                                     *zk-requirement
 
 *   Neovim >= 0.10.0
 *   `zk` >= 0.14.1
+*   `ripgrep` >= 14.1.0 (for grep feature)
+*   `ltoml` >= 0.4.1 (for `:ZkNewPrompt` and `zk.new_prompt()`)
 
 --------------------------------------------------------------------------------
 INSTALLATION                                                     *zk-installation*
@@ -147,6 +152,12 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     :ZkNew [{options}]
 <
 >
+    " Creates and edits a new note with prompt for choosing group, path and template
+    " params
+    "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
+    :ZkNewPrompt [{options}]
+<
+>
     " Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
@@ -169,6 +180,11 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     :ZkNotes [{options}]
+
+    " Opens a notes grep picker
+    " params
+    "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
+    :ZkGrep [{options}]
 <
     " Opens a notes picker for active buffers (showing notebook files only).
     " params
@@ -198,14 +214,6 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zktaglist
     :ZkTags [{options}]
 <
->
-    " Toggle automatic content updating
-    " When [trigger_name] is given, toggles opts.update[trigger_name].enabled.
-    " Otherwise, toggles opts.update.enabled.
-    " params
-    "   (optional) trigger_name
-    :ZkUpdateToggle [{trigger_name}]
-<
 
 The `options` parameter can be any valid Lua expression that evaluates to a table.
 For a list of available options, refer to the `zk` docs (https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#custom-commands).
@@ -227,6 +235,7 @@ You can access the underlying Lua function of a command, with `require("zk.comma
 Examples:
 >
     require("zk.commands").get("ZkNew")({ dir = "daily" })
+    require("zk.commands").get("ZkNewPrompt")({ title = vim.fn.input('Title: ') })
     require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
     require("zk.commands").get("ZkNewFromTitleSelection")()
 <
@@ -296,6 +305,13 @@ It's mainly used for the implementation of built-in and custom commands.
     require("zk").new(options)
 <
 >
+    ---Prompt for a new note with groups, paths, templates, and directories selections.
+    --
+    ---@param options? table
+    ---@param cb fun(options: table?, toml: table?)
+    require("zk").new_prompt(options, cb)
+<
+>
     ---Indexes the notebook
     --
     ---@param options? table additional options
@@ -311,7 +327,14 @@ It's mainly used for the implementation of built-in and custom commands.
     ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     ---@see zk.ui.pick_notes
     require("zk").pick_notes(options, picker_options, cb)
-<
+
+    ---Opens a notes grep picker, and calls the callback with the selection
+    --
+    ---@param options? table additional options
+    ---@param picker_options? table options for the picker
+    ---@param cb function
+    ---@see zk.ui.grep_notes
+    require("zk").grep_notes(options, picker_options, cb)
 >
     ---Opens a tags picker, and calls the callback with the selection
     --
@@ -413,6 +436,8 @@ Add these global mappings in your main Neovim config:
     vim.api.nvim_set_keymap("n", "<leader>zn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", opts)
     -- Open notes.
     vim.api.nvim_set_keymap("n", "<leader>zo", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", opts)
+    -- Grep notes.
+    vim.api.nvim_set_keymap("n", "<leader>zg", "<Cmd>ZkGrep<CR>", opts)
     -- Open notes associated with the selected tags.
     vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
     -- Search for the notes matching a given query.
@@ -421,6 +446,16 @@ Add these global mappings in your main Neovim config:
     vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
     -- Toggle auto update content
     vim.api.nvim_set_keymap("n", "<leader>zu", ":ZkUpdateToggle<CR>", opts)
+
+
+Open another notebook:
+
+    -- Open notes in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zO", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook' }<CR>", opts)
+    -- Open notes associated with a specific tag, in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zT", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook', tags = { 'todo' } }<CR>", opts)
+    -- Grep notes in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zG", "<Cmd>ZkGrep { notebook_path = '/path/to/another/notebook' }<CR>", opts)
 
 
 You can add additional key mappings for Markdown buffers located in a `zk` notebook, using `ftplugin`. First, make sure it is enabled in your Neovim config:
@@ -459,7 +494,6 @@ Then, create a new file under `~/.config/nvim/ftplugin/markdown.lua` to setup th
     end
 <
 
-
 --------------------------------------------------------------------------------
 UPDATE OPTIONS                                                 *zk-update_options*
 
@@ -472,7 +506,7 @@ Example for auto-updating datetime field 'modified' on save:
         enabled = true, -- true: enable auto content updating
         triggers = {
           on_save = {
-            enabled = false, -- true: enable auto content updating for this trigger
+            enabled = true, -- true: enable auto content updating for this trigger
             event = "BufWritePre", -- attach for this vim event
             rules = {
               ["modified - 2025-01-01 00:00:00"] = {
@@ -496,6 +530,141 @@ Example for auto-updating datetime field 'modified' on save:
       },
     })
 <
+
+--------------------------------------------------------------------------------
+INTEGRATIONS                                                     *zk-integrations*
+
+
+
+BUFFERLINE                                                         *zk-bufferline*
+
+Show YAML frontmatter `title` or `#` heading as buffer name.
+
+Defaut:
+>lua
+    require("zk").setup({
+      ...
+      integrations = {
+        bufferline = {
+          enabled = false,
+    
+          -- The fields to fetch
+          select = { "id", "title", "filenameStem" },
+          -- Available fields are:
+          --   filename, filenameStem, path, absPath, title, lead, body, snippets,
+          --   rawContent, wordCount, tags, metadata, created, modified, checksum
+          -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
+    
+          -- How to apply the formatter
+          override = true,
+          -- true  : Completely replace bufferline's `name_formatter` using the
+          --         formatter function defined below.
+          -- false : Do not replace it automatically. You must configure bufferline's
+          --         `name_formatter` yourself, which allows more flexibility.
+          --         (e.g. combining zk's formatter logic with your own custom rules.)
+    
+          ---buffer name formatter
+          ---@param note table
+          ---@return string?
+          formatter = function(note)
+            return note.title or note.filenameStem or note.id or nil
+          end,
+          -- Only the fields set by `select` option above are available.
+        },
+      },
+      ...
+    })
+<
+
+BUFFERLINE SAMPLE CONFIG                             *zk-bufferline_sample_config*
+
+Branching logics by tag:
+- Displaying the title (user-defined YAML frontmatter) as buffer name 
+- Branching if a specific tag is contained.
+
+YAML frontmatter:
+>markdown
+    ---
+    title      : Awesome Note Taking
+    author     : John Davis
+    published  : 2025
+    tags       : [book]
+    ---
+<
+
+Config:
+>lua
+    require("zk").setup({
+      integrations = {
+        bufferline = {
+          enabled = true,
+          select = { "id", "title", "filenameStem", "metadata" }, -- Add metadata
+          formatter = function(note)
+            if vim.tbl_contains(note.tags, "book") then
+              local published = metadata and metadata.published or '?'
+              local author = metadata and metadata.author or '?'
+              local title = metadata.title or '?'
+              return string.format("%s / %s (%s)", title, author, published)
+            else
+              return note.title or note.filenameStem or note.id or nil
+          end,
+        },
+      },
+      ...
+    })
+<
+After the sample setup, the buffer name is: `Awesome Note Taking / John Davis (2025)`
+
+NOTE:
+    As shown in the code above, `metadata` contains all the YAML frontmatter, including user defined fields.
+
+NOTE:
+    `note.metadata.title` captures only YAML title, while `note.title` can capture either the YAML title or a `# heading`.
+    Therefore, including `title` in select table and using `note.title` is a safer fallback to catch the title in any positions.
+
+
+Flexible config conbined with bufferline:
+- Displaying the title (headings or YAML frontmatter) as buffer name 
+- Extra modifications for other filetypes
+
+>lua
+    require("zk").setup({
+      ...
+      integrations = {
+        bufferline = {
+          enabled = true,
+          select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
+          override = false, -- Not override
+          formatter = function(note)
+            return note.title or note.filenameStem or note.id or nil
+          end,
+        },
+      },
+      ...
+    })
+<
+>lua
+    require("bufferline").setup({
+      options = {
+        ---@param buf table
+        ---@return string?
+        name_formatter = function(buf)
+          local ext = vim.fn.fnamemodify(buf.name, ":e")
+          if ext == "md" then
+            return require("zk.integrations.bufferline").name_formatter(buf) -- Call zk-nvim's `name_formatter` (Above `formatter` is internally used in refresh())
+          elseif ext == "org" then
+            return buf.name -- Add extra modifications here
+          elseif ext == "norg" then
+            return buf.name -- Add extra modifications here
+          end
+        end,
+      },
+    })
+<
+
+Note:
+    `buf` table contains `name`, `path` and `bufnr` fields.
+
 
 ================================================================================
 MISCELLANEOUS                                                   *zk-miscellaneous*
@@ -574,3 +743,5 @@ It's possible (but unnecessary) to also load the notes and tags pickers as a tel
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:fdm=marker:cole=2:
+
+

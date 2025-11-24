@@ -522,7 +522,7 @@ require("zk").setup({
     enabled = true, -- true: enable auto content updating
     triggers = {
       on_save = {
-        enabled = false, -- true: enable auto content updating for this trigger
+        enabled = true, -- true: enable auto content updating for this trigger
         event = "BufWritePre", -- attach for this vim event
         rules = {
           ["modified - 2025-01-01 00:00:00"] = {
