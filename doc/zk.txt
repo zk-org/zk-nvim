@@ -77,8 +77,9 @@ The default configuration
           enabled = true,
           filetypes = { "markdown" },
         },
-        update = {
-          -- See `|zk-update-options|`
+        update = { -- See `|zk-update-options|`
+          enabled = false,
+          triggers = {},
         },
       },
     })
@@ -146,12 +147,6 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     :ZkNew [{options}]
 <
 >
-    " Creates and edits a new note with prompt for choosing group, path and template
-    " params
-    "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
-    :ZkNewPrompt [{options}]
-<
->
     " Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
@@ -175,12 +170,12 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     :ZkNotes [{options}]
 <
->
+
     " Opens a notes picker for active buffers (showing notebook files only).
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     :ZkBuffers [{options}]
-<
+
 >
     " Opens a notes picker for the backlinks of the current buffer
     " params
@@ -234,7 +229,6 @@ You can access the underlying Lua function of a command, with `require("zk.comma
 Examples:
 >
     require("zk.commands").get("ZkNew")({ dir = "daily" })
-    require("zk.commands").get("ZkNewPrompt")({ title = vim.fn.input('Title: ') })
     require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
     require("zk.commands").get("ZkNewFromTitleSelection")()
 <
@@ -431,14 +425,6 @@ Add these global mappings in your main Neovim config:
     vim.api.nvim_set_keymap("n", "<leader>zu", ":ZkUpdateToggle<CR>", opts)
 
 
-Open another notebook:
-
-    -- Open notes in another notebook.
-    vim.api.nvim_set_keymap("n", "<leader>zO", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook' }<CR>", opts)
-    -- Open notes associated with a specific tag, in another notebook.
-    vim.api.nvim_set_keymap("n", "<leader>zT", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook', tags = { 'todo' } }<CR>", opts)
-
-
 You can add additional key mappings for Markdown buffers located in a `zk` notebook, using `ftplugin`. First, make sure it is enabled in your Neovim config:
 >
     filetype plugin on
@@ -590,7 +576,3 @@ It's possible (but unnecessary) to also load the notes and tags pickers as a tel
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:fdm=marker:cole=2:
-
-
-
-
