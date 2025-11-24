@@ -16,6 +16,7 @@ CONTENTS                                                             *zk-content
     1.8. API..............................................................|zk-api|
     1.9. Pickers......................................................|zk-pickers|
     1.10. Example Mappings...................................|zk-example_mappings|
+    1.11. Update Options.......................................|zk-update_options|
 2. Miscellaneous................................................|zk-miscellaneous|
     2.1. Syntax Highlighting Tips....................|zk-syntax_highlighting_tips|
     2.2. nvim-lsp-installer................................|zk-nvim-lsp-installer|
@@ -75,6 +76,9 @@ The default configuration
         auto_attach = {
           enabled = true,
           filetypes = { "markdown" },
+        },
+        update = {
+          -- See `|zk-update-options|`
         },
       },
     })
@@ -142,6 +146,12 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     :ZkNew [{options}]
 <
 >
+    " Creates and edits a new note with prompt for choosing group, path and template
+    " params
+    "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
+    :ZkNewPrompt [{options}]
+<
+>
     " Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
@@ -165,10 +175,12 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     :ZkNotes [{options}]
 <
+>
     " Opens a notes picker for active buffers (showing notebook files only).
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     :ZkBuffers [{options}]
+<
 >
     " Opens a notes picker for the backlinks of the current buffer
     " params
@@ -222,6 +234,7 @@ You can access the underlying Lua function of a command, with `require("zk.comma
 Examples:
 >
     require("zk.commands").get("ZkNew")({ dir = "daily" })
+    require("zk.commands").get("ZkNewPrompt")({ title = vim.fn.input('Title: ') })
     require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
     require("zk.commands").get("ZkNewFromTitleSelection")()
 <
@@ -416,7 +429,15 @@ Add these global mappings in your main Neovim config:
     vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
     -- Toggle auto update content
     vim.api.nvim_set_keymap("n", "<leader>zu", ":ZkUpdateToggle<CR>", opts)
-<
+
+
+Open another notebook:
+
+    -- Open notes in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zO", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook' }<CR>", opts)
+    -- Open notes associated with a specific tag, in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zT", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook', tags = { 'todo' } }<CR>", opts)
+
 
 You can add additional key mappings for Markdown buffers located in a `zk` notebook, using `ftplugin`. First, make sure it is enabled in your Neovim config:
 >
@@ -452,6 +473,44 @@ Then, create a new file under `~/.config/nvim/ftplugin/markdown.lua` to setup th
       -- Open the code actions for a visual selection.
       map("v", "<leader>za", ":'<,'>lua vim.lsp.buf.range_code_action()<CR>", opts)
     end
+<
+
+
+--------------------------------------------------------------------------------
+UPDATE OPTIONS                                                 *zk-update_options*
+
+Search patterns in markdown file and replace the line.
+
+Example for auto-updating datetime field 'modified' on save:
+>lua
+    require("zk").setup({
+      update = {
+        enabled = true, -- true: enable auto content updating
+        triggers = {
+          on_save = {
+            enabled = false, -- true: enable auto content updating for this trigger
+            event = "BufWritePre", -- attach for this vim event
+            rules = {
+              ["modified - 2025-01-01 00:00:00"] = {
+                pattern = "^(modified *: *)(%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d)$", -- line matching pattern
+                ---@param captures table
+                ---@param line string
+                ---@return string
+                format = function(captures, line) -- formatter for captured items
+                  captures[2] = os.date("%Y-%m-%d %H:%M:%S")
+                  return table.concat(captures)
+                end,
+                in_yaml = true, -- true: only matches in YAML frontmatter / false: only matches in content
+                notebook_paths = {}, -- valie notebook_paths (default: allows all notebook_paths)
+                dirs = {}, -- valid directories (default: allows all dirctories)
+              },
+              -- Add your rules here
+            },
+          },
+          -- Add your triggers here
+        },
+      },
+    })
 <
 
 ================================================================================
@@ -528,5 +587,10 @@ It's possible (but unnecessary) to also load the notes and tags pickers as a tel
     :Telescope zk tags created=today
 <
 
+
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:fdm=marker:cole=2:
+
+
+
+

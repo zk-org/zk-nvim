@@ -81,28 +81,9 @@ return {
           enabled = true,
         },
       },
-      update = {
-        enabled = false, -- true: enable auto content updating
-        triggers = {
-          on_save = {
-            enabled = false, -- true: enable auto content updating for this trigger
-            rules = {
-              ["modified - %Y-%m-%d %H:%M:%S"] = {
-                pattern = "^(modified *: *)(%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d)$", -- line matching pattern
-                ---@param captures table
-                ---@param line string
-                ---@return string
-                format = function(captures, line) -- formatter for captured items
-                  captures[2] = os.date("%Y-%m-%d %H:%M:%S")
-                  return table.concat(captures)
-                end,
-                in_yaml = true, -- true: only matches in YAML frontmatter / false: only matches in content
-                dirs = {}, -- valid directories (default: allows all dirctories)
-                notebook_paths = {}, -- valie notebook_paths (default: allows all notebook_paths)
-              },
-            },
-          },
-        },
+      update = { -- See `## Update Options`
+        enabled = false,
+        triggers = {},
       },
     })
   end,
@@ -484,7 +465,7 @@ vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { sort = { 'modified' }
 -- Search for the notes matching the current visual selection.
 vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
 
--- Toggle auto update content
+-- Toggle auto update
 vim.api.nvim_set_keymap("n", "<leader>zu", ":ZkUpdateToggle<CR>", opts)
 ```
 
@@ -529,6 +510,43 @@ if require("zk.util").notebook_root(vim.fn.expand('%:p')) ~= nil then
   map("v", "<leader>za", ":'<,'>lua vim.lsp.buf.range_code_action()<CR>", opts)
 end
 ```
+
+## Update Options
+
+Search patterns in markdown file and replace the line.
+
+Example for auto-updating datetime field 'modified' on save:
+```lua
+require("zk").setup({
+  update = {
+    enabled = true, -- true: enable auto content updating
+    triggers = {
+      on_save = {
+        enabled = false, -- true: enable auto content updating for this trigger
+        event = "BufWritePre", -- attach for this vim event
+        rules = {
+          ["modified - 2025-01-01 00:00:00"] = {
+            pattern = "^(modified *: *)(%d%d%d%d%-%d%d%-%d%d %d%d:%d%d:%d%d)$", -- line matching pattern
+            ---@param captures table
+            ---@param line string
+            ---@return string
+            format = function(captures, line) -- formatter for captured items
+              captures[2] = os.date("%Y-%m-%d %H:%M:%S")
+              return table.concat(captures)
+            end,
+            in_yaml = true, -- true: only matches in YAML frontmatter / false: only matches in content
+            notebook_paths = {}, -- valie notebook_paths (default: allows all notebook_paths)
+            dirs = {}, -- valid directories (default: allows all dirctories)
+          },
+          -- Add your rules here
+        },
+      },
+      -- Add your triggers here
+    },
+  },
+})
+```
+
 
 # Miscellaneous
 
