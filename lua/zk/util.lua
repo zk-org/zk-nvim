@@ -238,7 +238,7 @@ function M.set_autocmd_for_update()
     vim.api.nvim_create_autocmd(triger.event, {
       pattern = "*.md",
       callback = function()
-        require("zk.util").update(trigger_name)
+        M.update(trigger_name)
       end,
     })
   end
