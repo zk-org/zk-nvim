@@ -209,18 +209,26 @@ function M.update(trigger_name)
     end
   end
 
+  -- scope: "line"
   local in_yaml = false
   for i, line in ipairs(lines) do
     if line:match(YAML_DELIMITER) then
       in_yaml = not in_yaml
     end
     for _, rule in ipairs(rules) do
-      if rule.in_yaml == in_yaml then
+      if rule.in_yaml == in_yaml and rule.scope == "line" then
         captures = { line:match(rule.pattern) }
         if #captures > 0 then
           lines[i] = rule.format(captures, line)
         end
       end
+    end
+  end
+
+  -- scope: "file"
+  for _, rule in ipairs(rules) do
+    if rule.scope == "file" then
+      rule.format(lines)
     end
   end
 
