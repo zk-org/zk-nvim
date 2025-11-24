@@ -81,11 +81,12 @@ local function insert_link(selected, opts)
   opts = vim.tbl_extend("force", {}, opts or {})
 
   local location = util.get_lsp_location_from_selection()
-  local selected_text = util.get_selected_text()
+	local selected_text = ""
 
   if not selected then
     location = util.get_lsp_location_from_caret()
   else
+    selected_text = util.get_selected_text()
     if opts["matchSelected"] then
       opts = vim.tbl_extend("force", { match = { selected_text } }, opts or {})
     end
