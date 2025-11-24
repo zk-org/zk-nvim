@@ -680,7 +680,7 @@ tags :
 After:
 ```markdown
 ---
-tags : [ tag1, tag2, tag3 ]
+tags : [ tag2, tag3, tag1 ]
 ---
 ```
 
