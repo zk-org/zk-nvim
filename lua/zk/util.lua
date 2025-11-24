@@ -227,12 +227,21 @@ function M.update(trigger_name)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
 end
 
--- DEBUG: put this to some where else / Should add `event = "BufWritePre"` field and apply autocmd automatically ?
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*.md",
-  callback = function()
-    M.update("on_save")
-  end,
-})
+function M.set_autocmd_for_update()
+  local opts = require("zk.config").options
+  for trigger_name, triger in pairs(opts.update.triggers) do
+    local event = triger.event
+    local msg = string.format("'event' field is not set in %s", trigger_name)
+    if not event then
+      vim.notify(msg, vim.log.levels.INFO, { title = "zk-nvim" })
+    end
+    vim.api.nvim_create_autocmd(triger.event, {
+      pattern = "*.md",
+      callback = function()
+        M.update(trigger_name)
+      end,
+    })
+  end
+end
 
 return M
