@@ -13,6 +13,10 @@ M.defaults = {
       enabled = true,
     },
   },
+  update = {
+    enabled = false,
+    triggers = {},
+  },
 }
 
 M.options = M.defaults -- not necessary, but better code completion

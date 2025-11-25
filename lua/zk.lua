@@ -45,6 +45,7 @@ function M.setup(options)
   end
 
   require("zk.commands.builtin")
+  util.set_autocmd_for_update()
 end
 
 ---Cd into the notebook root
