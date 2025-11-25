@@ -198,13 +198,16 @@ function M.update(trigger_name)
   end
 
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  local rules = {}
+  local rules = {
+    line = {},
+    file = {},
+  }
 
-  -- Keep only the valid rules for the notebook_paths and dirs
+  -- Keep only the valid rules for the notebook_paths and dirs, and divide by line/file scope
   for _, rule in pairs(all_rules) do
     if is_notebook_allowed(rule.notebook_paths) then
       if is_dir_allowed(rule.dirs) then
-        table.insert(rules, rule)
+        table.insert(rules[rule.scope], rule)
       end
     end
   end
@@ -215,8 +218,8 @@ function M.update(trigger_name)
     if line:match(YAML_DELIMITER) then
       in_yaml = not in_yaml
     end
-    for _, rule in ipairs(rules) do
-      if rule.in_yaml == in_yaml and rule.scope == "line" then
+    for _, rule in pairs(rules.line) do
+      if rule.in_yaml == in_yaml then
         captures = { line:match(rule.pattern) }
         if #captures > 0 then
           lines[i] = rule.format(captures, line)
@@ -226,7 +229,7 @@ function M.update(trigger_name)
   end
 
   -- scope: "file"
-  for _, rule in ipairs(rules) do
+  for _, rule in pairs(rules.file) do
     if rule.scope == "file" then
       rule.format(lines)
     end
