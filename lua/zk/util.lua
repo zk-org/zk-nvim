@@ -185,15 +185,12 @@ end
 
 ---Cache zk info for all buffers
 function M.zk_buf_cache_all()
-  local notebook_path = M.notebook_root(vim.fn.getcwd())
-  if notebook_path then
-    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-      local is_listed = vim.api.nvim_get_option_value("buflisted", { buf = bufnr })
-      if is_listed then
-        local name = vim.api.nvim_buf_get_name(bufnr)
-        if name:match("%.md$") then
-          M.zk_buf_cache(bufnr)
-        end
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    local is_listed = vim.api.nvim_get_option_value("buflisted", { buf = bufnr })
+    if is_listed then
+      local name = vim.api.nvim_buf_get_name(bufnr)
+      if name:match("%.md$") then
+        M.zk_buf_cache(bufnr)
       end
     end
   end
