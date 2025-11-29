@@ -45,6 +45,7 @@ function M.setup(options)
   end
 
   require("zk.commands.builtin")
+  require("zk.autocmds")
 end
 
 ---Cd into the notebook root
