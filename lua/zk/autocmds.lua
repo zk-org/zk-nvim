@@ -3,7 +3,7 @@ local util = require("zk.util")
 ---Set autocmds
 
 ---Add zk_buf_cache() on save
-vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+vim.api.nvim_create_autocmd({ "BufWritePost", "BufWinEnter" }, {
   pattern = { "*.md" },
   callback = function()
     local bufnr = vim.api.nvim_get_current_buf()
