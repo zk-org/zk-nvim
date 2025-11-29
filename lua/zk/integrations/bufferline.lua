@@ -77,7 +77,7 @@ function M.override_name_formatter()
   if config.enabled and config.override then
     local bufferline_config = require("bufferline.config").get()
     bufferline_config.options.name_formatter = function(buf)
-      return require("zk.integrations.bufferline").name_formatter(buf)
+      return M.name_formatter(buf)
     end
     require("bufferline").setup(bufferline_config)
   end
