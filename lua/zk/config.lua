@@ -13,13 +13,13 @@ M.defaults = {
       enabled = true,
     },
   },
-  select = { "id", "title", "filenameStem" },
+  select = { "absPath", "filenameStem", "filename", "title" },
   integrations = {
     bufferline = {
       enabled = false,
       override = true,
       formatter = function(note)
-        return note.title or note.filenameStem or note.id or nil
+        return note.title or note.filenameStem or note.filename
       end,
     },
   },
