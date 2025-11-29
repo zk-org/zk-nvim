@@ -84,10 +84,10 @@ return {
           enabled = true,
         },
       },
+      select = { "id", "title", "filenameStem" },
       integrations = {
         bufferline = {
           enabled = true,
-          select = { "id", "title", "filenameStem" },
           override = true,
           formatter = function(note)
             return note.title or note.filenameStem or note.id or nil
@@ -518,12 +518,10 @@ Default:
 ```lua
 require("zk").setup({
   ...
+  select = { "id", "title", "filenameStem" }, -- The fields to fetch
   integrations = {
     bufferline = {
       enabled = false,
-
-      -- The fields to fetch
-      select = { "id", "title", "filenameStem" },
       -- Available fields are:
       --   filename, filenameStem, path, absPath, title, lead, body, snippets,
       --   rawContent, wordCount, tags, metadata, created, modified, checksum
@@ -563,7 +561,7 @@ YAML frontmatter:
 title      : Awesome Note Taking
 author     : John Davis
 published  : 2025
-tags       : [book]
+tags       : [ book ]
 ---
 ```
 Config:
@@ -571,9 +569,9 @@ Config:
 require("zk").setup({
   ...
   integrations = {
+    select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
     bufferline = {
       enabled = true,
-      select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
       override = true,
       formatter = function(note)
         local tags = note.tags or {}
@@ -609,10 +607,10 @@ After this sample setup, the buffer name is: `Awesome Note Taking / John Davis (
 ```lua
 require("zk").setup({
   ...
+  select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
   integrations = {
     bufferline = {
       enabled = true,
-      select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
       override = false, -- Not override
       formatter = function(note)
         return note.title or note.filenameStem or note.id or nil
