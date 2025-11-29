@@ -69,7 +69,8 @@ function M.show_note_picker(notes, options, cb)
       end,
       ["ctrl-e"] = function()
         local query = require("fzf-lua").config.__resume_data.last_query
-        require("zk").new({ title = query })
+        options["title"] = query
+        require("zk").new(options)
       end,
     },
   }, options.fzf_lua or {})
@@ -96,6 +97,7 @@ function M.show_tag_picker(tags, options, cb)
       ["--nth"] = 2,
       ["--exact"] = "",
       ["--tabstop"] = 4,
+      ["--multi"] = options.multi_select,
     },
     actions = {
       ["default"] = function(selected, _)

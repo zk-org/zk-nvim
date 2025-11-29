@@ -13,10 +13,10 @@ M.defaults = {
       enabled = true,
     },
   },
+  select = { "id", "title", "filenameStem" },
   integrations = {
     bufferline = {
       enabled = false,
-      select = { "id", "title", "filenameStem" },
       override = true,
       formatter = function(note)
         return note.title or note.filenameStem or note.id or nil
