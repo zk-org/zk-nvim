@@ -84,7 +84,7 @@ return {
           enabled = true,
         },
       },
-      select = { "id", "title", "filenameStem" },
+      select = { "absPath", "filename", "filenameStem", "title" },
       integrations = {
         bufferline = {
           enabled = true,
@@ -518,7 +518,7 @@ Default:
 ```lua
 require("zk").setup({
   ...
-  select = { "id", "title", "filenameStem" }, -- The fields to fetch
+  select = { "absPath", "filename", "filenameStem", "title" }, -- The fields to fetch
   integrations = {
     bufferline = {
       enabled = false,
@@ -539,7 +539,7 @@ require("zk").setup({
       ---@param note table
       ---@return string?
       formatter = function(note)
-        return note.title or note.filenameStem or note.id or nil
+        return note.title or note.filenameStem or note.filename
       end,
       -- Only the fields set by `select` option above are available.
     },
@@ -569,7 +569,7 @@ Config:
 require("zk").setup({
   ...
   integrations = {
-    select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
+    select = { "absPath", "filename", "filenameStem", "title", "tags", "metadata" }, -- Add tags and metadata
     bufferline = {
       enabled = true,
       override = true,
@@ -582,7 +582,7 @@ require("zk").setup({
           local published = metadata.published or '?'
           return string.format("%s / %s (%s)", title, author, published)
         end
-        return note.title or note.filenameStem or note.id or nil
+        return note.title or note.filenameStem or note.filename
       end,
     },
   },
@@ -607,13 +607,13 @@ After this sample setup, the buffer name is: `Awesome Note Taking / John Davis (
 ```lua
 require("zk").setup({
   ...
-  select = { "id", "title", "filenameStem", "tags", "metadata" }, -- Add tags and metadata
+  select = { "absPath", "filename", "filenameStem", "title", "tags", "metadata" }, -- Add tags and metadata
   integrations = {
     bufferline = {
       enabled = true,
       override = false, -- Not override
       formatter = function(note)
-        return note.title or note.filenameStem or note.id or nil
+        return note.title or note.filenameStem or note.filename
       end,
     },
   },
