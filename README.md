@@ -90,7 +90,7 @@ return {
           enabled = true,
           override = true,
           formatter = function(note)
-            return note.title or note.filenameStem or note.id or nil
+            return note.title or note.filenameStem or note.filename
           end,
         },
       },
