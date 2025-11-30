@@ -518,14 +518,17 @@ Default:
 ```lua
 require("zk").setup({
   ...
-  select = { "absPath", "filename", "filenameStem", "title" }, -- The fields to fetch
+  -- The fields to fetch
+  select = { "absPath", "filename", "filenameStem", "title" },
+  -- Available fields are:
+  --   filename, filenameStem, path, absPath, title, lead, body, snippets,
+  --   rawContent, wordCount, tags, metadata, created, modified, checksum
+  -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
+
   integrations = {
     bufferline = {
+      -- Enable/Disable bufferline integration
       enabled = false,
-      -- Available fields are:
-      --   filename, filenameStem, path, absPath, title, lead, body, snippets,
-      --   rawContent, wordCount, tags, metadata, created, modified, checksum
-      -- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list
 
       -- How to apply the formatter
       override = true,
