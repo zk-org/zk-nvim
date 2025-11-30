@@ -2,8 +2,8 @@ local util = require("zk.util")
 
 ---Set autocmds
 
----Add zk_buf_cache() on save
-vim.api.nvim_create_autocmd({ "BufWritePost", "BufWinEnter" }, {
+---Update zk cache on save and read
+vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost" }, {
   pattern = { "*.md" },
   callback = function()
     local bufnr = vim.api.nvim_get_current_buf()
@@ -13,7 +13,7 @@ vim.api.nvim_create_autocmd({ "BufWritePost", "BufWinEnter" }, {
   end,
 })
 
----Add zk_buf_cache_all() on nvim start
+---Fetch zk cache for all buffers on startup
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
     vim.schedule(function()
