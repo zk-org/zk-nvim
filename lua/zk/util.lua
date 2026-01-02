@@ -136,7 +136,7 @@ function M.get_selected_text()
     -- Note getregionpos returns 1-based indexing, but get_text expects 0-based
     local bufnr, line = start_pos[1], start_pos[2] - 1
     local startcol = start_pos[3] - 1
-    local endcol = end_pos[3] -- 0-indexing, but we want to include the last col so 
+    local endcol = end_pos[3] -- 0-indexing, but we want to include the last col so
     endcol = endcol == maxcol and -1 or endcol
     local chunk = vim.api.nvim_buf_get_text(bufnr, line, startcol, line, endcol, {})[1]
     table.insert(chunks, chunk)
@@ -154,7 +154,7 @@ function M.get_buffer_paths()
   for _, buf in ipairs(buffers) do
     local path = vim.api.nvim_buf_get_name(buf)
 
-    if path ~= "" then
+    if vim.api.nvim_buf_is_loaded(buf) and path ~= "" then
       table.insert(paths, path)
     end
   end
