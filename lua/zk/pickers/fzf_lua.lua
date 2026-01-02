@@ -40,6 +40,7 @@ function M.show_note_picker(notes, options, cb)
       ["--with-nth"] = 2,
       ["--tabstop"] = 4,
       ["--header"] = ansi_codes.blue("CTRL-E: create a note with the query as title"),
+      ["--multi"] = options.multi_select,
     },
     -- we rely on `fzf-lua` to open notes in any other case than the default (pressing enter)
     -- to take advantage of the plugin builtin actions like opening in a split
