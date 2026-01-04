@@ -6,10 +6,22 @@ local action_state = require("telescope.actions.state")
 local action_utils = require("telescope.actions.utils")
 local entry_display = require("telescope.pickers.entry_display")
 local previewers = require("telescope.previewers")
+local util = require("zk.util")
+local api = require("zk.api")
+local notes_cache = {}
 
 local M = {}
 
-M.note_picker_list_api_selection = { "title", "absPath", "path" }
+-- See https://zk-org.github.io/zk/tips/editors-integration.html#zk-list --> Expand section `2`
+M.note_picker_list_api_selection = { "title", "path", "absPath" }
+
+local function index_notes_by_path(notes)
+  local tbl = {}
+  for _, note in ipairs(notes) do
+    tbl[note.absPath] = note
+  end
+  return tbl
+end
 
 function M.create_note_entry_maker(_)
   return function(note)
@@ -114,6 +126,150 @@ function M.show_note_picker(notes, options, cb)
       end,
     })
     :find()
+end
+
+function M.make_grep_sorter(opts)
+  opts = opts or {}
+  local fzy = opts.fzy_mod or require("telescope.algos.fzy")
+
+  return require("telescope.sorters").Sorter:new({
+    scoring_function = function(_, prompt, line, display)
+      -- Order: fzf -> title (or filename) -> lnum -> col
+      local score
+      local filename, lnum, col, text = string.match(line, "^(.-):(%d+):(%d+):(.*)$")
+      lnum = tonumber(lnum) or 0
+      col = tonumber(col) or 0
+      -- fzf
+      local fzy_score = fzy.score(prompt, text or line)
+      score = -fzy_score * 1e6
+      -- title (or filename)
+      for i = 1, math.min(8, #filename) do
+        score = score + string.byte(filename, i) * math.pow(256, 8 - i)
+      end
+      -- lnum, col
+      score = score + lnum * 1e-3
+      score = score + col * 1e-6
+      return score
+    end,
+
+    highlighter = function(_, prompt, display)
+      local entry_text = display:match("^.-:%d+:%d+%s(.*)$") or display -- Should match the pattern returned by displayer()
+      local prefix_len = #display - #entry_text -- start position of entry.text
+      local relative_positions = fzy.positions(prompt, entry_text)
+      local absolute_positions = {}
+      for i, pos in ipairs(relative_positions) do
+        absolute_positions[i] = pos + prefix_len
+      end
+      return absolute_positions
+    end,
+  })
+end
+
+---@param root string
+function M.create_grep_entry_maker(root)
+  local displayer = entry_display.create({
+    separator = "",
+    items = { {}, {}, {}, {} },
+  })
+
+  return function(line)
+    local filename, lnum, col, text = string.match(line, "^(.-):(%d+):(%d+):(.*)$")
+    lnum, col = tonumber(lnum), tonumber(col)
+    local relpath = filename:sub(#root + 2)
+    local dir = vim.fn.fnamemodify(relpath, ":h")
+    dir = dir == "." and "" or vim.fs.joinpath(dir, "")
+    local base = vim.fn.fnamemodify(relpath, ":t")
+    local note = notes_cache[filename] or nil
+    local title = note and note.title or base
+
+    return {
+      filename = filename,
+      lnum = lnum,
+      col = col,
+      text = text,
+      ordinal = dir .. title .. ":" .. lnum .. ":" .. col .. ":" .. text,
+      display = function(entry)
+        return displayer({
+          { entry.dir, "TelescopeResultsLineNr" }, -- TODO: Is there a better hl?
+          { entry.title, "TelescopeResultsTitle" },
+          { ":" .. tostring(entry.lnum) .. ":" .. tostring(entry.col) .. " ", "TelescopeResultsLineNr" },
+          { entry.text, "TelescopeResultsNormal" },
+        })
+      end,
+      title = title,
+      dir = dir,
+      value = {
+        filename = filename,
+        lnum = lnum,
+        col = col,
+        text = text,
+        title = title,
+        absPath = filename,
+      },
+    }
+  end
+end
+
+-- TODO: Need refactoring with `telescope.builtin.files.live_grep`?
+-- See https://github.com/nvim-telescope/telescope.nvim/blob/b4da76be54691e854d3e0e02c36b0245f945c2c7/lua/telescope/builtin/__files.lua#L115
+function M.show_grep_picker(options, cb)
+  options = options or {}
+
+  local root = options.notebook_path or nil
+  if not root then
+    local path = util.resolve_notebook_path(0)
+    root = util.notebook_root(path or vim.fn.getcwd()) or vim.fn.getcwd()
+  end
+
+  local telescope_options =
+    vim.tbl_extend("force", { prompt_title = options.title or "Zk Grep" }, options.telescope or {})
+
+  local grep_finder = finders.new_job(function(prompt)
+    if not prompt or prompt == "" then
+      return nil
+    end
+    return {
+      "rg",
+      "--vimgrep",
+      "--no-heading",
+      "--smart-case",
+      prompt,
+      root,
+    }
+  end, M.create_grep_entry_maker(root))
+
+  api.list(root, { select = M.note_picker_list_api_selection }, function(err, notes)
+    if not err then
+      notes_cache = index_notes_by_path(notes)
+      pickers
+        .new(telescope_options, {
+          finder = grep_finder,
+          previewer = conf.grep_previewer(options),
+          sorter = M.make_grep_sorter(options),
+          attach_mappings = function(prompt_bufnr)
+            actions.select_default:replace(function()
+              if options.multi_select then
+                local selection = {}
+                action_utils.map_selections(prompt_bufnr, function(entry, _)
+                  table.insert(selection, entry.value)
+                end)
+                if vim.tbl_isempty(selection) then
+                  table.insert(selection, action_state.get_selected_entry().value)
+                end
+                actions.close(prompt_bufnr)
+                cb(selection)
+              else
+                local entry = action_state.get_selected_entry()
+                actions.close(prompt_bufnr)
+                cb(entry and entry.value or nil)
+              end
+            end)
+            return true
+          end,
+        })
+        :find()
+    end
+  end)
 end
 
 function M.show_tag_picker(tags, options, cb)

@@ -31,6 +31,7 @@ REQUIREMENTS                                                     *zk-requirement
 
 *   Neovim >= 0.10.0
 *   `zk` >= 0.14.1
+*   `ripgrep` >= 14.1.0 (for grep feature)
 
 --------------------------------------------------------------------------------
 INSTALLATION                                                     *zk-installation*
@@ -164,6 +165,11 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     :ZkNotes [{options}]
+
+    " Opens a notes grep picker
+    " params
+    "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
+    :ZkGrep [{options}]
 <
     " Opens a notes picker for active buffers (showing notebook files only).
     " params
@@ -298,7 +304,14 @@ It's mainly used for the implementation of built-in and custom commands.
     ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
     ---@see zk.ui.pick_notes
     require("zk").pick_notes(options, picker_options, cb)
-<
+
+    ---Opens a notes grep picker, and calls the callback with the selection
+    --
+    ---@param options? table additional options
+    ---@param picker_options? table options for the picker
+    ---@param cb function
+    ---@see zk.ui.grep_notes
+    require("zk").grep_notes(options, picker_options, cb)
 >
     ---Opens a tags picker, and calls the callback with the selection
     --
@@ -400,13 +413,25 @@ Add these global mappings in your main Neovim config:
     vim.api.nvim_set_keymap("n", "<leader>zn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", opts)
     -- Open notes.
     vim.api.nvim_set_keymap("n", "<leader>zo", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", opts)
+    -- Grep notes.
+    vim.api.nvim_set_keymap("n", "<leader>zg", "<Cmd>ZkGrep<CR>", opts)
     -- Open notes associated with the selected tags.
     vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
     -- Search for the notes matching a given query.
     vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", opts)
     -- Search for the notes matching the current visual selection.
     vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
-<
+
+
+Open another notebook:
+
+    -- Open notes in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zO", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook' }<CR>", opts)
+    -- Open notes associated with a specific tag, in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zT", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook', tags = { 'todo' } }<CR>", opts)
+    -- Grep notes in another notebook.
+    vim.api.nvim_set_keymap("n", "<leader>zG", "<Cmd>ZkGrep { notebook_path = '/path/to/another/notebook' }<CR>", opts)
+
 
 You can add additional key mappings for Markdown buffers located in a `zk` notebook, using `ftplugin`. First, make sure it is enabled in your Neovim config:
 >
@@ -517,6 +542,7 @@ It's possible (but unnecessary) to also load the notes and tags pickers as a tel
     :Telescope zk tags
     :Telescope zk tags created=today
 <
+
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:fdm=marker:cole=2:

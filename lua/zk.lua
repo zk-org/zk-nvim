@@ -109,6 +109,16 @@ function M.pick_notes(options, picker_options, cb)
   end)
 end
 
+---Opens a grep picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see zk.ui.grep_notes
+function M.grep_notes(options, picker_options, cb)
+  ui.grep_notes(options, picker_options, cb)
+end
+
 ---Opens a tags picker, and calls the callback with the selection
 --
 ---@param options? table additional options
@@ -131,14 +141,23 @@ end
 ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zklist
 ---@see zk.ui.pick_notes
 function M.edit(options, picker_options)
-  M.pick_notes(options, picker_options, function(notes)
+  function cb(notes)
     if picker_options and picker_options.multi_select == false then
       notes = { notes }
     end
     for _, note in ipairs(notes) do
       vim.cmd("e " .. note.absPath)
+      if note.lnum and note.col then
+        vim.api.nvim_win_set_cursor(0, { note.lnum, math.max(note.col - 1, 0) })
+      end
     end
-  end)
+  end
+
+  if options and options.grep and options.grep == true then
+    M.grep_notes(options, picker_options, cb)
+  else
+    M.pick_notes(options, picker_options, cb)
+  end
 end
 
 return M
