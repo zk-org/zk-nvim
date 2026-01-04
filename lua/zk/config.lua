@@ -13,6 +13,16 @@ M.defaults = {
       enabled = true,
     },
   },
+  select = { "absPath", "filenameStem", "filename", "title" },
+  integrations = {
+    bufferline = {
+      enabled = false,
+      override = true,
+      formatter = function(note)
+        return note.title or note.filenameStem or note.filename
+      end,
+    },
+  },
 }
 
 M.options = M.defaults -- not necessary, but better code completion
