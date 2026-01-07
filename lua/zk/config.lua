@@ -13,6 +13,7 @@ M.defaults = {
       enabled = true,
     },
   },
+  select = { "id", "title", "filenameStem" },
 }
 
 M.options = M.defaults -- not necessary, but better code completion
