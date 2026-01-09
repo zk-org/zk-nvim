@@ -604,21 +604,3 @@ Then change this line in `.zk/config.toml`
 editor = "nvim -u ~/path/to/init-zk/init.lua"
 ```
 
-## Telescope Plugin
-
-> Not recommended, instead just use the
-> [:ZkNotes or :ZkTags commands](#built-in-commands).
-
-It's possible (but not required) to also load the notes and tags pickers as a
-telescope plugin.
-
-```lua
-require("telescope").load_extension("zk")
-```
-
-```vim
-:Telescope zk notes
-:Telescope zk notes createdAfter=3\ days\ ago
-:Telescope zk tags
-:Telescope zk tags created=today
-```
