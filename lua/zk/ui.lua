@@ -4,7 +4,6 @@ local M = {}
 
 ---Opens a notes picker
 --
----@param notes list
 ---@param options? table containing {picker}, {title}, {multi_select} keys
 ---@param cb function
 function M.pick_notes(notes, options, cb)
@@ -19,7 +18,6 @@ end
 
 ---Opens a tags picker
 --
----@param tags list
 ---@param options? table containing {picker}, {title}, {multi_select} keys
 ---@param cb function
 function M.pick_tags(tags, options, cb)

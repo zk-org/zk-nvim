@@ -11,8 +11,7 @@ function M.external_client()
     client_name = "zk"
   end
 
-  local active_clients = {}
-  active_clients = vim.lsp.get_clients({ name = client_name })
+  local active_clients = vim.lsp.get_clients({ name = client_name })
 
   if next(active_clients) == nil then
     return

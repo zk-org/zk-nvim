@@ -15,7 +15,7 @@ function fzf_lua_previewer:new(o, opts, fzf_win)
   return self
 end
 
-function fzf_lua_previewer:parse_entry(entry)
+function fzf_lua_previewer.parse_entry(entry)
   local path = entry:match("([^" .. delimiter .. "]+)")
   return { path = path }
 end
@@ -44,7 +44,7 @@ function M.show_note_picker(notes, options, cb)
     -- we rely on `fzf-lua` to open notes in any other case than the default (pressing enter)
     -- to take advantage of the plugin builtin actions like opening in a split
     actions = {
-      ["default"] = function(selected, opts)
+      ["default"] = function(selected)
         local selected_notes = vim.tbl_map(function(line)
           local path = string.match(line, "([^" .. delimiter .. "]+)")
           return notes_by_path[path]

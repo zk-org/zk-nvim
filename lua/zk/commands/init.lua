@@ -2,7 +2,8 @@ local M = {}
 
 local name_fn_map = {}
 
----A thin wrapper around `vim.api.nvim_create_user_command` which parses the `params.args` of the command as a Lua table and passes it on to `fn`.
+---A thin wrapper around `vim.api.nvim_create_user_command` which parses
+---the `params.args` of the command as a Lua table and passes it on to `fn`.
 ---@param name string
 ---@param fn function
 ---@param opts? table {needs_selection} makes sure the command is called with a range
