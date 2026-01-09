@@ -15,7 +15,8 @@ function fzf_lua_previewer:new(o, opts, fzf_win)
   return self
 end
 
-function fzf_lua_previewer.parse_entry(entry)
+-- luacheck: ignore self
+function fzf_lua_previewer:parse_entry(entry)
   local path = entry:match("([^" .. delimiter .. "]+)")
   return { path = path }
 end
