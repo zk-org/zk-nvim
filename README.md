@@ -16,6 +16,8 @@ to see it in action.
 | 0.1.1         | 0.13.0 - 0.14.1 | 0.9.5          |
 | 0.1.0         | 0.13.0 - 0.14.1 | 0.8.0 - 0.9.5  |
 
+* `ltoml` >= 0.4.1 (for `:ZkNewPrompt` and `zk.new_prompt()`)
+
 ## Installation
 
 Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
@@ -161,6 +163,9 @@ see what they can do, and learn as you go.
 - `:ZkNew [{options}]`  
   Creates and edits a new note.
 
+- `:'<,'>ZkNewPrompt [{options}]`  
+  Creates and edits a new note with prompt for choosing group, path and template.
+
 - `:'<,'>ZkNewFromTitleSelection [{options}]`  
   Creates a new note from the visual selection (used as the **title**) and
   replaces the selection with a link to the note.
@@ -168,6 +173,7 @@ see what they can do, and learn as you go.
 - `:'<,'>ZkNewFromContentSelection [{options}]`  
   Creates a new note from the visual selection (used as the **content**) and
   replaces the selection with a link to the note.
+
 
 ### Navigation
 
@@ -234,6 +240,7 @@ _Examples:_
 
 ```lua
 require("zk.commands").get("ZkNew")({ dir = "daily" })
+require("zk.commands").get("ZkNewPrompt")({ title = vim.fn.input('Title: ') })
 require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
 require("zk.commands").get("ZkNewFromTitleSelection")()
 ```
@@ -312,6 +319,14 @@ require("zk").cd(options)
 ---@param options? table additional options
 ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
 require("zk").new(options)
+```
+
+```lua
+---Prompt for a new note with groups, paths, templates, and directories selections.
+--
+---@param options? table
+---@param cb fun(options: table?, toml: table?)
+require("zk").new_prompt(options, cb)
 ```
 
 ```lua

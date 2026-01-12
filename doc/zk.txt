@@ -31,6 +31,7 @@ REQUIREMENTS                                                     *zk-requirement
 
 *   Neovim >= 0.10.0
 *   `zk` >= 0.14.1
+*   `ltoml` >= 0.4.1 (for `:ZkNewPrompt` and `zk.new_prompt()`)
 
 --------------------------------------------------------------------------------
 INSTALLATION                                                     *zk-installation*
@@ -142,6 +143,12 @@ BUILT-IN COMMANDS                                           *zk-built-in_command
     :ZkNew [{options}]
 <
 >
+    " Creates and edits a new note with prompt for choosing group, path and template
+    " params
+    "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
+    :ZkNewPrompt [{options}]
+<
+>
     " Creates a new note and uses the last visual selection as the title while replacing the selection with a link to the new note
     " params
     "   (optional) additional options, see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
@@ -214,6 +221,7 @@ You can access the underlying Lua function of a command, with `require("zk.comma
 Examples:
 >
     require("zk.commands").get("ZkNew")({ dir = "daily" })
+    require("zk.commands").get("ZkNewPrompt")({ title = vim.fn.input('Title: ') })
     require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
     require("zk.commands").get("ZkNewFromTitleSelection")()
 <
@@ -281,6 +289,13 @@ It's mainly used for the implementation of built-in and custom commands.
     ---@param options? table additional options
     ---@see https://github.com/zk-org/zk/blob/main/docs/tips/editors-integration.md#zknew
     require("zk").new(options)
+<
+>
+    ---Prompt for a new note with groups, paths, templates, and directories selections.
+    --
+    ---@param options? table
+    ---@param cb fun(options: table?, toml: table?)
+    require("zk").new_prompt(options, cb)
 <
 >
     ---Indexes the notebook
