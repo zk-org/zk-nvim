@@ -33,7 +33,7 @@ function M.show_note_picker(notes, options, cb)
   options = options or {}
   local notes_by_path = {}
   local fzf_opts = vim.tbl_deep_extend("force", {
-    prompt = options.title .. " ❯ ",
+    prompt = options.title .. " > ",
     previewer = fzf_lua_previewer,
     fzf_opts = {
       ["--delimiter"] = delimiter,
@@ -92,7 +92,7 @@ function M.show_tag_picker(tags, options, cb)
   options = options or {}
   local tags_by_name = {}
   local fzf_opts = vim.tbl_extend("force", {
-    prompt = options.title .. "> ",
+    prompt = options.title .. " > ",
     fzf_opts = {
       ["--delimiter"] = delimiter,
       ["--tiebreak"] = "index",
