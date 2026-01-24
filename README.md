@@ -16,6 +16,8 @@ to see it in action.
 | 0.1.1         | 0.13.0 - 0.14.1 | 0.9.5          |
 | 0.1.0         | 0.13.0 - 0.14.1 | 0.8.0 - 0.9.5  |
 
+* `ripgrep` >= 14.1.0 (for grep feature)
+
 ## Installation
 
 Via [packer.nvim](https://github.com/wbthomason/packer.nvim)
@@ -179,6 +181,9 @@ see what they can do, and learn as you go.
 - `:ZkNotes [{options}]`  
   Opens a notes picker.
 
+- `:ZkGrep [{options}]`
+  Opens a grep notes picker
+
 - `:ZkBuffers [{options}]`  
   Opens a notes picker for active buffers (notebook files only).
 
@@ -334,6 +339,16 @@ require("zk").pick_notes(options, picker_options, cb)
 ```
 
 ```lua
+---Opens a notes grep picker, and calls the callback with the selection
+--
+---@param options? table additional options
+---@param picker_options? table options for the picker
+---@param cb function
+---@see zk.ui.grep_notes
+require("zk").grep_notes(options, picker_options, cb)
+```
+
+```lua
 ---Opens a tags picker, and calls the callback with the selection
 --
 ---@param options? table additional options
@@ -416,6 +431,16 @@ require("zk.ui").pick_notes(notes, options, cb)
 ```
 
 ```lua
+---Opens a grep picker
+--
+---@param options? table containing {notebook_path}, {picker}, {multi_select} keys
+---@param picker_options? table
+---@param cb function
+
+require("zk.ui").grep_notes(options, picker_options, cb)
+```
+
+```lua
 ---Opens a tags picker
 --
 ---@param tags list
@@ -444,6 +469,8 @@ vim.api.nvim_set_keymap("n", "<leader>zn", "<Cmd>ZkNew { title = vim.fn.input('T
 
 -- Open notes.
 vim.api.nvim_set_keymap("n", "<leader>zo", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", opts)
+-- Grep notes.
+vim.api.nvim_set_keymap("n", "<leader>zg", "<Cmd>ZkGrep<CR>", opts)
 -- Open notes associated with the selected tags.
 vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
 
@@ -451,6 +478,17 @@ vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", opts)
 -- Search for the notes matching the current visual selection.
 vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
+```
+
+Open another notebook:
+
+```lua
+-- Open notes in another notebook.
+vim.api.nvim_set_keymap("n", "<leader>zO", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook' }<CR>", opts)
+-- Open notes associated with a specific tag, in another notebook.
+vim.api.nvim_set_keymap("n", "<leader>zT", "<Cmd>ZkNotes { notebook_path = '/path/to/another/notebook', tags = { 'todo' } }<CR>", opts)
+-- Grep notes in another notebook.
+vim.api.nvim_set_keymap("n", "<leader>zG", "<Cmd>ZkGrep { notebook_path = '/path/to/another/notebook' }<CR>", opts)
 ```
 
 You can add additional key mappings for Markdown buffers located in a `zk`
