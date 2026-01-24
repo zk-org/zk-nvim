@@ -28,7 +28,7 @@ H.item_picker = function(items, opts, cb)
   opts = opts or {}
   local minipick_opts = vim.tbl_deep_extend("force", {
     window = {
-      prompt_prefix = opts.title .. "> ",
+      prompt_prefix = opts.title .. " > ",
     },
     source = {
       items = items,
