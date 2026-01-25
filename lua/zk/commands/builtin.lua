@@ -17,6 +17,13 @@ commands.add("ZkNew", function(options)
   zk.new(options)
 end)
 
+commands.add("ZkNewPrompt", function(options)
+  options = options or {}
+  zk.new_prompt(options, function(_options, _)
+    zk.new(_options)
+  end)
+end)
+
 commands.add("ZkNewFromTitleSelection", function(options)
   local location = util.get_lsp_location_from_selection()
   local selected_text = util.get_selected_text()
