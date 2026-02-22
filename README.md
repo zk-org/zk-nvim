@@ -219,7 +219,9 @@ _Examples:_
 ```vim
 :ZkNew { dir = "daily", date = "yesterday" }
 :ZkNotes { createdAfter = "3 days ago", tags = { "work" } }
+:ZkNotes { matchStrategy = "nl", match = { "notes about calendar sync incidents" } }
 :'<,'>ZkNewFromTitleSelection " this will use your last visual mode selection. Note that you *must* call this command with the '<,'> range.
+:'<,'>ZkMatch { matchStrategy = "nl" }
 :ZkCd
 ```
 
@@ -235,6 +237,7 @@ _Examples:_
 ```lua
 require("zk.commands").get("ZkNew")({ dir = "daily" })
 require("zk.commands").get("ZkNotes")({ createdAfter = "3 days ago", tags = { "work" } })
+require("zk.commands").get("ZkNotes")({ matchStrategy = "nl", match = { "notes about OAuth refresh failures" } })
 require("zk.commands").get("ZkNewFromTitleSelection")()
 ```
 
@@ -449,6 +452,8 @@ vim.api.nvim_set_keymap("n", "<leader>zt", "<Cmd>ZkTags<CR>", opts)
 
 -- Search for the notes matching a given query.
 vim.api.nvim_set_keymap("n", "<leader>zf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", opts)
+-- Natural-language search.
+vim.api.nvim_set_keymap("n", "<leader>zF", "<Cmd>ZkNotes { sort = { 'modified' }, matchStrategy = 'nl', match = { vim.fn.input('Ask: ') } }<CR>", opts)
 -- Search for the notes matching the current visual selection.
 vim.api.nvim_set_keymap("v", "<leader>zf", ":'<,'>ZkMatch<CR>", opts)
 ```
@@ -603,4 +608,3 @@ Then change this line in `.zk/config.toml`
 # editor = "vim"
 editor = "nvim -u ~/path/to/init-zk/init.lua"
 ```
-
