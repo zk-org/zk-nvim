@@ -35,11 +35,10 @@ Via [lazy.nvim](https://github.com/folke/lazy.nvim)
 ```lua
 {
   "zk-org/zk-nvim",
-  config = function()
-    require("zk").setup({
-      -- See Setup section below
-    })
-  end
+  name = "zk",
+  opts = {
+    -- See Setup section below
+  },
 }
 ```
 
@@ -60,34 +59,33 @@ Default `lazy.nvim` setup:
 ```lua
 return {
   "zk-org/zk-nvim",
-  config = function()
-    require("zk").setup({
-      -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker",
-      -- or select" (`vim.ui.select`).
-      picker = "select",
+  name = "zk",
+  opts = {
+    -- Can be "telescope", "fzf", "fzf_lua", "minipick", "snacks_picker",
+    -- or select" (`vim.ui.select`).
+    picker = "select",
 
-      lsp = {
-        -- `config` is passed to `vim.lsp.start(config)`
-        config = {
-          name = "zk",
-          cmd = { "zk", "lsp" },
-          filetypes = { "markdown" },
-          -- on_attach = ...
-          -- etc, see `:h vim.lsp.start()`
-        },
-
-        -- automatically attach buffers in a zk notebook that match the given filetypes
-        auto_attach = {
-          enabled = true,
-        },
+    lsp = {
+      -- `config` is passed to `vim.lsp.start(config)`
+      config = {
+        name = "zk",
+        cmd = { "zk", "lsp" },
+        filetypes = { "markdown" },
+        -- on_attach = ...
+        -- etc, see `:h vim.lsp.start()`
       },
-    })
-  end,
+
+      -- automatically attach buffers in a zk notebook that match the given filetypes
+      auto_attach = {
+        enabled = true,
+      },
+    },
+  },
 }
 ```
 
-Note that the `setup` function will not add any key mappings for you. If you
-want to add key mappings, see the [example mappings](#example-mappings).
+Note that this will not add any key mappings for you. If you want to add key
+mappings, see the [example mappings](#example-mappings).
 
 ### Picker Options
 
@@ -587,9 +585,8 @@ require("lazy").setup({
 	},
 	{
 		"zk-org/zk-nvim",
-		config = function()
-			require("zk").setup()
-		end,
+		name = "zk",
+		opts = {},
 	},
 	-- automatically check for plugin updates
 	checker = { enabled = true },
