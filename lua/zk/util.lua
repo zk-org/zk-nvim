@@ -49,13 +49,17 @@ local function get_offset_encoding(bufnr)
   local error_level = vim.log.levels.ERROR
   local offset_encoding --- @type 'utf-8'|'utf-16'|'utf-32'
   if zk_client == nil then
-    vim.notify_once("No zk client found for this buffer. Using default encoding of utf-16", error_level)
+    vim.notify_once("No zk client found for this buffer. Falling back to default (utf-16)", error_level)
     offset_encoding = "utf-16"
   elseif zk_client.offset_encoding == nil then
     vim.notify_once(
-      string.format("ZK Client (id: %s) offset_encoding is nil. Do not unset offset_encoding.", zk_client.id),
+      string.format(
+        "ZK Client (id: %s) offset_encoding is nil. Falling back to default (utf-16).",
+        zk_client.id
+      ),
       error_level
     )
+    offset_encoding = "utf-16"
   else
     offset_encoding = zk_client.offset_encoding
   end
