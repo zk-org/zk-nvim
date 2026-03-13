@@ -581,8 +581,7 @@ vim.g.maplocalleader = "\\"
 -- Setup lazy.nvim
 require("lazy").setup({
 	{ "neovim/nvim-lspconfig" },
-	{ "zk-org/zk-nvim", opts = {},
-	},
+	{ "zk-org/zk-nvim", name = "zk", opts = {}, },
 	-- automatically check for plugin updates
 	checker = { enabled = true },
 })
