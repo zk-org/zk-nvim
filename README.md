@@ -161,11 +161,13 @@ see what they can do, and learn as you go.
 
 - `:'<,'>ZkNewFromTitleSelection [{options}]`\
   Creates a new note from the visual selection (used as the **title**) and
-  replaces the selection with a link to the note.
+  replaces the selection with a link to the note (unless `append = true` is
+  passed to options).
 
 - `:'<,'>ZkNewFromContentSelection [{options}]`\
   Creates a new note from the visual selection (used as the **content**) and
-  replaces the selection with a link to the note.
+  replaces the selection with a link to the note (unless `append = true` is
+  passed to options).
 
 ### Navigation
 
