@@ -17,13 +17,20 @@ commands.add("ZkNew", function(options)
   zk.new(options)
 end)
 
-commands.add("ZkNewFromTitleSelection", function(options)
+local function zk_new_from_selection(kind, options)
   local location = util.get_lsp_location_from_selection()
   local selected_text = util.get_selected_text()
   assert(selected_text ~= nil, "No selected text")
 
   options = options or {}
-  options.title = selected_text
+
+  if kind == "title" then
+    options.title = selected_text
+  elseif kind == "content" then
+    options.content = selected_text
+  else
+    error("Invalid kind: " .. tostring(kind))
+  end
 
   if options.inline == true then
     options.inline = nil
@@ -34,25 +41,14 @@ commands.add("ZkNewFromTitleSelection", function(options)
   end
 
   zk.new(options)
+end
+
+commands.add("ZkNewFromTitleSelection", function(options)
+  zk_new_from_selection("title", options)
 end, { needs_selection = true })
 
 commands.add("ZkNewFromContentSelection", function(options)
-  local location = util.get_lsp_location_from_selection()
-  local selected_text = util.get_selected_text()
-  assert(selected_text ~= nil, "No selected text")
-
-  options = options or {}
-  options.content = selected_text
-
-  if options.inline == true then
-    options.inline = nil
-    options.dryRun = true
-    options.insertContentAtLocation = location
-  else
-    options.insertLinkAtLocation = location
-  end
-
-  zk.new(options)
+  zk_new_from_selection("content", options)
 end, { needs_selection = true })
 
 commands.add("ZkCd", zk.cd)
