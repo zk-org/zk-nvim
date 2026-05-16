@@ -123,14 +123,24 @@ commands.add("ZkMatch", function(options)
   zk.edit(options, { title = "Zk Notes matching " .. vim.inspect(selected_text) })
 end, { needs_selection = true })
 
+-- List of tag specific search terms, which need to be later ignored.
+-- https://zk-org.github.io/zk/tips/editors-integration.html#zk-tag-list
+-- https://github.com/zk-org/zk-nvim/pull/290
+local search_terms = { "name", "note-count" }
+
 commands.add("ZkTags", function(options)
   zk.pick_tags(options, { title = "Zk Tags" }, function(tags)
     tags = vim.tbl_map(function(v)
       return v.name
     end, tags)
+
+		-- Don't pass on tag specific search terms to subsequent call to sort.
     options.sort = vim.tbl_filter(function(v)
-      return string.find(v, "note-count[+-]?") ~= nil
+      return not vim.iter(search_terms):any(function(term)
+        return vim.startswith(v, term)
+      end)
     end, options.sort)
+
     options = vim.tbl_extend("keep", { tags = tags }, options or {})
     zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
   end)
