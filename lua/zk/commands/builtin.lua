@@ -139,6 +139,10 @@ commands.add("ZkTags", function(options)
       end, options.sort)
     end
 
+    if options and options.use_or then
+      tags = { table.concat(tags, " OR ") }
+    end
+
     options = vim.tbl_extend("keep", { tags = tags }, options or {})
     zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
   end)
