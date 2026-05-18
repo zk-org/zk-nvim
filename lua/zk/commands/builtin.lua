@@ -130,12 +130,14 @@ commands.add("ZkTags", function(options)
       return v.name
     end, tags)
 
-		-- Don't pass on tag specific search terms to subsequent call to sort.
-    options.sort = vim.tbl_filter(function(v)
-      return not vim.iter(search_terms):any(function(term)
-        return vim.startswith(v, term)
-      end)
-    end, options.sort)
+    -- Don't pass on tag specific search terms to subsequent call to sort.
+    if options and options.sort then
+      options.sort = vim.tbl_filter(function(v)
+        return not vim.iter(search_terms):any(function(term)
+          return vim.startswith(v, term)
+        end)
+      end, options.sort)
+    end
 
     options = vim.tbl_extend("keep", { tags = tags }, options or {})
     zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
