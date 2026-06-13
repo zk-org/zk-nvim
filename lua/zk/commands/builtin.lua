@@ -2,6 +2,7 @@ local zk = require("zk")
 local api = require("zk.api")
 local util = require("zk.util")
 local commands = require("zk.commands")
+local config = require("zk.config")
 
 commands.add("ZkIndex", zk.index)
 
@@ -130,6 +131,12 @@ commands.add("ZkTags", function(options)
       return v.name
     end, tags)
 
+    local sep = config.options.tags.multi_select_strategy
+    if options and options.multi_select_strategy then
+      sep = options.multi_select_strategy
+    end
+    local tag_query = table.concat(tags, " " .. sep .. " ")
+
     -- Don't pass on tag specific search terms to subsequent call to sort.
     if options and options.sort then
       options.sort = vim.tbl_filter(function(v)
@@ -139,7 +146,7 @@ commands.add("ZkTags", function(options)
       end, options.sort)
     end
 
-    options = vim.tbl_extend("keep", { tags = tags }, options or {})
-    zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) })
+    options = vim.tbl_extend("keep", { tags = { tag_query } }, options or {})
+    zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) .. " using " .. sep })
   end)
 end)
