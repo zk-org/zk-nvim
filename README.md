@@ -80,6 +80,12 @@ return {
         enabled = true,
       },
     },
+
+    tags = {
+      -- Configure how multiple tags should be combined in a ZkTags search
+      -- Can be "AND" or "OR"
+      multi_select_strategy = "AND",
+    }
   },
 }
 ```

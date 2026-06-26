@@ -13,6 +13,9 @@ M.defaults = {
       enabled = true,
     },
   },
+  tags = {
+    multi_select_strategy = "AND",
+  },
 }
 
 M.options = M.defaults -- not necessary, but better code completion
