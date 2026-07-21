@@ -98,7 +98,7 @@ local function insert_link(selected, opts)
       link_opts.title = selected_text
     end
 
-    api.link(note.path, location, nil, link_opts, function(err, res)
+    api.link(note.path, location, nil, link_opts, function(err)
       if err then
         error(err)
       end
