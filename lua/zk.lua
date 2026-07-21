@@ -23,7 +23,7 @@ end
 --
 ---@param bufnr number
 function M._lsp_buf_auto_add(bufnr)
-  if vim.api.nvim_buf_get_option(bufnr, "buftype") == "nofile" then
+  if vim.api.nvim_get_option_value("buftype", { buf = bufnr }) == "nofile" then
     return
   end
 

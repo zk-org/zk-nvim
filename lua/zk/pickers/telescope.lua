@@ -82,13 +82,19 @@ function M.show_note_picker(notes, options, cb)
               table.insert(selection, entry.value)
             end)
             if vim.tbl_isempty(selection) then
-              selection = { action_state.get_selected_entry().value }
+              local entry = action_state.get_selected_entry()
+              if entry then
+                selection = { entry.value }
+              end
             end
             actions.close(prompt_bufnr)
             cb(selection)
           else
+            local entry = action_state.get_selected_entry()
             actions.close(prompt_bufnr)
-            cb(action_state.get_selected_entry().value)
+            if entry then
+              cb(entry.value)
+            end
           end
         end)
         mapping("i", "<C-e>", function()
