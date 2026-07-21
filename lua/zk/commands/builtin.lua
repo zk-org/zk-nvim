@@ -99,7 +99,7 @@ local function insert_link(selected, opts)
     end
 
     api.link(note.path, location, nil, link_opts, function(err, res)
-      if not res then
+      if err then
         error(err)
       end
     end)
