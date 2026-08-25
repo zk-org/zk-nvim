@@ -3,13 +3,12 @@ local M = {}
 local name_fn_map = {}
 
 ---A thin wrapper around `vim.api.nvim_create_user_command` which parses
----the `params.args` of the command as a Lua table and passes it on to `fn`.
+---the `params.args` of the command as a Lua table and passes it on to `fn`,
+---along with `params.range`.
 ---@param name string
 ---@param fn function
 ---@param opts? table {needs_selection} makes sure the command is called with a range.
 ---{optional_selection} allows (but doesn't require) the command to be called with a range.
----{raw_args} passes `params.args` (the raw, unparsed argument string) and `params.range`
----to `fn` directly instead of `loadstring`-parsing `params.args` as a Lua table.
 ---@see vim.api.nvim_create_user_command
 function M.add(name, fn, opts)
   opts = opts or {}
@@ -20,16 +19,12 @@ function M.add(name, fn, opts)
         "Command needs a selection and must be called with '<,'> range. Try making a selection first."
       )
     end
-    if opts.raw_args then
-      fn(params.args, params.range)
-    else
-      fn(loadstring("return " .. params.args)())
-    end
+    fn(loadstring("return " .. params.args)(), params.range)
   end, {
     nargs = "?",
     force = true,
     range = opts.needs_selection or opts.optional_selection,
-    complete = opts.raw_args and nil or "lua",
+    complete = "lua",
   })
   name_fn_map[name] = fn
 end

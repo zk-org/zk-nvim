@@ -113,78 +113,31 @@ commands.add("ZkInsertLinkAtSelection", function(opts)
 	insert_link(true, opts)
 end, { title = "Insert Zk link", needs_selection = true })
 
----Splits a leading balanced `{...}` Lua table literal off the front of
----`text`, returning the table-literal substring and the remaining text after
----it (trimmed). Returns nil for the table string if `text` doesn't start
----with a balanced `{...}` (e.g. unbalanced braces).
----@param text string
----@return string? table_str
----@return string remainder
-local function split_leading_table(text)
-	local brace_depth = 0
-	local string_quote_char = nil
-	local position = 1
-	local text_length = #text
-	while position <= text_length do
-		local current_char = text:sub(position, position)
-		if string_quote_char then
-			if current_char == "\\" then
-				position = position + 1
-			elseif current_char == string_quote_char then
-				string_quote_char = nil
-			end
-		elseif current_char == '"' or current_char == "'" then
-			string_quote_char = current_char
-		elseif current_char == "{" then
-			brace_depth = brace_depth + 1
-		elseif current_char == "}" then
-			brace_depth = brace_depth - 1
-			if brace_depth == 0 then
-				return text:sub(1, position), vim.trim(text:sub(position + 1))
-			end
-		end
-		position = position + 1
-	end
-	return nil, text
-end
-
--- Matches against provided search terms, word under cursor (normal mode) and visual selection.
--- Can also be combined with options, e.g. `:ZkMatch {tags = {"scienece"}} search terms`.
--- Priority: options.match > free-text args > visual selection > word under cursor.
-commands.add("ZkMatch", function(args, range)
-	local trimmed = vim.trim(args)
-	local options = {}
-	local remainder = trimmed
-
-	if vim.startswith(trimmed, "{") then
-		local options_str, rest = split_leading_table(trimmed)
-		local chunk = options_str and loadstring("return " .. options_str)
-		assert(chunk ~= nil, "Malformed {options} table given to :ZkMatch")
-		options = chunk() or {}
-		remainder = rest
-	end
+-- Matches against the provided options (which may include a `match` field
+-- - see https://zk-org.github.io/zk/tips/editors-integration.html#zk-list),
+-- a visual selection, or (in normal mode with no selection) the word under
+-- the cursor. `options.match`, if given, takes priority over the selection
+-- or cursor word.
+commands.add("ZkMatch", function(options, range)
+	options = options or {}
 
 	if not options.match then
 		local match_text
-		if remainder ~= "" then
-			match_text = remainder
-		elseif range == 2 then
+		if range == 2 then
 			match_text = util.get_selected_text()
-		end
-		if not match_text then
+		else
 			local cword = vim.fn.expand("<cword>")
 			match_text = cword ~= "" and cword or nil
 		end
 		assert(
 			match_text ~= nil,
-			"No selected text, search term, or word under cursor given. Usage: :ZkMatch <term> or visually select text."
+			"No selected text or word under cursor given. Usage: :'<,'>ZkMatch or place the cursor on a word."
 		)
 		options.match = { match_text }
 	end
 
-	local title_text = table.concat(options.match, ", ")
-	zk.edit(options, { title = "Zk Notes matching " .. vim.inspect(title_text) })
-end, { raw_args = true, optional_selection = true })
+	zk.edit(options, { title = "Zk Notes matching " .. vim.inspect(options.match) })
+end, { optional_selection = true })
 
 -- List of tag specific search terms, which need to be later ignored.
 -- https://zk-org.github.io/zk/tips/editors-integration.html#zk-tag-list
