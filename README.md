@@ -54,8 +54,9 @@ or
 
 ## Setup
 
-> [!IMPORTANT] If you have the [zk cli](https://github.com/zk-org/zk) installed,
-> then you _do not need to install `zk lsp`_ via Mason (or otherwise).
+> [!IMPORTANT]\
+> If you have the [zk cli](https://github.com/zk-org/zk) installed, then you _do
+> not need to install `zk lsp`_ via Mason (or otherwise).
 
 Default `lazy.nvim` setup:
 
@@ -214,11 +215,12 @@ see what they can do, and learn as you go.
 [Options (ZkList)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-list)
 
 - `:ZkMatch [{options}]`\
-  Opens a notes picker, filtering for notes matching a search term. The term
-  is resolved from, in priority order: an explicit `options.match` (see the
-  `match` option in [Options (ZkList)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-list)),
-  a visual selection (`:'<,'>ZkMatch`), or — in normal mode — the word under
-  the cursor.
+  Opens a notes picker, filtering for notes matching a search term. The term is
+  resolved from, in priority order: an explicit `options.match` (see the `match`
+  option in
+  [Options (ZkList)](https://zk-org.github.io/zk/tips/editors-integration.html#zk-list)),
+  a visual selection (`:'<,'>ZkMatch`), or — in normal mode — the word under the
+  cursor.
 
 - `:ZkTags [{options}]`\
   Opens a notes picker for selected tags.
