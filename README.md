@@ -613,3 +613,7 @@ Then change this line in `.zk/config.toml`
 # editor = "vim"
 editor = "nvim -u ~/path/to/init-zk/init.lua"
 ```
+
+Running `zk <edit|new|etc>` will then by default use the minimal neovim config. 
+To test opening with neovim directly (bypassing zk's handling of the editor),
+run `nvim -u ~/path/to/init-zk/init.lua <file|cmd>` explicitly on the commandline. 
