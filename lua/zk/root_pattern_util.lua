@@ -38,6 +38,9 @@ M.path = (function()
     if not path or #path == 0 then
       return
     end
+    if is_windows then
+      path = path:gsub("\\", "/")
+    end
     local result = path:gsub(strip_sep_pat, ""):gsub(strip_dir_pat, "")
     if #result == 0 then
       if is_windows then
