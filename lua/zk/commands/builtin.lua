@@ -154,7 +154,10 @@ commands.add("ZkTags", function(options)
 		if options and options.multi_select_strategy then
 			sep = options.multi_select_strategy
 		end
-		local tag_query = table.concat(tags, " " .. sep .. " ")
+		local tag_query = tags
+		if sep == "OR" then
+			tag_query = { table.concat(tags, " OR ") }
+		end
 
 		-- Don't pass on tag specific search terms to subsequent call to sort.
 		if options and options.sort then
@@ -165,7 +168,7 @@ commands.add("ZkTags", function(options)
 			end, options.sort)
 		end
 
-		options = vim.tbl_extend("keep", { tags = { tag_query } }, options or {})
+		options = vim.tbl_extend("keep", { tags = tag_query }, options or {})
 		zk.edit(options, { title = "Zk Notes for tag(s) " .. vim.inspect(tags) .. " using " .. sep })
 	end)
 end)
